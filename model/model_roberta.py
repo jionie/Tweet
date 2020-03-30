@@ -2,34 +2,27 @@ from transformers import *
 import torch
 import torch.nn as nn
 
-############################################ Define Net Class
-class TweetBert(nn.Module):
-    def __init__(self, model_type="bert-large-uncased", hidden_layers=None):
-        super(TweetBert, self).__init__()
 
-        self.model_name = 'TweetBert'
+############################################ Define Net Class
+class TweetRoberta(nn.Module):
+    def __init__(self, model_type="roberta-base", hidden_layers=None, tokenizer=None):
+        super(TweetRoberta, self).__init__()
+
+        self.model_name = 'TweetRoberta'
         self.model_type = model_type
 
         if hidden_layers is None:
             hidden_layers = [-1, -3, -5, -7]
         self.hidden_layers = hidden_layers
 
-        if model_type == "bert-large-uncased":
-            self.config = BertConfig.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
-            self.bert = BertModel.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-large-cased":
-            self.config = BertConfig.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
-            self.bert = BertModel.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-base-uncased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-uncased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-base-cased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-cased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+        if model_type == "roberta-large":
+            self.config = RobertaConfig.from_pretrained(model_type)
+            self.roberta = RobertaModel.from_pretrained(model_type, hidden_dropout_prob=0, output_hidden_states=True)
+            self.roberta.resize_token_embeddings(len(tokenizer))
+        elif model_type == "roberta-base":
+            self.config = RobertaConfig.from_pretrained(model_type)
+            self.roberta = RobertaModel.from_pretrained(model_type, hidden_dropout_prob=0, output_hidden_states=True)
+            self.roberta.resize_token_embeddings(len(tokenizer))
         else:
             raise NotImplementedError
 
@@ -83,7 +76,7 @@ class TweetBert(nn.Module):
             end_positions=None,
     ):
 
-        outputs = self.bert(
+        outputs = self.roberta(
             input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
@@ -120,8 +113,7 @@ class TweetBert(nn.Module):
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
-        
-        
+
 
 ############################################ Define test Net function
 def test_Net():
@@ -131,10 +123,16 @@ def test_Net():
     all_attention_masks = torch.tensor([[1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 0, 0]])
     all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
     all_start_positions = torch.tensor([0, 1])
-    all_end_positions =  torch.tensor([3, 4])
+    all_end_positions = torch.tensor([3, 4])
     print(all_start_positions.shape)
 
-    model = TweetBert()
+    ADD_TOKEN_LIST = ["[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"]
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    tokenizer.cls_token = '[CLS]'
+    tokenizer.sep_token = '[SEP]'
+    _ = tokenizer.add_tokens(ADD_TOKEN_LIST)
+
+    model = TweetRoberta(tokenizer=tokenizer)
 
     y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
               start_positions=all_start_positions, end_positions=all_end_positions)
@@ -150,4 +148,4 @@ def test_Net():
 if __name__ == "__main__":
     print("------------------------testing Net----------------------")
     test_Net()
-    
+

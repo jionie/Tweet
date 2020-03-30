@@ -2,34 +2,25 @@ from transformers import *
 import torch
 import torch.nn as nn
 
-############################################ Define Net Class
-class TweetBert(nn.Module):
-    def __init__(self, model_type="bert-large-uncased", hidden_layers=None):
-        super(TweetBert, self).__init__()
 
-        self.model_name = 'TweetBert'
+############################################ Define Net Class
+class TweetT5(nn.Module):
+    def __init__(self, model_type="t5-base", hidden_layers=None):
+        super(TweetT5, self).__init__()
+
+        self.model_name = 'TweetT5'
         self.model_type = model_type
 
         if hidden_layers is None:
             hidden_layers = [-1, -3, -5, -7]
         self.hidden_layers = hidden_layers
 
-        if model_type == "bert-large-uncased":
-            self.config = BertConfig.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
-            self.bert = BertModel.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-large-cased":
-            self.config = BertConfig.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
-            self.bert = BertModel.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-base-uncased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-uncased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
-        elif model_type == "bert-base-cased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-cased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+        if model_type == "t5-large":
+            self.config = T5Config.from_pretrained(model_type)
+            self.t5 = T5Model.from_pretrained(model_type, dropout_rate=0.1, output_hidden_states=True)
+        elif model_type == "t5-base":
+            self.config = T5Config.from_pretrained(model_type)
+            self.t5 = T5Model.from_pretrained(model_type, dropout_rate=0.1, output_hidden_states=True)
         else:
             raise NotImplementedError
 
@@ -75,21 +66,25 @@ class TweetBert(nn.Module):
             self,
             input_ids=None,
             attention_mask=None,
-            token_type_ids=None,
-            position_ids=None,
-            head_mask=None,
+            encoder_outputs=None,
+            decoder_input_ids=None,
+            decoder_attention_mask=None,
             inputs_embeds=None,
+            decoder_inputs_embeds=None,
+            head_mask=None,
             start_positions=None,
             end_positions=None,
     ):
 
-        outputs = self.bert(
-            input_ids,
+        outputs = self.t5(
+            input_ids=input_ids,
             attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            position_ids=position_ids,
-            head_mask=head_mask,
+            encoder_outputs=encoder_outputs,
+            decoder_input_ids=decoder_input_ids,
+            decoder_attention_mask=decoder_attention_mask,
             inputs_embeds=inputs_embeds,
+            decoder_inputs_embeds=decoder_inputs_embeds,
+            head_mask=head_mask,
         )
 
         hidden_states = outputs[2]
@@ -120,8 +115,7 @@ class TweetBert(nn.Module):
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
-        
-        
+
 
 ############################################ Define test Net function
 def test_Net():
@@ -131,13 +125,13 @@ def test_Net():
     all_attention_masks = torch.tensor([[1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 0, 0]])
     all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
     all_start_positions = torch.tensor([0, 1])
-    all_end_positions =  torch.tensor([3, 4])
+    all_end_positions = torch.tensor([3, 4])
     print(all_start_positions.shape)
 
-    model = TweetBert()
+    model = TweetT5()
 
-    y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
-              start_positions=all_start_positions, end_positions=all_end_positions)
+    y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, start_positions=all_start_positions,
+              end_positions=all_end_positions)
     print(y)
     print("loss: ", y[0])
     print("start_logits: ", y[1])
@@ -150,4 +144,4 @@ def test_Net():
 if __name__ == "__main__":
     print("------------------------testing Net----------------------")
     test_Net()
-    
+
