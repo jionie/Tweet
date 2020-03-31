@@ -44,7 +44,7 @@ parser.add_argument('--model_type', type=str, default="bert-base-uncased", requi
 
 ############################################ Define Helper functions and dataset function from transformers run_swag.py
 def load_and_cache_examples(data_dir, input_file, model_type, tokenizer, max_seq_length=384, max_query_length=64,
-                            doc_stride=128, threads=1, mode="train", seed=42, fold=0, output_examples=False):
+                            doc_stride=128, threads=1, mode="train", seed=42, fold=0, output_examples=True):
 
     # Load data features from cache or dataset file
     if mode == "train":
@@ -390,19 +390,21 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         raise NotImplementedError
 
 
-    ds_train = load_and_cache_examples(data_path, 'split/train_fold_%s_seed_%s.json' % (fold, seed), model_type,
-                                       tokenizer, max_seq_length, max_query_length, doc_stride, threads, mode="train",
-                                       output_examples=False)
+    ds_train, examples_train, features_train = load_and_cache_examples(data_path, 'split/train_fold_%s_seed_%s.json' %
+                                                                       (fold, seed), model_type, tokenizer,
+                                                                       max_seq_length, max_query_length, doc_stride,
+                                                                       threads, mode="train", output_examples=True)
     train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                                drop_last=True)
 
-    ds_val = load_and_cache_examples(data_path, 'split/val_fold_%s_seed_%s.json' % (fold, seed), model_type,
-                                       tokenizer, max_seq_length, max_query_length, doc_stride, threads, mode="train",
-                                       output_examples=False)
+    ds_val, examples_val, features_val = load_and_cache_examples(data_path, 'split/val_fold_%s_seed_%s.json' %
+                                                                 (fold, seed), model_type, tokenizer, max_seq_length,
+                                                                 max_query_length, doc_stride, threads, mode="train",
+                                                                 output_examples=True)
     val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=True, num_workers=num_workers,
                                              drop_last=True)
 
-    return train_loader, val_loader, tokenizer
+    return train_loader, examples_train, features_train, val_loader, examples_val, features_val, tokenizer
 
 
 ############################################ Define test function
@@ -460,7 +462,8 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                       val_batch_size=4,
                       num_workers=2):
 
-    train_loader, val_loader, tokenizer = get_train_val_loaders(data_path=data_path, seed=seed, fold=fold,
+    train_loader, examples_train, features_train, val_loader, examples_val, features_val, tokenizer = \
+                                            get_train_val_loaders(data_path=data_path, seed=seed, fold=fold,
                                                                 max_seq_length=max_seq_length,
                                                                 max_query_length=max_query_length,
                                                                 doc_stride=doc_stride, threads=threads,

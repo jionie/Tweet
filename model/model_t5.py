@@ -75,7 +75,6 @@ class TweetT5(nn.Module):
             start_positions=None,
             end_positions=None,
     ):
-
         outputs = self.t5(
             input_ids=input_ids,
             attention_mask=attention_mask,

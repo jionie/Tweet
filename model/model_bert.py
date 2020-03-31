@@ -138,7 +138,7 @@ def test_Net():
 
     y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
               start_positions=all_start_positions, end_positions=all_end_positions)
-    print(y)
+
     print("loss: ", y[0])
     print("start_logits: ", y[1])
     print("end_logits: ", y[2])
