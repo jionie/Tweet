@@ -574,7 +574,7 @@ class QA():
                     prediction = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
                     prediction = " ".join(prediction).replace(" ##", "").strip()
 
-                    self.train_metrics.append(jaccard(label, prediction))
+                    self.val_metrics.append(jaccard(label, prediction))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
