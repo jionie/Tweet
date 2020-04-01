@@ -11,7 +11,7 @@ class TweetBert(nn.Module):
         self.model_type = model_type
 
         if hidden_layers is None:
-            hidden_layers = [-1, -3, -5, -7]
+            hidden_layers = [-1]
         self.hidden_layers = hidden_layers
 
         if model_type == "bert-large-uncased":
@@ -39,7 +39,7 @@ class TweetBert(nn.Module):
         self.activation = nn.ReLU()
 
         self.dropouts = nn.ModuleList([
-            nn.Dropout(0.5) for _ in range(5)
+            nn.Dropout(0.2) for _ in range(5)
         ])
 
     def get_hidden_states(self, hidden_states):

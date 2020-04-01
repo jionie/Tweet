@@ -396,19 +396,19 @@ class QA():
         self.writer = SummaryWriter()
         ############################################################################### eval setting
         self.eval_step = len(self.train_data_loader)  # or len(train_data_loader)
-        self.log_step = 50
+        self.log_step = int(len(self.train_data_loader)*self.config.progress_rate)
         self.eval_count = 0
         self.count = 0
     
-        for epoch in range(self.epoch, self.config.num_epoch):
+        while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
 
             # update lr and start from start_epoch
-            if (epoch > 1) and (not self.lr_scheduler_each_iter):
+            if (self.epoch > 1) and (not self.lr_scheduler_each_iter):
                 self.scheduler.step()
 
-            self.log.write("Epoch%s\n" % epoch)
+            self.log.write("Epoch%s\n" % self.epoch)
             self.log.write('\n')
 
             sum_train_loss = np.zeros_like(self.train_loss)
@@ -431,8 +431,8 @@ class QA():
 
                 # set input to cuda mode
                 all_input_ids = all_input_ids.cuda()
-                all_attention_masks   = all_attention_masks.cuda()
-                all_token_type_ids    = all_token_type_ids.cuda()
+                all_attention_masks = all_attention_masks.cuda()
+                all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
 
@@ -458,7 +458,7 @@ class QA():
                         self.scheduler.step()
 
                     self.writer.add_scalar('train_loss_' + str(self.config.fold), loss.item(),
-                                           (epoch-1)*len(self.train_data_loader)*self.config.batch_size+tr_batch_i*
+                                           (self.epoch-1)*len(self.train_data_loader)*self.config.batch_size+tr_batch_i*
                                            self.config.batch_size)
                     self.step += 1
 
@@ -504,6 +504,8 @@ class QA():
             if (self.count == self.config.early_stopping):
                 break
 
+            self.epoch += 1
+
     def evaluate_op(self):
 
         self.eval_count += 1
@@ -537,7 +539,7 @@ class QA():
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
                 self.writer.add_scalar('val_loss_' + str(self.config.fold), loss.item(), (self.eval_count - 1) * len(
-                    self.val_data_loader) * self.config.valid_batch_size + val_batch_i * self.config.valid_batch_size)
+                    self.val_data_loader) * self.config.val_batch_size + val_batch_i * self.config.val_batch_size)
 
                 # translate to predictions
                 start_logits = start_logits.argmax(dim=-1)
@@ -559,10 +561,10 @@ class QA():
                     label = " ".join([self.tokenizer.decode(element) for element in label])
                     prediction = " ".join([self.tokenizer.decode(element) for element in prediction])
 
-                    self.train_metrics.append(jaccard(label, prediction))
+                    self.val_metrics.append(jaccard(label, prediction))
 
-                l = np.array([loss.item() * self.config.valid_batch_size])
-                n = np.array([self.config.valid_batch_size])
+                l = np.array([loss.item() * self.config.val_batch_size])
+                n = np.array([self.config.val_batch_size])
                 valid_loss = valid_loss + l
                 valid_num = valid_num + n
 

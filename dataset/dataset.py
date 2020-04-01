@@ -355,14 +355,6 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         tokenizer.cls_token = '[CLS]'
         tokenizer.sep_token = '[SEP]'
 
-    elif model_type == "flaubert-base-uncased":
-
-        tokenizer = FlaubertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                             "[CLS]", "[MASK]"])
-    elif (model_type == "flaubert-base-cased") or (model_type == "flaubert-large-cased"):
-
-        tokenizer = FlaubertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                             "[CLS]", "[MASK]"])
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
         tokenizer = XLNetTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
@@ -375,16 +367,6 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         tokenizer.sep_token = '[SEP]'
         num_added_tokens = tokenizer.add_tokens(ADD_TOKEN_LIST)
         print('Number of Tokens Added : ', num_added_tokens)
-
-    elif ((model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2")
-          or (model_type == "albert-xxlarge-v2")):
-
-        tokenizer = AlbertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
-    elif model_type == "gpt2":
-
-        tokenizer = AutoTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
     else:
 
         raise NotImplementedError
@@ -401,8 +383,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
                                                                  (fold, seed), model_type, tokenizer, max_seq_length,
                                                                  max_query_length, doc_stride, threads, mode="train",
                                                                  output_examples=True)
-    val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=True, num_workers=num_workers,
-                                             drop_last=True)
+    val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=False, num_workers=num_workers,
+                                             drop_last=False)
 
     return train_loader, examples_train, features_train, val_loader, examples_val, features_val, tokenizer
 
