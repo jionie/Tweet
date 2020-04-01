@@ -36,10 +36,10 @@ class TweetBert(nn.Module):
         self.down = nn.Linear(len(hidden_layers), 1)
         self.qa_outputs = nn.Linear(self.config.hidden_size, self.config.num_labels)
 
-        self.activation = nn.ReLU()
+        self.activation = nn.SELU()
 
         self.dropouts = nn.ModuleList([
-            nn.Dropout(0.2) for _ in range(5)
+            nn.Dropout(0.5) for _ in range(5)
         ])
 
     def get_hidden_states(self, hidden_states):
@@ -96,6 +96,9 @@ class TweetBert(nn.Module):
 
         fuse_hidden = self.get_hidden_states(hidden_states)
         logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_outputs)
+
+        # hidden_states = outputs[0]
+        # logits = self.qa_outputs(hidden_states)
 
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits = start_logits.squeeze(-1)

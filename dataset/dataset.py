@@ -3,9 +3,13 @@ import os
 import json
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
+from functools import partial
+from multiprocessing import Pool, cpu_count
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 from transformers import *
+from transformers.data.processors.squad import *
 from sklearn.model_selection import StratifiedKFold
 
 ############################################ Define augments for test
@@ -42,8 +46,108 @@ parser.add_argument('--model_type', type=str, default="bert-base-uncased", requi
                     help='specify the model_type for BertTokenizer')
 
 
-############################################ Define Helper functions and dataset function from transformers run_swag.py
-def load_and_cache_examples(data_dir, input_file, model_type, tokenizer, max_seq_length=384, max_query_length=64,
+############################################ Modify Helper functions and dataset function from transformers run_swag.py
+def squad_convert_examples_to_features_v2(
+    examples, tokenizer, max_seq_length, doc_stride, max_query_length, is_training, return_dataset=False, threads=1
+):
+    """
+    Converts a list of examples into a list of features that can be directly given as input to a model.
+    It is model-dependant and takes advantage of many of the tokenizer's features to create the model's inputs.
+    Args:
+        examples: list of :class:`~transformers.data.processors.squad.SquadExample`
+        tokenizer: an instance of a child of :class:`~transformers.PreTrainedTokenizer`
+        max_seq_length: The maximum sequence length of the inputs.
+        doc_stride: The stride used when the context is too large and is split across several features.
+        max_query_length: The maximum length of the query.
+        is_training: whether to create features for model evaluation or model training.
+        return_dataset: Default False. Either 'pt' or 'tf'.
+            if 'pt': returns a torch.data.TensorDataset,
+            if 'tf': returns a tf.data.Dataset
+        threads: multiple processing threadsa-smi
+    Returns:
+        list of :class:`~transformers.data.processors.squad.SquadFeatures`
+    Example::
+        processor = SquadV2Processor()
+        examples = processor.get_dev_examples(data_dir)
+        features = squad_convert_examples_to_features(
+            examples=examples,
+            tokenizer=tokenizer,
+            max_seq_length=args.max_seq_length,
+            doc_stride=args.doc_stride,
+            max_query_length=args.max_query_length,
+            is_training=not evaluate,
+        )
+    """
+
+    # Defining helper methods
+    features = []
+    threads = min(threads, cpu_count())
+    with Pool(threads, initializer=squad_convert_example_to_features_init, initargs=(tokenizer,)) as p:
+        annotate_ = partial(
+            squad_convert_example_to_features,
+            max_seq_length=max_seq_length,
+            doc_stride=doc_stride,
+            max_query_length=max_query_length,
+            is_training=is_training,
+        )
+        features = list(
+            tqdm(
+                p.imap(annotate_, examples, chunksize=32),
+                total=len(examples),
+                desc="convert squad examples to features",
+            )
+        )
+    new_features = []
+    unique_id = 1000000000
+    example_index = 0
+    for example_features in tqdm(features, total=len(features), desc="add example index and unique id"):
+        if not example_features:
+            continue
+        for example_feature in example_features:
+            example_feature.example_index = example_index
+            example_feature.unique_id = unique_id
+            new_features.append(example_feature)
+            unique_id += 1
+        example_index += 1
+    features = new_features
+    del new_features
+    if return_dataset == "pt":
+
+        # Convert to Tensors and build dataset
+        all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
+        all_attention_masks = torch.tensor([f.attention_mask for f in features], dtype=torch.long)
+        all_token_type_ids = torch.tensor([f.token_type_ids for f in features], dtype=torch.long)
+        all_cls_index = torch.tensor([f.cls_index for f in features], dtype=torch.long)
+        all_p_mask = torch.tensor([f.p_mask for f in features], dtype=torch.float)
+        all_is_impossible = torch.tensor([f.is_impossible for f in features], dtype=torch.float)
+
+        if not is_training:
+            print("test")
+            all_example_index = torch.arange(all_input_ids.size(0), dtype=torch.long)
+            dataset = TensorDataset(
+                all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_cls_index, all_p_mask
+            )
+        else:
+            all_example_index = torch.arange(all_input_ids.size(0), dtype=torch.long)
+            all_start_positions = torch.tensor([f.start_position for f in features], dtype=torch.long)
+            all_end_positions = torch.tensor([f.end_position for f in features], dtype=torch.long)
+            dataset = TensorDataset(
+                all_input_ids,
+                all_attention_masks,
+                all_token_type_ids,
+                all_example_index,
+                all_start_positions,
+                all_end_positions,
+                all_cls_index,
+                all_p_mask,
+                all_is_impossible,
+            )
+
+        return features, dataset
+
+    return features
+
+def load_and_cache_examples_v2(data_dir, input_file, model_type, tokenizer, max_seq_length=384, max_query_length=64,
                             doc_stride=128, threads=1, mode="train", seed=42, fold=0, output_examples=True):
 
     # Load data features from cache or dataset file
@@ -91,7 +195,7 @@ def load_and_cache_examples(data_dir, input_file, model_type, tokenizer, max_seq
         else:
             examples = processor.get_dev_examples(data_dir, filename=input_file)
 
-        features, dataset = squad_convert_examples_to_features(
+        features, dataset = squad_convert_examples_to_features_v2(
             examples=examples,
             tokenizer=tokenizer,
             max_seq_length=max_seq_length,
@@ -275,46 +379,16 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
         tokenizer = T5Tokenizer.from_pretrained(model_type, additional_special_tokens=ADD_TOKEN_LIST)
         tokenizer.cls_token = '[CLS]'
         tokenizer.sep_token = '[SEP]'
-
-    elif model_type == "flaubert-base-uncased":
-
-        tokenizer = FlaubertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                             "[CLS]", "[MASK]"])
-    elif (model_type == "flaubert-base-cased") or (model_type == "flaubert-large-cased"):
-
-        tokenizer = FlaubertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                             "[CLS]", "[MASK]"])
-    elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
-
-        tokenizer = XLNetTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
-    elif model_type == "roberta-base":
-
-        ADD_TOKEN_LIST = ["[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"]
-        tokenizer = RobertaTokenizer.from_pretrained(model_type)
-        tokenizer.cls_token = '[CLS]'
-        tokenizer.sep_token = '[SEP]'
-        num_added_tokens = tokenizer.add_tokens(ADD_TOKEN_LIST)
-        print('Number of Tokens Added : ', num_added_tokens)
-
-    elif ((model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2")
-          or (model_type == "albert-xxlarge-v2")):
-
-        tokenizer = AlbertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
-    elif model_type == "gpt2":
-
-        tokenizer = AutoTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
     else:
 
         raise NotImplementedError
 
-    ds_test = load_and_cache_examples(data_path, "test.json", model_type, tokenizer, max_seq_length, max_query_length,
-                                      doc_stride, threads, mode="test", output_examples=False)
+    ds_test, examples_test, features_test = load_and_cache_examples_v2(data_path, "test.json", model_type, tokenizer,
+                                                                    max_seq_length, max_query_length, doc_stride,
+                                                                    threads, mode="test", output_examples=True)
+    # print(len(ds_test.tensors))
     loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=False)
-
-    return loader
+    return loader, examples_test, features_test
 
 
 def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/",
@@ -372,14 +446,14 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         raise NotImplementedError
 
 
-    ds_train, examples_train, features_train = load_and_cache_examples(data_path, 'split/train_fold_%s_seed_%s.json' %
+    ds_train, examples_train, features_train = load_and_cache_examples_v2(data_path, 'split/train_fold_%s_seed_%s.json' %
                                                                        (fold, seed), model_type, tokenizer,
                                                                        max_seq_length, max_query_length, doc_stride,
                                                                        threads, mode="train", output_examples=True)
     train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                                drop_last=True)
 
-    ds_val, examples_val, features_val = load_and_cache_examples(data_path, 'split/val_fold_%s_seed_%s.json' %
+    ds_val, examples_val, features_val = load_and_cache_examples_v2(data_path, 'split/val_fold_%s_seed_%s.json' %
                                                                  (fold, seed), model_type, tokenizer, max_seq_length,
                                                                  max_query_length, doc_stride, threads, mode="train",
                                                                  output_examples=True)
@@ -416,11 +490,11 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                      batch_size=4,
                      num_workers=4):
 
-    loader = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, max_query_length=max_query_length,
+    test_loader, examples_test, features_test = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, max_query_length=max_query_length,
                              doc_stride=doc_stride, threads=threads, model_type=model_type, batch_size=batch_size,
                              num_workers=num_workers)
 
-    for all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_cls_index, all_p_mask in loader:
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_cls_index, all_p_mask) in enumerate(test_loader):
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -452,13 +526,14 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                                 model_type=model_type, batch_size=batch_size,
                                                                 val_batch_size=val_batch_size, num_workers=num_workers)
 
-    for all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions, all_cls_index, \
-        all_p_mask, all_is_impossible in train_loader:
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions, all_end_positions, all_cls_index, \
+        all_p_mask, all_is_impossible) in enumerate(train_loader):
 
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
         print("all_token_type_ids (numpy): ", all_token_type_ids.numpy().shape)
+        print("all_example_index (numpy): ", all_example_index.numpy().shape)
         print("all_start_positions (numpy): ", all_start_positions.numpy().shape)
         print("all_end_positions (numpy): ", all_end_positions.numpy().shape)
         print("all_cls_index (numpy): ", all_cls_index.numpy().shape)
@@ -467,12 +542,13 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("------------------------testing train loader finished----------------------")
         break
 
-    for all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions, all_cls_index, \
-        all_p_mask, all_is_impossible in val_loader:
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions, all_end_positions, all_cls_index, \
+        all_p_mask, all_is_impossible) in enumerate(val_loader):
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
         print("all_token_type_ids (numpy): ", all_token_type_ids.numpy().shape)
+        print("all_example_index (numpy): ", all_example_index.numpy().shape)
         print("all_start_positions (numpy): ", all_start_positions.numpy().shape)
         print("all_end_positions (numpy): ", all_end_positions.numpy().shape)
         print("all_cls_index (numpy): ", all_cls_index.numpy().shape)

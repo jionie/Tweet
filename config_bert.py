@@ -12,9 +12,9 @@ class Config_Bert:
         self.load_optimizer = False
         self.skip_layers = []
         # model
-        self.model_type = "bert-base-uncased"
+        self.model_type = "bert-large-cased"
         self.model_name = 'TweetBert'
-        self.hidden_layers = [-1, -3, -5, -7, -9]
+        self.hidden_layers = [-1, -2, -3, -4]
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
@@ -44,19 +44,20 @@ class Config_Bert:
         # dataset setting
         self.max_seq_length = 192
         self.max_query_length = 64
+        self.max_answer_length = 30
         self.doc_stride = 64
         self.threads = 4
         # optimizer
         self.optimizer_name = "AdamW"
         # lr scheduler
-        self.lr_scheduler_name = 'WarmupLinearSchedule'
-        self.warmup_proportion = 0.05
+        self.lr_scheduler_name = 'WarmupCosineAnealing'
+        self.warmup_proportion = 0.001
         # lr
-        self.lr = 5e-5
-        self.weight_decay = 0.00
+        self.lr = 1e-4
+        self.weight_decay = 0.001
         # differential lr settings
         self.decay_factor = 0.9
-        self.min_lr = 5e-5
+        self.min_lr = 2e-6
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
@@ -66,10 +67,17 @@ class Config_Bert:
         self.shuffle = True
         self.drop_last = True
         # gradient accumulation
-        self.accumulation_steps = 1
+        self.accumulation_steps = 2
         # epochs
-        self.num_epoch = 12
+        self.num_epoch = 100
         # early stopping
-        self.early_stopping = 3
+        self.early_stopping = 30
         # progress rate
         self.progress_rate = 1/20
+        # inference setting
+        self.n_best_size = 20
+        self.do_lower_case = True
+        self.verbose_logging = True
+        self.null_score_diff_threshold = 0
+        self.version_2_with_negative = True
+

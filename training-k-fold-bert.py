@@ -7,14 +7,20 @@ import gc
 import random
 import argparse
 import pandas as pd
+import json
 import numpy as np
 
 # import pytorch related libraries
 import torch
-import torch.nn as nn
 from tensorboardX import SummaryWriter
 from pytorch_pretrained_bert.optimization import BertAdam
 from transformers import *
+from transformers.data.processors.squad import SquadResult
+from transformers.data.metrics.squad_metrics import (
+    compute_predictions_log_probs,
+    compute_predictions_logits,
+    squad_evaluate,
+)
 
 # import apex for mix precision training
 from apex import amp
@@ -65,7 +71,6 @@ class QA():
         self.load_data()
         self.prepare_train()
         self.setup_model()
-        self.show_info()
 
     def setup_logger(self):
         self.log = Logger()
@@ -94,7 +99,7 @@ class QA():
                             seed=self.config.seed,
                             split=self.config.split)
 
-        self.test_data_loader = get_test_loader(data_path=self.config.data_path,
+        self.test_data_loader, self.examples_test, self.features_test = get_test_loader(data_path=self.config.data_path,
                          max_seq_length=self.config.max_seq_length,
                          max_query_length=self.config.max_query_length,
                          doc_stride=self.config.doc_stride,
@@ -248,7 +253,7 @@ class QA():
                                       warmup=self.config.warmup_proportion,
                                       t_total=num_train_optimization_steps)
         elif self.config.optimizer_name == "AdamW":
-            self.optimizer = BertAdam(self.optimizer_grouped_parameters, eps=4e-5)
+            self.optimizer = BertAdam(self.optimizer_grouped_parameters, eps=1e-8)
         elif self.config.optimizer_name == "FusedAdam":
             self.optimizer = FusedAdam(self.optimizer_grouped_parameters,
                                        bias_correction=False)
@@ -256,7 +261,7 @@ class QA():
             raise NotImplementedError
 
         # lr scheduler
-        if self.config.lr_scheduler_name == "CosineAnealing":
+        if self.config.lr_scheduler_name == "WarmupCosineAnealing":
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_cosine_schedule_with_warmup(self.optimizer,
@@ -267,7 +272,7 @@ class QA():
         elif self.config.lr_scheduler_name == "WarmRestart":
             self.scheduler = WarmRestart(self.optimizer, T_max=5, T_mult=1, eta_min=1e-6)
             self.lr_scheduler_each_iter = False
-        elif self.config.lr_scheduler_name == "WarmupLinearSchedule":
+        elif self.config.lr_scheduler_name == "WarmupLinear":
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_linear_schedule_with_warmup(self.optimizer,
@@ -388,6 +393,7 @@ class QA():
         self.log.write('\n')
 
     def train_op(self):
+        self.show_info()
         self.log.write('** start training here! **\n')
         self.log.write('   batch_size=%d,  accumulation_steps=%d\n' % (self.config.batch_size,
                                                                        self.config.accumulation_steps))
@@ -399,6 +405,8 @@ class QA():
         self.log_step = int(len(self.train_data_loader)*self.config.progress_rate)
         self.eval_count = 0
         self.count = 0
+        label = None
+        prediction = None
     
         while self.epoch <= self.config.num_epoch:
 
@@ -418,7 +426,7 @@ class QA():
             torch.cuda.empty_cache()
             self.model.zero_grad()
 
-            for tr_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
+            for tr_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
                              all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
                     enumerate(self.train_data_loader):
 
@@ -450,7 +458,7 @@ class QA():
                     loss.backward()
 
                 if ((tr_batch_i+1) % self.config.accumulation_steps == 0):
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=5.0, norm_type=2)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0, norm_type=2)
                     self.optimizer.step()
                     self.model.zero_grad()
                     # adjust lr
@@ -469,18 +477,18 @@ class QA():
                 def to_list(tensor):
                     return tensor.detach().cpu().tolist()
 
-                all_input_ids = to_list(all_input_ids)
                 all_start_positions = to_list(all_start_positions)
                 all_end_positions = to_list(all_end_positions)
                 start_logits = to_list(start_logits)
                 end_logits = to_list(end_logits)
 
-                for input_idx in range(len(all_input_ids)):
-                    label = all_input_ids[input_idx][all_start_positions[input_idx]: all_end_positions[input_idx]]
-                    prediction = all_input_ids[input_idx][start_logits[input_idx]: end_logits[input_idx]]
+                for input_idx, example_index in enumerate(all_example_index):
 
-                    label = " ".join([self.tokenizer.decode(element) for element in label])
-                    prediction = " ".join([self.tokenizer.decode(element) for element in prediction])
+                    train_feature = self.features_train[example_index.item()]
+                    label = train_feature.tokens[all_start_positions[input_idx]: all_end_positions[input_idx]+1]
+                    label = " ".join(label).replace(" ##", "").strip()
+                    prediction = train_feature.tokens[start_logits[input_idx] : end_logits[input_idx]+1]
+                    prediction = " ".join(prediction).replace(" ##", "").strip()
 
                     self.train_metrics.append(jaccard(label, prediction))
 
@@ -498,6 +506,9 @@ class QA():
                     self.log.write('lr: %f train loss: %f train_jaccard: %f\n' % \
                         (rate, train_loss[0], mean_train_metric))
 
+                    print("Training ground truth: ", label)
+                    print("Training prediction: ", prediction)
+
                 if (tr_batch_i+1) % self.eval_step == 0:
                     self.evaluate_op()
 
@@ -512,13 +523,15 @@ class QA():
         self.val_metrics = []
         valid_loss = np.zeros(1, np.float32)
         valid_num = np.zeros_like(valid_loss)
+        label = None
+        prediction = None
 
         with torch.no_grad():
 
             # init cache
             torch.cuda.empty_cache()
 
-            for val_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
+            for val_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
                              all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
                     enumerate(self.val_data_loader):
 
@@ -548,20 +561,20 @@ class QA():
                 def to_list(tensor):
                     return tensor.detach().cpu().tolist()
 
-                all_input_ids = to_list(all_input_ids)
                 all_start_positions = to_list(all_start_positions)
                 all_end_positions = to_list(all_end_positions)
                 start_logits = to_list(start_logits)
                 end_logits = to_list(end_logits)
 
-                for input_idx in range(len(all_input_ids)):
-                    label = all_input_ids[all_start_positions[input_idx]: all_end_positions[input_idx]]
-                    prediction = all_input_ids[start_logits[input_idx]: end_logits[input_idx]]
+                for input_idx, example_index in enumerate(all_example_index):
+                    train_feature = self.features_train[example_index.item()]
+                    label = train_feature.tokens[all_start_positions[input_idx]: all_end_positions[input_idx] + 1]
+                    label = " ".join(label).replace(" ##", "").strip()
 
-                    label = " ".join([self.tokenizer.decode(element) for element in label])
-                    prediction = " ".join([self.tokenizer.decode(element) for element in prediction])
+                    prediction = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    prediction = " ".join(prediction).replace(" ##", "").strip()
 
-                    self.val_metrics.append(jaccard(label, prediction))
+                    self.train_metrics.append(jaccard(label, prediction))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
@@ -573,6 +586,8 @@ class QA():
 
             self.log.write('validation loss: %f val_jaccard: %f\n' % \
                       (valid_loss[0], mean_val_metric))
+            print("Validating ground truth: ", label)
+            print("Validating prediction: ", prediction)
 
         if (mean_val_metric >= self.valid_metric_optimal):
 
@@ -587,6 +602,104 @@ class QA():
         else:
             self.count += 1
 
+    def infer_op(self):
+
+        all_results = []
+        my_results = []
+
+        with torch.no_grad():
+
+            # init cache
+            torch.cuda.empty_cache()
+
+            for val_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index,
+                              all_cls_index, all_p_mask) in \
+                    enumerate(self.test_data_loader):
+
+                # set model to eval mode
+                self.model.eval()
+
+                # set input to cuda mode
+                all_input_ids = all_input_ids.cuda()
+                all_attention_masks = all_attention_masks.cuda()
+                all_token_type_ids = all_token_type_ids.cuda()
+
+                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                     token_type_ids=all_token_type_ids)
+
+                start_logits, end_logits = outputs[0], outputs[1]
+
+                def to_list(tensor):
+                    return tensor.detach().cpu().tolist()
+
+                start_index = to_list(start_logits.argmax(dim=-1))
+                end_index = to_list(end_logits.argmax(dim=-1))
+
+                for i, example_index in enumerate(all_example_index):
+                    eval_feature = self.features_test[example_index.item()]
+                    # print(eval_feature.__dict__)
+                    unique_id = int(eval_feature.unique_id)
+
+                    start_logits_list = [to_list(start_logit[i]) for start_logit in start_logits]
+                    end_logits_list = [to_list(end_logit[i]) for end_logit in end_logits]
+
+                    result = SquadResult(unique_id, start_logits_list, end_logits_list)
+
+                    all_results.append(result)
+
+                for input_idx, example_index in enumerate(all_example_index):
+                    eval_feature = self.features_test[example_index.item()]
+                    my_prediction = eval_feature.tokens[start_index[input_idx] : end_index[input_idx]+1]
+                    my_prediction = " ".join(my_prediction).replace(" ##", "").strip()
+                    my_results.append(my_prediction)
+
+        output_prediction_file = os.path.join(self.config.checkpoint_folder, "predictions_{}.json".format(self.config.fold))
+        output_nbest_file = os.path.join(self.config.checkpoint_folder, "nbest_predictions_{}.json".format(self.config.fold))
+        output_null_log_odds_file = os.path.join(self.config.checkpoint_folder, "null_odds_{}.json".format(self.config.fold))
+
+        predictions = compute_predictions_logits(
+            self.examples_test,
+            self.features_test,
+            all_results,
+            self.config.n_best_size,
+            self.config.max_answer_length,
+            self.config.do_lower_case,
+            output_prediction_file,
+            output_nbest_file,
+            output_null_log_odds_file,
+            self.config.verbose_logging,
+            self.config.version_2_with_negative,
+            self.config.null_score_diff_threshold,
+            self.tokenizer,
+        )
+
+        results = squad_evaluate(self.examples_test, predictions)
+
+        # save csv
+        submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
+        pd_test = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
+
+        predictions_ = json.load(open(output_prediction_file, 'r'))
+        for i in range(len(submission)):
+            id_ = submission['textID'][i]
+            if pd_test['sentiment'][i] == 'neutral':  # neutral postprocessing
+                submission.loc[i, 'selected_text'] = pd_test['text'][i]
+            else:
+                submission.loc[i, 'selected_text'] = predictions_[id_]
+
+        submission.to_csv(os.path.join(self.config.checkpoint_folder, "predictions_{}.csv".format(self.config.fold)))
+
+        for i in range(len(submission)):
+            if pd_test['sentiment'][i] == 'neutral':  # neutral postprocessing
+                submission.loc[i, 'selected_text'] = pd_test['text'][i]
+            else:
+                submission.loc[i, 'selected_text'] = my_results[i]
+
+        submission.to_csv(os.path.join(self.config.checkpoint_folder, "my_predictions_{}.csv".format(self.config.fold)))
+
+        return results
+
+
 
 if __name__ == "__main__":
 
@@ -598,3 +711,4 @@ if __name__ == "__main__":
 
     qa = QA(config)
     qa.train_op()
+    # qa.infer_op()
