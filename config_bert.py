@@ -53,12 +53,12 @@ class Config_Bert:
         self.max_grad_norm = 1
         # lr scheduler
         self.lr_scheduler_name = 'WarmupLinear'
-        self.warmup_proportion = 0.00
+        self.warmup_proportion = 0.005
         # lr
         self.lr = 5e-5
         self.weight_decay = 0.001
         # differential lr settings
-        self.differential_lr = False
+        self.differential_lr = True
         self.decay_factor = 0.9
         self.min_lr = 2e-6
         # differential lr setting, step or decay
@@ -70,9 +70,9 @@ class Config_Bert:
         self.shuffle = True
         self.drop_last = True
         # gradient accumulation
-        self.accumulation_steps = 1
+        self.accumulation_steps = 2
         # epochs
-        self.num_epoch = 3
+        self.num_epoch = 30
         # early stopping
         self.early_stopping = 30
         # progress rate

@@ -38,41 +38,41 @@ class TweetBert(nn.Module):
                                                         hidden_dropout_prob=0.1, output_hidden_states=True)
         elif model_type == "bert-base-uncased":
             self.config = AutoConfig.from_pretrained(
-                "bert",
+                "bert-base-uncased",
             )
             self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
-            self.model = AutoModel.from_pretrained(
+            self.bert = AutoModel.from_pretrained(
                 model_type,
                 config=self.config,
             )
         elif model_type == "bert-base-cased":
             self.config = AutoConfig.from_pretrained(
-                "bert",
+                "bert-base-cased",
             )
             self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
-            self.model = AutoModel.from_pretrained(
+            self.bert = AutoModel.from_pretrained(
                 model_type,
                 config=self.config,
             )
         elif model_type == "roberta-base":
             self.config = AutoConfig.from_pretrained(
-                "roberta",
+                "roberta-base",
             )
             self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
-            self.model = AutoModel.from_pretrained(
+            self.bert = AutoModel.from_pretrained(
                 model_type,
                 config=self.config,
             )
         elif model_type == "roberta-large":
             self.config = AutoConfig.from_pretrained(
-                "roberta",
+                "roberta-large",
             )
             self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
-            self.model = AutoModel.from_pretrained(
+            self.bert = AutoModel.from_pretrained(
                 model_type,
                 config=self.config,
             )
