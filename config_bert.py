@@ -72,15 +72,15 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = 2
         # epochs
-        self.num_epoch = 30
+        self.num_epoch = 10
         # early stopping
-        self.early_stopping = 30
+        self.early_stopping = 10
         # progress rate
         self.progress_rate = 1/20
         # inference setting
         self.n_best_size = 20
         self.do_lower_case = True
-        self.verbose_logging = True
+        self.verbose_logging = False
         self.null_score_diff_threshold = 0
         self.version_2_with_negative = False
 

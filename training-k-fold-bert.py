@@ -1,5 +1,6 @@
 # import os and define graphic card
 import os
+
 os.environ["OMP_NUM_THREADS"] = "1"
 
 # import common libraries
@@ -18,6 +19,7 @@ from transformers.data.processors.squad import SquadResult
 
 # import apex for mix precision training
 from apex import amp
+
 amp.register_half_function(torch, "einsum")
 from apex.optimizers import FusedAdam
 
@@ -27,7 +29,7 @@ from dataset.dataset import *
 # import utils
 from utils.squad_metrics import *
 from utils.ranger import *
-from utils.lrs_scheduler import * 
+from utils.lrs_scheduler import *
 from utils.loss_function import *
 from utils.metric import *
 from utils.file import *
@@ -37,7 +39,6 @@ from model.model_bert import *
 
 # import config
 from config_bert import *
-
 
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
@@ -52,8 +53,8 @@ def seed_everything(seed=42):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.benchmark     = False  ##uses the inbuilt cudnn auto-tuner to find the fastest convolution algorithms. -
-    torch.backends.cudnn.enabled       = True
+    torch.backends.cudnn.benchmark = False  ##uses the inbuilt cudnn auto-tuner to find the fastest convolution algorithms. -
+    torch.backends.cudnn.enabled = True
     torch.backends.cudnn.deterministic = True
 
 
@@ -96,26 +97,26 @@ class QA():
                             split=self.config.split)
 
         self.test_data_loader, self.examples_test, self.features_test = get_test_loader(data_path=self.config.data_path,
-                         max_seq_length=self.config.max_seq_length,
-                         max_query_length=self.config.max_query_length,
-                         doc_stride=self.config.doc_stride,
-                         threads=self.config.threads,
-                         model_type=self.config.model_type,
-                         batch_size=self.config.val_batch_size,
-                         num_workers=self.config.num_workers)
+                                                                                        max_seq_length=self.config.max_seq_length,
+                                                                                        max_query_length=self.config.max_query_length,
+                                                                                        doc_stride=self.config.doc_stride,
+                                                                                        threads=self.config.threads,
+                                                                                        model_type=self.config.model_type,
+                                                                                        batch_size=self.config.val_batch_size,
+                                                                                        num_workers=self.config.num_workers)
 
         self.train_data_loader, self.examples_train, self.features_train, self.val_data_loader, self.examples_val, \
-                self.features_val, self.tokenizer = get_train_val_loaders(data_path=self.config.data_path,
-                                                              seed=self.config.seed,
-                                                              fold=self.config.fold,
-                                                              max_seq_length=self.config.max_seq_length,
-                                                              max_query_length=self.config.max_query_length,
-                                                              doc_stride=self.config.doc_stride,
-                                                              threads=self.config.threads,
-                                                              model_type=self.config.model_type,
-                                                              batch_size=self.config.batch_size,
-                                                              val_batch_size=self.config.val_batch_size,
-                                                              num_workers=self.config.num_workers)
+        self.features_val, self.tokenizer = get_train_val_loaders(data_path=self.config.data_path,
+                                                                  seed=self.config.seed,
+                                                                  fold=self.config.fold,
+                                                                  max_seq_length=self.config.max_seq_length,
+                                                                  max_query_length=self.config.max_query_length,
+                                                                  doc_stride=self.config.doc_stride,
+                                                                  threads=self.config.threads,
+                                                                  model_type=self.config.model_type,
+                                                                  batch_size=self.config.batch_size,
+                                                                  val_batch_size=self.config.val_batch_size,
+                                                                  num_workers=self.config.num_workers)
 
     def prepare_train(self):
         # preparation for training
@@ -127,7 +128,7 @@ class QA():
 
     def pick_model(self):
         # for switching model
-        self.model = TweetBert(model_type=self.config.model_type, hidden_layers=self.config.hidden_layers)\
+        self.model = TweetBert(model_type=self.config.model_type, hidden_layers=self.config.hidden_layers) \
             .to(self.config.device)
         # config = AutoConfig.from_pretrained("roberta-large")
         # self.model = AutoModelForQuestionAnswering.from_pretrained("roberta-large", config=config).to(self.config.device)
@@ -139,7 +140,7 @@ class QA():
             list_lr = []
 
             if ((self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-base-cased")
-                  or self.config.model_type == "roberta-base"):
+                    or self.config.model_type == "roberta-base"):
 
                 list_layers = [self.model.bert.embeddings,
                                self.model.bert.encoder.layer[0],
@@ -272,9 +273,9 @@ class QA():
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_cosine_schedule_with_warmup(self.optimizer,
-                                                        num_warmup_steps=int(num_train_optimization_steps *
-                                                                             self.config.warmup_proportion),
-                                                        num_training_steps=num_train_optimization_steps)
+                                                             num_warmup_steps=int(num_train_optimization_steps *
+                                                                                  self.config.warmup_proportion),
+                                                             num_training_steps=num_train_optimization_steps)
             self.lr_scheduler_each_iter = False
         elif self.config.lr_scheduler_name == "WarmRestart":
             self.scheduler = WarmRestart(self.optimizer, T_max=5, T_mult=1, eta_min=1e-6)
@@ -283,9 +284,9 @@ class QA():
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_linear_schedule_with_warmup(self.optimizer,
-                                                        num_warmup_steps=int(num_train_optimization_steps *
-                                                                             self.config.warmup_proportion),
-                                                        num_training_steps=num_train_optimization_steps)
+                                                             num_warmup_steps=int(num_train_optimization_steps *
+                                                                                  self.config.warmup_proportion),
+                                                             num_training_steps=num_train_optimization_steps)
             self.lr_scheduler_each_iter = True
         else:
             raise NotImplementedError
@@ -399,12 +400,12 @@ class QA():
         self.writer = SummaryWriter()
         ############################################################################### eval setting
         self.eval_step = len(self.train_data_loader)  # or len(train_data_loader)
-        self.log_step = int(len(self.train_data_loader)*self.config.progress_rate)
+        self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
         self.eval_count = 0
         self.count = 0
         label = None
         prediction = None
-    
+
         while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
@@ -423,8 +424,9 @@ class QA():
             torch.cuda.empty_cache()
             self.model.zero_grad()
 
-            for tr_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
-                             all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
+            for tr_batch_i, (
+            all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
+            all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -443,8 +445,8 @@ class QA():
 
                 if self.config.model_type in ["roberta-large", "roberta-base"]:
                     outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                       start_positions=all_start_positions,
-                                       end_positions=all_end_positions)
+                                         start_positions=all_start_positions,
+                                         end_positions=all_end_positions)
                 else:
                     outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
@@ -459,7 +461,7 @@ class QA():
                 else:
                     loss.backward()
 
-                if ((tr_batch_i+1) % self.config.accumulation_steps == 0):
+                if ((tr_batch_i + 1) % self.config.accumulation_steps == 0):
                     if self.config.apex:
                         torch.nn.utils.clip_grad_norm_(amp.master_params(self.optimizer), self.config.max_grad_norm)
                     else:
@@ -471,7 +473,8 @@ class QA():
                         self.scheduler.step()
 
                     self.writer.add_scalar('train_loss_' + str(self.config.fold), loss.item(),
-                                           (self.epoch-1)*len(self.train_data_loader)*self.config.batch_size+tr_batch_i*
+                                           (self.epoch - 1) * len(
+                                               self.train_data_loader) * self.config.batch_size + tr_batch_i *
                                            self.config.batch_size)
                     self.step += 1
 
@@ -485,36 +488,63 @@ class QA():
                 all_start_positions = to_list(all_start_positions)
                 all_end_positions = to_list(all_end_positions)
                 start_logits = to_list(start_logits)
-                end_logits = to_list(end_logits)
+                end_logits = to_list((end_logits))
 
                 for input_idx, example_index in enumerate(all_example_index):
-
                     train_feature = self.features_train[example_index.item()]
-                    label = train_feature.tokens[all_start_positions[input_idx]: all_end_positions[input_idx]+1]
-                    label = " ".join(label).replace(" ##", "").strip()
-                    prediction = train_feature.tokens[start_logits[input_idx] : end_logits[input_idx]+1]
-                    prediction = " ".join(prediction).replace(" ##", "").strip()
+                    train_example = self.examples_train[example_index.item()]
 
-                    self.train_metrics.append(jaccard(label, prediction))
+                    # print(train_feature.token_to_orig_map.keys(), start_logits[input_idx], end_logits[input_idx])
+
+                    if start_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
+                    elif start_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
+
+                    if end_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
+                    elif end_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
+
+                    # get label
+                    label_doc_start = train_feature.token_to_orig_map[all_start_positions[input_idx]]
+                    label_doc_end = train_feature.token_to_orig_map[all_end_positions[input_idx]]
+                    label_tokens = train_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
+                    label_text = " ".join(label_tokens)
+
+                    tok_tokens = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    orig_doc_start = train_feature.token_to_orig_map[start_logits[input_idx]]
+                    orig_doc_end = train_feature.token_to_orig_map[end_logits[input_idx]]
+                    orig_tokens = train_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
+                    tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
+
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
+
+                    final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
+                                                verbose_logging=self.config.verbose_logging)
+
+                    self.train_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
                 sum_train_loss = sum_train_loss + l
-                sum_train      = sum_train + n
+                sum_train = sum_train + n
 
                 # log for training
-                if (tr_batch_i+1) % self.log_step == 0:
-                    train_loss          = sum_train_loss / (sum_train + 1e-12)
+                if (tr_batch_i + 1) % self.log_step == 0:
+                    train_loss = sum_train_loss / (sum_train + 1e-12)
                     sum_train_loss[...] = 0
-                    sum_train[...]      = 0
-                    mean_train_metric   = np.mean(self.train_metrics)
+                    sum_train[...] = 0
+                    mean_train_metric = np.mean(self.train_metrics)
                     self.log.write('lr: %f train loss: %f train_jaccard: %f\n' % \
-                        (rate, train_loss[0], mean_train_metric))
+                                   (rate, train_loss[0], mean_train_metric))
 
-                    print("Training ground truth: ", label)
-                    print("Training prediction: ", prediction)
+                    print("Training ground truth: ", label_text)
+                    print("Training prediction: ", final_text)
 
-                if (tr_batch_i+1) % self.eval_step == 0:
+                if (tr_batch_i + 1) % self.eval_step == 0:
                     self.evaluate_op()
 
             if (self.count == self.config.early_stopping):
@@ -536,8 +566,9 @@ class QA():
             # init cache
             torch.cuda.empty_cache()
 
-            for val_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
-                             all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
+            for val_batch_i, (
+            all_input_ids, all_attention_masks, all_token_type_ids, all_example_index, all_start_positions,
+            all_end_positions, all_cls_index, all_p_mask, all_is_impossible) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -574,17 +605,42 @@ class QA():
                 all_start_positions = to_list(all_start_positions)
                 all_end_positions = to_list(all_end_positions)
                 start_logits = to_list(start_logits)
-                end_logits = to_list(end_logits)
+                end_logits = to_list((end_logits))
 
                 for input_idx, example_index in enumerate(all_example_index):
-                    train_feature = self.features_train[example_index.item()]
-                    label = train_feature.tokens[all_start_positions[input_idx]: all_end_positions[input_idx] + 1]
-                    label = " ".join(label).replace(" ##", "").strip()
+                    eval_feature = self.features_val[example_index.item()]
+                    eval_example = self.examples_val[example_index.item()]
 
-                    prediction = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
-                    prediction = " ".join(prediction).replace(" ##", "").strip()
+                    if start_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
+                    elif start_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
 
-                    self.val_metrics.append(jaccard(label, prediction))
+                    if end_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
+                    elif end_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
+
+                    # get label
+                    label_doc_start = eval_feature.token_to_orig_map[all_start_positions[input_idx]]
+                    label_doc_end = eval_feature.token_to_orig_map[all_end_positions[input_idx]]
+                    label_tokens = eval_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
+                    label_text = " ".join(label_tokens)
+
+                    tok_tokens = eval_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    orig_doc_start = eval_feature.token_to_orig_map[start_logits[input_idx]]
+                    orig_doc_end = eval_feature.token_to_orig_map[end_logits[input_idx]]
+                    orig_tokens = eval_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
+                    tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
+
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
+
+                    final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
+                                                verbose_logging=self.config.verbose_logging)
+
+                    self.train_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
@@ -595,9 +651,9 @@ class QA():
             mean_val_metric = np.mean(self.val_metrics)
 
             self.log.write('validation loss: %f val_jaccard: %f\n' % \
-                      (valid_loss[0], mean_val_metric))
-            print("Validating ground truth: ", label)
-            print("Validating prediction: ", prediction)
+                           (valid_loss[0], mean_val_metric))
+            print("Validating ground truth: ", label_text)
+            print("Validating prediction: ", final_text)
 
         if (mean_val_metric >= self.valid_metric_optimal):
 
@@ -659,13 +715,16 @@ class QA():
 
                 for input_idx, example_index in enumerate(all_example_index):
                     eval_feature = self.features_test[example_index.item()]
-                    my_prediction = eval_feature.tokens[start_index[input_idx] : end_index[input_idx]+1]
+                    my_prediction = eval_feature.tokens[start_index[input_idx]: end_index[input_idx] + 1]
                     my_prediction = " ".join(my_prediction).replace(" ##", "").strip()
                     my_results.append(my_prediction)
 
-        output_prediction_file = os.path.join(self.config.checkpoint_folder, "predictions_{}.json".format(self.config.fold))
-        output_nbest_file = os.path.join(self.config.checkpoint_folder, "nbest_predictions_{}.json".format(self.config.fold))
-        output_null_log_odds_file = os.path.join(self.config.checkpoint_folder, "null_odds_{}.json".format(self.config.fold))
+        output_prediction_file = os.path.join(self.config.checkpoint_folder,
+                                              "predictions_{}.json".format(self.config.fold))
+        output_nbest_file = os.path.join(self.config.checkpoint_folder,
+                                         "nbest_predictions_{}.json".format(self.config.fold))
+        output_null_log_odds_file = os.path.join(self.config.checkpoint_folder,
+                                                 "null_odds_{}.json".format(self.config.fold))
 
         predictions = compute_predictions_logits(
             self.examples_test,
@@ -709,7 +768,6 @@ class QA():
         submission.to_csv(os.path.join(self.config.checkpoint_folder, "my_predictions_{}.csv".format(self.config.fold)))
 
         return results
-
 
 
 if __name__ == "__main__":
