@@ -776,8 +776,7 @@ if __name__ == "__main__":
     # update fold
     config = Config_Bert()
     config.fold = args.fold
-
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
-    # qa.infer_op()
+    # qa.train_op()
+    qa.infer_op()

@@ -163,6 +163,18 @@ def load_and_cache_examples_v2(data_dir, input_file, model_type, tokenizer, max_
             ),
         )
         evaluate = False
+    elif mode == "val":
+        cached_features_file = os.path.join(
+            data_dir,
+            "cached_{}_{}_{}_{}_{}".format(
+                mode,
+                model_type,
+                str(max_seq_length),
+                str(seed),
+                str(fold)
+            ),
+        )
+        evaluate = False
     elif mode == "test":
         cached_features_file = os.path.join(
             data_dir,
@@ -176,38 +188,29 @@ def load_and_cache_examples_v2(data_dir, input_file, model_type, tokenizer, max_
     else:
         raise NotImplementedError
 
-    # Init features and dataset from cache if it exists
-    if os.path.exists(cached_features_file):
-        print("Loading features from cached file %s", cached_features_file)
-        features_and_dataset = torch.load(cached_features_file)
-        features, dataset, examples = (
-            features_and_dataset["features"],
-            features_and_dataset["dataset"],
-            features_and_dataset["examples"],
-        )
+    # overwrite cache for multiple tokenizers
+    print("Creating features from dataset file at %s", input_file)
+
+    processor = SquadV2Processor()
+
+    if evaluate:
+        examples = processor.get_dev_examples(data_dir, filename=input_file)
     else:
-        print("Creating features from dataset file at %s", input_file)
+        examples = processor.get_train_examples(data_dir, filename=input_file)
 
-        processor = SquadV2Processor()
+    features, dataset = squad_convert_examples_to_features_v2(
+        examples=examples,
+        tokenizer=tokenizer,
+        max_seq_length=max_seq_length,
+        doc_stride=doc_stride,
+        max_query_length=max_query_length,
+        is_training=not evaluate,
+        return_dataset="pt",
+        threads=threads,
+    )
 
-        if evaluate:
-            examples = processor.get_dev_examples(data_dir, filename=input_file)
-        else:
-            examples = processor.get_train_examples(data_dir, filename=input_file)
-
-        features, dataset = squad_convert_examples_to_features_v2(
-            examples=examples,
-            tokenizer=tokenizer,
-            max_seq_length=max_seq_length,
-            doc_stride=doc_stride,
-            max_query_length=max_query_length,
-            is_training=not evaluate,
-            return_dataset="pt",
-            threads=threads,
-        )
-
-        print("Saving features into cached file %s", cached_features_file)
-        torch.save({"features": features, "dataset": dataset, "examples": examples}, cached_features_file)
+    print("Saving features into cached file %s", cached_features_file)
+    torch.save({"features": features, "dataset": dataset, "examples": examples}, cached_features_file)
 
     if output_examples:
         return dataset, examples, features
@@ -499,14 +502,15 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     ds_train, examples_train, features_train = load_and_cache_examples_v2(data_path, 'split/train_fold_%s_seed_%s.json' %
                                                                        (fold, seed), model_type, tokenizer,
                                                                        max_seq_length, max_query_length, doc_stride,
-                                                                       threads, mode="train", output_examples=True)
+                                                                       threads, mode="train", seed=seed, fold=fold,
+                                                                          output_examples=True)
     train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                                drop_last=True)
 
     ds_val, examples_val, features_val = load_and_cache_examples_v2(data_path, 'split/val_fold_%s_seed_%s.json' %
                                                                  (fold, seed), model_type, tokenizer, max_seq_length,
-                                                                 max_query_length, doc_stride, threads, mode="train",
-                                                                 output_examples=True)
+                                                                 max_query_length, doc_stride, threads, mode="val",
+                                                                 seed=seed, fold=fold, output_examples=True)
     val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=False, num_workers=num_workers,
                                              drop_last=False)
 
