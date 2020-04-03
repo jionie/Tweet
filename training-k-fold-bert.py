@@ -640,7 +640,7 @@ class QA():
                     final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
                                                 verbose_logging=self.config.verbose_logging)
 
-                    self.train_metrics.append(jaccard(label_text, final_text))
+                    self.val_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
