@@ -1,8 +1,21 @@
 import torch.nn.functional as F
 from . import functions as Func
 import torch.nn as nn
-import numpy as np
 import torch
+
+class CrossEntropyLossOHEM(torch.nn.Module):
+    def __init__(self, ignore_index, top_k=0.75):
+        super(CrossEntropyLossOHEM, self).__init__()
+        self.top_k = top_k
+        self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
+
+    def forward(self, input, target):
+        loss = self.loss(input, target)
+        if self.top_k == 1:
+            return torch.mean(loss)
+        else:
+            valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
+            return torch.mean(valid_loss)
 
 class MSELoss(nn.Module):
     def __init__(self, gamma=2):

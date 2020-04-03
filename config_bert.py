@@ -12,7 +12,7 @@ class Config_Bert:
         self.load_optimizer = False
         self.skip_layers = []
         # model
-        self.model_type = "bert-large-cased"
+        self.model_type = "roberta-large"
         self.model_name = 'TweetBert'
         self.hidden_layers = [-1, -2, -3, -4]
         # path, specify the path for data
@@ -49,13 +49,16 @@ class Config_Bert:
         self.threads = 4
         # optimizer
         self.optimizer_name = "AdamW"
+        self.adam_epsilon = 1e-8
+        self.max_grad_norm = 1
         # lr scheduler
-        self.lr_scheduler_name = 'WarmupCosineAnealing'
-        self.warmup_proportion = 0.001
+        self.lr_scheduler_name = 'WarmupLinear'
+        self.warmup_proportion = 0.00
         # lr
-        self.lr = 1e-4
+        self.lr = 5e-5
         self.weight_decay = 0.001
         # differential lr settings
+        self.differential_lr = False
         self.decay_factor = 0.9
         self.min_lr = 2e-6
         # differential lr setting, step or decay
@@ -67,17 +70,17 @@ class Config_Bert:
         self.shuffle = True
         self.drop_last = True
         # gradient accumulation
-        self.accumulation_steps = 2
+        self.accumulation_steps = 1
         # epochs
-        self.num_epoch = 100
+        self.num_epoch = 3
         # early stopping
         self.early_stopping = 30
         # progress rate
         self.progress_rate = 1/20
         # inference setting
-        self.n_best_size = 20
+        self.n_best_size = 10
         self.do_lower_case = True
         self.verbose_logging = True
         self.null_score_diff_threshold = 0
-        self.version_2_with_negative = True
+        self.version_2_with_negative = False
 

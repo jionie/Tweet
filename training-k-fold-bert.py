@@ -13,23 +13,19 @@ import numpy as np
 # import pytorch related libraries
 import torch
 from tensorboardX import SummaryWriter
-from pytorch_pretrained_bert.optimization import BertAdam
 from transformers import *
 from transformers.data.processors.squad import SquadResult
-from transformers.data.metrics.squad_metrics import (
-    compute_predictions_log_probs,
-    compute_predictions_logits,
-    squad_evaluate,
-)
 
 # import apex for mix precision training
 from apex import amp
+amp.register_half_function(torch, "einsum")
 from apex.optimizers import FusedAdam
 
 # import dataset class
 from dataset.dataset import *
 
 # import utils
+from utils.squad_metrics import *
 from utils.ranger import *
 from utils.lrs_scheduler import * 
 from utils.loss_function import *
@@ -131,86 +127,105 @@ class QA():
 
     def pick_model(self):
         # for switching model
-        self.model = TweetBert(model_type=self.config.model_type, hidden_layers=self.config.hidden_layers)\
-            .to(self.config.device)
+        # self.model = TweetBert(model_type=self.config.model_type, hidden_layers=self.config.hidden_layers)\
+        #     .to(self.config.device)
+        config = AutoConfig.from_pretrained("roberta-large")
+        self.model = AutoModelForQuestionAnswering.from_pretrained("roberta-large", config=config).to(self.config.device)
 
     def differential_lr(self):
 
-        self.optimizer_grouped_parameters = []
-        list_lr = []
+        if self.config.differential_lr:
+            self.optimizer_grouped_parameters = []
+            list_lr = []
 
-        if ((self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-base-cased")):
+            if ((self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-base-cased")
+                  or self.config.model_type == "roberta-base"):
 
-            list_layers = [self.model.bert.embeddings,
-                           self.model.bert.encoder.layer[0],
-                           self.model.bert.encoder.layer[1],
-                           self.model.bert.encoder.layer[2],
-                           self.model.bert.encoder.layer[3],
-                           self.model.bert.encoder.layer[4],
-                           self.model.bert.encoder.layer[5],
-                           self.model.bert.encoder.layer[6],
-                           self.model.bert.encoder.layer[7],
-                           self.model.bert.encoder.layer[8],
-                           self.model.bert.encoder.layer[9],
-                           self.model.bert.encoder.layer[10],
-                           self.model.bert.encoder.layer[11],
-                           self.model.down,
-                           self.model.qa_outputs
-                           ]
+                list_layers = [self.model.bert.embeddings,
+                               self.model.bert.encoder.layer[0],
+                               self.model.bert.encoder.layer[1],
+                               self.model.bert.encoder.layer[2],
+                               self.model.bert.encoder.layer[3],
+                               self.model.bert.encoder.layer[4],
+                               self.model.bert.encoder.layer[5],
+                               self.model.bert.encoder.layer[6],
+                               self.model.bert.encoder.layer[7],
+                               self.model.bert.encoder.layer[8],
+                               self.model.bert.encoder.layer[9],
+                               self.model.bert.encoder.layer[10],
+                               self.model.bert.encoder.layer[11],
+                               self.model.down,
+                               self.model.qa_outputs
+                               ]
 
-        elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")):
+            elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
+                  or self.config.model_type == "roberta-large"):
 
-            list_layers = [self.model.bert.embeddings,
-                           self.model.bert.encoder.layer[0],
-                           self.model.bert.encoder.layer[1],
-                           self.model.bert.encoder.layer[2],
-                           self.model.bert.encoder.layer[3],
-                           self.model.bert.encoder.layer[4],
-                           self.model.bert.encoder.layer[5],
-                           self.model.bert.encoder.layer[6],
-                           self.model.bert.encoder.layer[7],
-                           self.model.bert.encoder.layer[8],
-                           self.model.bert.encoder.layer[9],
-                           self.model.bert.encoder.layer[10],
-                           self.model.bert.encoder.layer[11],
-                           self.model.bert.encoder.layer[12],
-                           self.model.bert.encoder.layer[13],
-                           self.model.bert.encoder.layer[14],
-                           self.model.bert.encoder.layer[15],
-                           self.model.bert.encoder.layer[16],
-                           self.model.bert.encoder.layer[17],
-                           self.model.bert.encoder.layer[18],
-                           self.model.bert.encoder.layer[19],
-                           self.model.bert.encoder.layer[20],
-                           self.model.bert.encoder.layer[21],
-                           self.model.bert.encoder.layer[22],
-                           self.model.bert.encoder.layer[23],
-                           self.model.down,
-                           self.model.qa_outputs
-                           ]
-        else:
-            raise NotImplementedError
+                list_layers = [self.model.bert.embeddings,
+                               self.model.bert.encoder.layer[0],
+                               self.model.bert.encoder.layer[1],
+                               self.model.bert.encoder.layer[2],
+                               self.model.bert.encoder.layer[3],
+                               self.model.bert.encoder.layer[4],
+                               self.model.bert.encoder.layer[5],
+                               self.model.bert.encoder.layer[6],
+                               self.model.bert.encoder.layer[7],
+                               self.model.bert.encoder.layer[8],
+                               self.model.bert.encoder.layer[9],
+                               self.model.bert.encoder.layer[10],
+                               self.model.bert.encoder.layer[11],
+                               self.model.bert.encoder.layer[12],
+                               self.model.bert.encoder.layer[13],
+                               self.model.bert.encoder.layer[14],
+                               self.model.bert.encoder.layer[15],
+                               self.model.bert.encoder.layer[16],
+                               self.model.bert.encoder.layer[17],
+                               self.model.bert.encoder.layer[18],
+                               self.model.bert.encoder.layer[19],
+                               self.model.bert.encoder.layer[20],
+                               self.model.bert.encoder.layer[21],
+                               self.model.bert.encoder.layer[22],
+                               self.model.bert.encoder.layer[23],
+                               self.model.down,
+                               self.model.qa_outputs
+                               ]
+            else:
+                raise NotImplementedError
 
-        if self.config.method == "step":
-            mult = self.config.lr / self.config.min_lr
-            step = mult ** (1 / (len(list_layers) - 1))
-            list_lr = [self.config.min_lr * (step ** i) for i in range(len(list_layers))]
-        elif self.config.method == "decay":
+            if self.config.method == "step":
+                mult = self.config.lr / self.config.min_lr
+                step = mult ** (1 / (len(list_layers) - 1))
+                list_lr = [self.config.min_lr * (step ** i) for i in range(len(list_layers))]
+            elif self.config.method == "decay":
 
-            for i in range(len(list_layers)):
-                list_lr.append(self.config.lr)
-                self.config.lr = self.config.lr * self.config.decay_factor
-            list_lr.reverse()
+                for i in range(len(list_layers)):
+                    list_lr.append(self.config.lr)
+                    self.config.lr = self.config.lr * self.config.decay_factor
+                list_lr.reverse()
 
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-        print(list_lr)
+            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+            print(list_lr)
 
-        for i in range(len(list_lr)):
+            for i in range(len(list_lr)):
 
-            if isinstance(list_layers[i], list):
+                if isinstance(list_layers[i], list):
 
-                for list_layer in list_layers[i]:
-                    layer_parameters = list(list_layer.named_parameters())
+                    for list_layer in list_layers[i]:
+                        layer_parameters = list(list_layer.named_parameters())
+
+                        self.optimizer_grouped_parameters.append({
+                            'params': [p for n, p in layer_parameters if not any(nd in n for nd in no_decay)],
+                            'lr': list_lr[i],
+                            'weight_decay': self.config.weight_decay})
+
+                        self.optimizer_grouped_parameters.append({
+                            'params': [p for n, p in layer_parameters if any(nd in n for nd in no_decay)],
+                            'lr': list_lr[i],
+                            'weight_decay': 0.0})
+
+                else:
+
+                    layer_parameters = list(list_layers[i].named_parameters())
 
                     self.optimizer_grouped_parameters.append({
                         'params': [p for n, p in layer_parameters if not any(nd in n for nd in no_decay)],
@@ -222,19 +237,17 @@ class QA():
                         'lr': list_lr[i],
                         'weight_decay': 0.0})
 
-            else:
-
-                layer_parameters = list(list_layers[i].named_parameters())
-
-                self.optimizer_grouped_parameters.append({
-                    'params': [p for n, p in layer_parameters if not any(nd in n for nd in no_decay)],
-                    'lr': list_lr[i],
-                    'weight_decay': self.config.weight_decay})
-
-                self.optimizer_grouped_parameters.append({
-                    'params': [p for n, p in layer_parameters if any(nd in n for nd in no_decay)],
-                    'lr': list_lr[i],
-                    'weight_decay': 0.0})
+        else:
+            param_optimizer = list(self.model.named_parameters())
+            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+            self.optimizer_grouped_parameters = [
+                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+                 'lr': self.config.lr,
+                 'weight_decay': self.config.weight_decay},
+                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+                 'lr': self.config.lr,
+                 'weight_decay': 0.0}
+            ]
 
     def prepare_optimizer(self):
 
@@ -243,17 +256,11 @@ class QA():
 
         # optimizer
         if self.config.optimizer_name == "Adam":
-            self.optimizer = torch.optim.Adam(self.optimizer_grouped_parameters)
+            self.optimizer = torch.optim.Adam(self.optimizer_grouped_parameters, eps=self.config.adam_epsilon)
         elif self.config.optimizer_name == "Ranger":
             self.optimizer = Ranger(self.optimizer_grouped_parameters)
-        elif self.config.optimizer_name == "BertAdam":
-            num_train_optimization_steps = self.config.num_epoch * len(train_data_loader) \
-                                           // self.config.accumulation_steps
-            self.optimizer = BertAdam(self.optimizer_grouped_parameters,
-                                      warmup=self.config.warmup_proportion,
-                                      t_total=num_train_optimization_steps)
         elif self.config.optimizer_name == "AdamW":
-            self.optimizer = BertAdam(self.optimizer_grouped_parameters, eps=1e-8)
+            self.optimizer = AdamW(self.optimizer_grouped_parameters, eps=self.config.adam_epsilon)
         elif self.config.optimizer_name == "FusedAdam":
             self.optimizer = FusedAdam(self.optimizer_grouped_parameters,
                                        bias_correction=False)
@@ -340,17 +347,7 @@ class QA():
         self.log.write('Model saved as {}.'.format(save_path))
 
     def setup_model(self):
-        # initialize model weights, optimizer, and loss function
         self.pick_model()
-
-        def init_weights(model):
-            for name, param in model.named_parameters():
-                if 'weight' in name:
-                    torch.nn.init.normal_(param.data, mean=0, std=0.01)
-                else:
-                    torch.nn.init.constant_(param.data, 0)
-
-        self.model.apply(init_weights)
 
         if self.config.data_parallel:
             self.prepare_optimizer()
@@ -444,9 +441,14 @@ class QA():
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
 
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                   token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                   end_positions=all_end_positions)
+                if self.config.model_type in ["roberta-large", "roberta-base"]:
+                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                       start_positions=all_start_positions,
+                                       end_positions=all_end_positions)
+                else:
+                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                         end_positions=all_end_positions)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -458,7 +460,10 @@ class QA():
                     loss.backward()
 
                 if ((tr_batch_i+1) % self.config.accumulation_steps == 0):
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0, norm_type=2)
+                    if self.config.apex:
+                        torch.nn.utils.clip_grad_norm_(amp.master_params(self.optimizer), self.config.max_grad_norm)
+                    else:
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm)
                     self.optimizer.step()
                     self.model.zero_grad()
                     # adjust lr
@@ -545,9 +550,14 @@ class QA():
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
 
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                     end_positions=all_end_positions)
+                if self.config.model_type in ["roberta-large", "roberta-base"]:
+                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                         start_positions=all_start_positions,
+                                         end_positions=all_end_positions)
+                else:
+                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                         end_positions=all_end_positions)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -674,6 +684,7 @@ class QA():
         )
 
         results = squad_evaluate(self.examples_test, predictions)
+        print(results)
 
         # save csv
         submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
@@ -702,13 +713,13 @@ class QA():
 
 
 if __name__ == "__main__":
-
     args = parser.parse_args()
 
     # update fold
     config = Config_Bert()
     config.fold = args.fold
 
+    seed_everything(config.seed)
     qa = QA(config)
     qa.train_op()
     # qa.infer_op()

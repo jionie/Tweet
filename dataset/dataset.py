@@ -190,10 +190,10 @@ def load_and_cache_examples_v2(data_dir, input_file, model_type, tokenizer, max_
 
         processor = SquadV2Processor()
 
-        if not evaluate:
-            examples = processor.get_train_examples(data_dir, filename=input_file)
-        else:
+        if evaluate:
             examples = processor.get_dev_examples(data_dir, filename=input_file)
+        else:
+            examples = processor.get_train_examples(data_dir, filename=input_file)
 
         features, dataset = squad_convert_examples_to_features_v2(
             examples=examples,
@@ -365,18 +365,48 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
         csv_path = os.path.join(data_path, "test.csv")
         test_preprocessing(csv_path, json_path)
 
-    if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
-
-        tokenizer = BertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                         "[CLS]", "[MASK]"])
-    elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
-
-        tokenizer = BertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                         "[CLS]", "[MASK]"])
+    if (model_type == "bert-base-uncased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
+    elif (model_type == "bert-large-uncased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
+    elif (model_type == "bert-base-cased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif (model_type == "bert-large-cased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
     elif model_type == "t5-base":
-
-        ADD_TOKEN_LIST = ["[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"]
-        tokenizer = T5Tokenizer.from_pretrained(model_type, additional_special_tokens=ADD_TOKEN_LIST)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
+    elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif model_type == "roberta-base":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+        tokenizer.cls_token = '[CLS]'
+        tokenizer.sep_token = '[SEP]'
+    elif model_type == "roberta-large":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
         tokenizer.cls_token = '[CLS]'
         tokenizer.sep_token = '[SEP]'
     else:
@@ -403,6 +433,7 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
                           val_batch_size=4,
                           num_workers=2):
 
+    train_preprocessing(os.path.join(data_path, 'train.csv'), os.path.join(data_path, 'train.json'))
     train_json_path = os.path.join(data_path, 'split/train_fold_%s_seed_%s.json' % (fold, seed))
     val_json_path = os.path.join(data_path, 'split/val_fold_%s_seed_%s.json' % (fold, seed))
 
@@ -414,33 +445,50 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         val_csv_path = os.path.join(data_path, 'split/val_fold_%s_seed_%s.csv' % (fold, seed))
         train_preprocessing(val_csv_path, val_json_path)
 
-    if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
-
-        tokenizer = BertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                         "[CLS]", "[MASK]"])
-    elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
-
-        tokenizer = BertTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                         "[CLS]", "[MASK]"])
+    if (model_type == "bert-base-uncased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
+    elif (model_type == "bert-large-uncased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
+    elif (model_type == "bert-base-cased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif (model_type == "bert-large-cased"):
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
     elif model_type == "t5-base":
-
-        ADD_TOKEN_LIST = ["[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"]
-        tokenizer = T5Tokenizer.from_pretrained(model_type, additional_special_tokens=ADD_TOKEN_LIST)
-        tokenizer.cls_token = '[CLS]'
-        tokenizer.sep_token = '[SEP]'
-
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
+        )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
-
-        tokenizer = XLNetTokenizer.from_pretrained(model_type, additional_special_tokens=["[UNK]", "[SEP]", "[PAD]",
-                                                                                          "[CLS]", "[MASK]"])
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
     elif model_type == "roberta-base":
-
-        ADD_TOKEN_LIST = ["[UNK]", "[SEP]", "[PAD]", "[CLS]", "[MASK]"]
-        tokenizer = RobertaTokenizer.from_pretrained(model_type)
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
         tokenizer.cls_token = '[CLS]'
         tokenizer.sep_token = '[SEP]'
-        num_added_tokens = tokenizer.add_tokens(ADD_TOKEN_LIST)
-        print('Number of Tokens Added : ', num_added_tokens)
+    elif model_type == "roberta-large":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+        tokenizer.cls_token = '[CLS]'
+        tokenizer.sep_token = '[SEP]'
     else:
 
         raise NotImplementedError

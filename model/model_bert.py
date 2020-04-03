@@ -2,6 +2,20 @@ from transformers import *
 import torch
 import torch.nn as nn
 
+class CrossEntropyLossOHEM(torch.nn.Module):
+    def __init__(self, ignore_index, top_k=0.75):
+        super(CrossEntropyLossOHEM, self).__init__()
+        self.top_k = top_k
+        self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
+
+    def forward(self, input, target):
+        loss = self.loss(input, target)
+        if self.top_k == 1:
+            return torch.mean(loss)
+        else:
+            valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
+            return torch.mean(valid_loss)
+
 ############################################ Define Net Class
 class TweetBert(nn.Module):
     def __init__(self, model_type="bert-large-uncased", hidden_layers=None):
@@ -17,19 +31,51 @@ class TweetBert(nn.Module):
         if model_type == "bert-large-uncased":
             self.config = BertConfig.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
             self.bert = BertModel.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+                                                  hidden_dropout_prob=0.1, output_hidden_states=True)
         elif model_type == "bert-large-cased":
             self.config = BertConfig.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
             self.bert = BertModel.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad",
                                                         hidden_dropout_prob=0.1, output_hidden_states=True)
         elif model_type == "bert-base-uncased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-uncased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+            self.config = AutoConfig.from_pretrained(
+                "bert",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.model = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
         elif model_type == "bert-base-cased":
-            self.config = BertConfig.from_pretrained(model_type)
-            self.bert = BertModel.from_pretrained("bert-base-cased",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+            self.config = AutoConfig.from_pretrained(
+                "bert",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.model = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
+        elif model_type == "roberta-base":
+            self.config = AutoConfig.from_pretrained(
+                "roberta",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.model = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
+        elif model_type == "roberta-large":
+            self.config = AutoConfig.from_pretrained(
+                "roberta",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.model = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
         else:
             raise NotImplementedError
 
@@ -117,6 +163,7 @@ class TweetBert(nn.Module):
             end_positions.clamp_(0, ignored_index)
 
             loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index)
+            # loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5)
             start_loss = loss_fct(start_logits, start_positions)
             end_loss = loss_fct(end_logits, end_positions)
             total_loss = (start_loss + end_loss) / 2
