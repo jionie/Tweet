@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import *
 from transformers.data.processors.squad import *
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 
 ############################################ Define augments for test
 
@@ -331,6 +331,8 @@ def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/twee
 
     if split == "StratifiedKFold":
         kf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True).split(X=df.textID, y=df.sentiment)
+    elif split == "KFold":
+        kf = KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(df.text)
     else:
         raise NotImplementedError
 

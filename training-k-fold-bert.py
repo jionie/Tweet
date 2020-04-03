@@ -41,7 +41,7 @@ from config_bert import *
 
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
-parser.add_argument('--fold', type=int, default=0, required=False, help="specify the fold for training")
+parser.add_argument('--fold', type=int, default=1, required=False, help="specify the fold for training")
 
 
 ############################################################################## seed All
@@ -650,8 +650,8 @@ class QA():
                     # print(eval_feature.__dict__)
                     unique_id = int(eval_feature.unique_id)
 
-                    start_logits_list = [to_list(start_logit[i]) for start_logit in start_logits]
-                    end_logits_list = [to_list(end_logit[i]) for end_logit in end_logits]
+                    start_logits_list = to_list(start_logits[i])
+                    end_logits_list = to_list(end_logits[i])
 
                     result = SquadResult(unique_id, start_logits_list, end_logits_list)
 

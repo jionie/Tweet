@@ -162,8 +162,8 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
-            loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index)
-            # loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5)
+            # loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index)
+            loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75)
             start_loss = loss_fct(start_logits, start_positions)
             end_loss = loss_fct(end_logits, end_positions)
             total_loss = (start_loss + end_loss) / 2

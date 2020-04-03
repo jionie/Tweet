@@ -20,10 +20,10 @@ class Config_Bert:
         # path, specify the path for saving splitted csv
         self.save_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # k fold setting
-        self.split = "StratifiedKFold"
+        self.split = "KFold"
         self.seed = 1996
         self.n_splits = 5
-        self.fold = 0
+        self.fold = 1
         # path, specify the path for saving model
         self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/model", self.model_name)
         if not os.path.exists(self.model_folder):
@@ -65,7 +65,7 @@ class Config_Bert:
         self.method = "step"
         # dataloader settings
         self.batch_size = 8
-        self.val_batch_size = 64
+        self.val_batch_size = 32
         self.num_workers = 4
         self.shuffle = True
         self.drop_last = True
@@ -78,7 +78,7 @@ class Config_Bert:
         # progress rate
         self.progress_rate = 1/20
         # inference setting
-        self.n_best_size = 10
+        self.n_best_size = 20
         self.do_lower_case = True
         self.verbose_logging = True
         self.null_score_diff_threshold = 0
