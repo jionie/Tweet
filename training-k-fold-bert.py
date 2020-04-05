@@ -538,7 +538,7 @@ class QA():
                                                     verbose_logging=self.config.verbose_logging)
                         final_text = " ".join(set(final_text.lower().split()))
 
-                    if not (train_feature.tokens[1] == "neutral" and len(actual_text.split()) < 2):
+                    if not (train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
                         self.train_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.batch_size])
@@ -666,7 +666,7 @@ class QA():
                                                     verbose_logging=self.config.verbose_logging)
                         final_text = " ".join(set(final_text.lower().split()))
 
-                    if not (eval_feature.tokens[1] == "neutral" and len(actual_text.split()) < 2):
+                    if not (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
                         self.val_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
