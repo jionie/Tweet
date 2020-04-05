@@ -57,8 +57,8 @@ class Config_Bert:
         self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0.005
         # lr
-        self.lr = 5e-5
-        self.weight_decay = 0.01
+        self.lr = 2e-5
+        self.weight_decay = 0.1
         # differential lr settings
         self.differential_lr = True
         self.decay_factor = 0.9

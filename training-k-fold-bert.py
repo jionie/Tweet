@@ -407,6 +407,8 @@ class QA():
         while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
+            self.train_metrics_no_postprocessing = []
+            self.train_metrics_postprocessing = []
 
             # update lr and start from start_epoch
             if (self.epoch > 1) and (not self.lr_scheduler_each_iter):
@@ -498,52 +500,43 @@ class QA():
 
                     train_feature = self.features_train[example_index.item()]
                     train_example = self.examples_train[example_index.item()]
+                    actual_text = " ".join(train_example.doc_tokens)
 
-                    start_position = train_example.start_position
-                    end_position = train_example.end_position
-                    actual_text = " ".join(train_example.doc_tokens[start_position: (end_position + 1)])
+                    if start_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
+                    elif start_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
 
-                    if train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2:
-                        # print(train_feature.tokens[1], actual_text, len(actual_text.split()))
-                        final_text = actual_text
-                        # get label
-                        label_doc_start = train_feature.token_to_orig_map[all_start_positions[input_idx]]
-                        label_doc_end = train_feature.token_to_orig_map[all_end_positions[input_idx]]
-                        label_tokens = train_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
-                        label_text = " ".join(label_tokens)
+                    if end_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
+                    elif end_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
+
+                    # get label
+                    label_doc_start = train_feature.token_to_orig_map[all_start_positions[input_idx]]
+                    label_doc_end = train_feature.token_to_orig_map[all_end_positions[input_idx]]
+                    label_tokens = train_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
+                    label_text = " ".join(label_tokens)
+
+                    tok_tokens = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    orig_doc_start = train_feature.token_to_orig_map[start_logits[input_idx]]
+                    orig_doc_end = train_feature.token_to_orig_map[end_logits[input_idx]]
+                    orig_tokens = train_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
+                    tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
+
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
+
+                    final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
+                                                verbose_logging=self.config.verbose_logging)
+                    final_text = " ".join(set(final_text.lower().split()))
+
+                    if (train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
+                        self.train_metrics_postprocessing.append(jaccard(label_text, actual_text))
                     else:
-                        if start_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
-                            start_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
-                        elif start_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
-                            start_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
-
-                        if end_logits[input_idx] > max(list(train_feature.token_to_orig_map.keys())):
-                            end_logits[input_idx] = max(list(train_feature.token_to_orig_map.keys()))
-                        elif end_logits[input_idx] < min(list(train_feature.token_to_orig_map.keys())):
-                            end_logits[input_idx] = min(list(train_feature.token_to_orig_map.keys()))
-
-                        # get label
-                        label_doc_start = train_feature.token_to_orig_map[all_start_positions[input_idx]]
-                        label_doc_end = train_feature.token_to_orig_map[all_end_positions[input_idx]]
-                        label_tokens = train_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
-                        label_text = " ".join(label_tokens)
-
-                        tok_tokens = train_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
-                        orig_doc_start = train_feature.token_to_orig_map[start_logits[input_idx]]
-                        orig_doc_end = train_feature.token_to_orig_map[end_logits[input_idx]]
-                        orig_tokens = train_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
-                        tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
-
-                        tok_text = tok_text.strip()
-                        tok_text = " ".join(tok_text.split())
-                        orig_text = " ".join(orig_tokens)
-
-                        final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
-                                                    verbose_logging=self.config.verbose_logging)
-                        final_text = " ".join(set(final_text.lower().split()))
-
-                    if not (train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
-                        self.train_metrics.append(jaccard(label_text, final_text))
+                        self.train_metrics_no_postprocessing.append(jaccard(label_text, final_text))
+                    self.train_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
@@ -556,8 +549,11 @@ class QA():
                     sum_train_loss[...] = 0
                     sum_train[...] = 0
                     mean_train_metric = np.mean(self.train_metrics)
-                    self.log.write('lr: %f train loss: %f train_jaccard: %f\n' % \
-                                   (rate, train_loss[0], mean_train_metric))
+                    mean_train_metric_postprocessing = np.mean(self.train_metrics_postprocessing)
+                    mean_train_metric_no_postprocessing = np.mean(self.train_metrics_no_postprocessing)
+
+                    self.log.write('lr: %f train loss: %f train_jaccard: %f train_jaccard_postprocessing: %f train_jaccard_no_postprocessing: %f\n' % \
+                                   (rate, train_loss[0], mean_train_metric, mean_train_metric_postprocessing, mean_train_metric_no_postprocessing))
 
                     print("Training ground truth: ", label_text)
                     print("Training prediction: ", final_text)
@@ -573,9 +569,12 @@ class QA():
     def evaluate_op(self):
 
         self.eval_count += 1
-        self.val_metrics = []
         valid_loss = np.zeros(1, np.float32)
         valid_num = np.zeros_like(valid_loss)
+
+        self.eval_metrics = []
+        self.eval_metrics_no_postprocessing = []
+        self.eval_metrics_postprocessing = []
 
         with torch.no_grad():
 
@@ -629,51 +628,43 @@ class QA():
 
                     eval_feature = self.features_val[example_index.item()]
                     eval_example = self.examples_val[example_index.item()]
+                    actual_text = " ".join(eval_example.doc_tokens)
 
-                    start_position = eval_example.start_position
-                    end_position = eval_example.end_position
-                    actual_text = " ".join(eval_example.doc_tokens[start_position: (end_position + 1)])
+                    if start_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
+                    elif start_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
+                        start_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
 
-                    if eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2:
-                        final_text = actual_text
-                        # get label
-                        label_doc_start = eval_feature.token_to_orig_map[all_start_positions[input_idx]]
-                        label_doc_end = eval_feature.token_to_orig_map[all_end_positions[input_idx]]
-                        label_tokens = eval_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
-                        label_text = " ".join(label_tokens)
+                    if end_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
+                    elif end_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
+                        end_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
+
+                    # get label
+                    label_doc_start = eval_feature.token_to_orig_map[all_start_positions[input_idx]]
+                    label_doc_end = eval_feature.token_to_orig_map[all_end_positions[input_idx]]
+                    label_tokens = eval_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
+                    label_text = " ".join(label_tokens)
+
+                    tok_tokens = eval_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    orig_doc_start = eval_feature.token_to_orig_map[start_logits[input_idx]]
+                    orig_doc_end = eval_feature.token_to_orig_map[end_logits[input_idx]]
+                    orig_tokens = eval_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
+                    tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
+
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
+
+                    final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
+                                                verbose_logging=self.config.verbose_logging)
+                    final_text = " ".join(set(final_text.lower().split()))
+
+                    if (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
+                        self.eval_metrics_postprocessing.append(jaccard(label_text, actual_text))
                     else:
-                        if start_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
-                            start_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
-                        elif start_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
-                            start_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
-
-                        if end_logits[input_idx] > max(list(eval_feature.token_to_orig_map.keys())):
-                            end_logits[input_idx] = max(list(eval_feature.token_to_orig_map.keys()))
-                        elif end_logits[input_idx] < min(list(eval_feature.token_to_orig_map.keys())):
-                            end_logits[input_idx] = min(list(eval_feature.token_to_orig_map.keys()))
-
-                        # get label
-                        label_doc_start = eval_feature.token_to_orig_map[all_start_positions[input_idx]]
-                        label_doc_end = eval_feature.token_to_orig_map[all_end_positions[input_idx]]
-                        label_tokens = eval_example.doc_tokens[label_doc_start: (label_doc_end + 1)]
-                        label_text = " ".join(label_tokens)
-
-                        tok_tokens = eval_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
-                        orig_doc_start = eval_feature.token_to_orig_map[start_logits[input_idx]]
-                        orig_doc_end = eval_feature.token_to_orig_map[end_logits[input_idx]]
-                        orig_tokens = eval_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
-                        tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
-
-                        tok_text = tok_text.strip()
-                        tok_text = " ".join(tok_text.split())
-                        orig_text = " ".join(orig_tokens)
-
-                        final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
-                                                    verbose_logging=self.config.verbose_logging)
-                        final_text = " ".join(set(final_text.lower().split()))
-
-                    if not (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
-                        self.val_metrics.append(jaccard(label_text, final_text))
+                        self.eval_metrics_no_postprocessing.append(jaccard(label_text, final_text))
+                    self.eval_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
@@ -682,19 +673,21 @@ class QA():
                 valid_num = valid_num + n
 
             valid_loss = valid_loss / valid_num
-            mean_val_metric = np.mean(self.val_metrics)
+            mean_eval_metric = np.mean(self.eval_metrics)
+            mean_eval_metric_postprocessing = np.mean(self.eval_metrics_postprocessing)
+            mean_eval_metric_no_postprocessing = np.mean(self.eval_metrics_no_postprocessing)
 
-            self.log.write('validation loss: %f val_jaccard: %f\n' % \
-                           (valid_loss[0], mean_val_metric))
+            self.log.write('validation loss: %f eval_jaccard: %f eval_jaccard_postprocessing: %f eval_jaccard_no_postprocessing: %f\n' % \
+                           (valid_loss[0], mean_eval_metric, mean_eval_metric_postprocessing, mean_eval_metric_no_postprocessing))
             print("Validating ground truth: ", label_text)
             print("Validating prediction: ", final_text)
 
-        if (mean_val_metric >= self.valid_metric_optimal):
+        if (mean_eval_metric_no_postprocessing >= self.valid_metric_optimal):
 
             self.log.write('Validation metric improved ({:.6f} --> {:.6f}).  Saving model ...'.format(
-                self.valid_metric_optimal, mean_val_metric))
+                self.valid_metric_optimal, mean_eval_metric_no_postprocessing))
 
-            self.valid_metric_optimal = mean_val_metric
+            self.valid_metric_optimal = mean_eval_metric_no_postprocessing
             self.save_check_point()
 
             self.count = 0
