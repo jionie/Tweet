@@ -403,8 +403,6 @@ class QA():
         self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
         self.eval_count = 0
         self.count = 0
-        label = None
-        prediction = None
 
         while self.epoch <= self.config.num_epoch:
 
@@ -443,14 +441,18 @@ class QA():
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
 
+                sentiment = [self.features_train[example_index.item()].tokens[1] for example_index in all_example_index]
+                sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
+                sentiment_weight = torch.tensor(sentiment_weight).float().cuda()
+
                 if self.config.model_type in ["roberta-large", "roberta-base"]:
                     outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          start_positions=all_start_positions,
-                                         end_positions=all_end_positions)
+                                         end_positions=all_end_positions, sentiment_weight=sentiment_weight)
                 else:
                     outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions)
+                                         end_positions=all_end_positions, sentiment_weight=sentiment_weight)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -479,6 +481,8 @@ class QA():
                     self.step += 1
 
                 # translate to predictions
+                start_logits = torch.softmax(start_logits, dim=-1)
+                end_logits = torch.softmax(end_logits, dim=-1)
                 start_logits = start_logits.argmax(dim=-1)
                 end_logits = end_logits.argmax(dim=-1)
 
@@ -608,6 +612,8 @@ class QA():
                     self.val_data_loader) * self.config.val_batch_size + val_batch_i * self.config.val_batch_size)
 
                 # translate to predictions
+                start_logits = torch.softmax(start_logits, dim=-1)
+                end_logits = torch.softmax(end_logits, dim=-1)
                 start_logits = start_logits.argmax(dim=-1)
                 end_logits = end_logits.argmax(dim=-1)
 

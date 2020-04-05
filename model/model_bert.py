@@ -3,18 +3,35 @@ import torch
 import torch.nn as nn
 
 class CrossEntropyLossOHEM(torch.nn.Module):
-    def __init__(self, ignore_index, top_k=0.75):
+    def __init__(self, ignore_index, top_k=0.75, reduction='mean'):
         super(CrossEntropyLossOHEM, self).__init__()
         self.top_k = top_k
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
+        self.reduction = reduction
 
-    def forward(self, input, target):
+    def forward(self, input, target, sentiment=None):
         loss = self.loss(input, target)
+        if sentiment is not None:
+            loss *= sentiment
         if self.top_k == 1:
-            return torch.mean(loss)
+            if self.reduction == "mean":
+                return torch.mean(loss)
+            elif self.reduction == "sum":
+                return torch.sum(loss)
+            elif self.reduction == "none":
+                return loss
+            else:
+                raise NotImplementedError
         else:
             valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
-            return torch.mean(valid_loss)
+            if self.reduction == "mean":
+                return torch.mean(valid_loss)
+            elif self.reduction == "sum":
+                return torch.sum(valid_loss)
+            elif self.reduction == "none":
+                return valid_loss
+            else:
+                raise NotImplementedError
 
 ############################################ Define Net Class
 class TweetBert(nn.Module):
@@ -40,7 +57,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "bert-base-uncased",
             )
-            self.config.hidden_dropout_prob = 0.2
+            self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -50,7 +67,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "bert-base-cased",
             )
-            self.config.hidden_dropout_prob = 0.2
+            self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -60,7 +77,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "roberta-base",
             )
-            self.config.hidden_dropout_prob = 0.2
+            self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -70,7 +87,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "roberta-large",
             )
-            self.config.hidden_dropout_prob = 0.2
+            self.config.hidden_dropout_prob = 0.1
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -127,6 +144,7 @@ class TweetBert(nn.Module):
             inputs_embeds=None,
             start_positions=None,
             end_positions=None,
+            sentiment_weight=None,
     ):
 
         outputs = self.bert(
@@ -162,11 +180,23 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
-            # loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index)
-            loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5)
-            start_loss = loss_fct(start_logits, start_positions)
-            end_loss = loss_fct(end_logits, end_positions)
-            total_loss = (start_loss + end_loss) / 2
+            if self.training:
+                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
+                if sentiment_weight is None:
+                    start_loss = loss_fct(start_logits, start_positions)
+                    end_loss = loss_fct(end_logits, end_positions)
+                else:
+                    start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
+                    end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
+                total_loss = (start_loss + end_loss) / 2
+            else:
+                loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="mean")
+                start_loss = loss_fct(start_logits, start_positions)
+                end_loss = loss_fct(end_logits, end_positions)
+                if sentiment_weight is not None:
+                    start_loss *= sentiment_weight
+                    end_loss *= sentiment_weight
+                total_loss = (start_loss + end_loss) / 2
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)

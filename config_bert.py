@@ -16,6 +16,7 @@ class Config_Bert:
         self.do_lower_case = True
         self.model_name = 'TweetBert'
         self.hidden_layers = [-3, -4, -5, -6]
+        self.sentiment_weight_map = {"neutral": 0.25, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
@@ -61,7 +62,7 @@ class Config_Bert:
         # differential lr settings
         self.differential_lr = True
         self.decay_factor = 0.9
-        self.min_lr = 5e-6
+        self.min_lr = 2e-6
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
