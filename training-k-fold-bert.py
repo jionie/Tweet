@@ -662,6 +662,7 @@ class QA():
                         self.eval_metrics_postprocessing.append(jaccard(label_text, actual_text))
                     else:
                         self.eval_metrics_no_postprocessing.append(jaccard(label_text, final_text))
+                        self.eval_metrics_postprocessing.append(jaccard(label_text, final_text))
                     self.eval_metrics.append(jaccard(label_text, final_text))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
