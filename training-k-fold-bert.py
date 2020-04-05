@@ -530,7 +530,6 @@ class QA():
 
                     final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
                                                 verbose_logging=self.config.verbose_logging)
-                    final_text = " ".join(set(final_text.lower().split()))
 
                     if (train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
                         self.train_metrics_postprocessing.append(jaccard(label_text, actual_text))
@@ -658,7 +657,6 @@ class QA():
 
                     final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
                                                 verbose_logging=self.config.verbose_logging)
-                    final_text = " ".join(set(final_text.lower().split()))
 
                     if (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
                         self.eval_metrics_postprocessing.append(jaccard(label_text, actual_text))

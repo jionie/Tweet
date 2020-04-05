@@ -16,7 +16,7 @@ class Config_Bert:
         self.do_lower_case = True
         self.model_name = 'TweetBert'
         self.hidden_layers = [-3, -4, -5, -6]
-        self.sentiment_weight_map = {"neutral": 0.25, "positive": 1, "negative": 1}
+        self.sentiment_weight_map = {"neutral": 0.1, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
