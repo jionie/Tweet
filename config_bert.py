@@ -3,7 +3,7 @@ import os
 
 class Config_Bert:
     # config settings
-    def __init__(self):
+    def __init__(self, fold):
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
@@ -12,18 +12,19 @@ class Config_Bert:
         self.load_optimizer = False
         self.skip_layers = []
         # model
-        self.model_type = "roberta-large"
+        self.model_type = "roberta-base"
+        self.do_lower_case = True
         self.model_name = 'TweetBert'
-        self.hidden_layers = [-1, -2, -3, -4]
+        self.hidden_layers = [-3, -4, -5, -6]
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
         self.save_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # k fold setting
-        self.split = "KFold"
-        self.seed = 1996
+        self.split = "StratifiedKFold"
+        self.seed = 2020
         self.n_splits = 5
-        self.fold = 1
+        self.fold = fold
         # path, specify the path for saving model
         self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/model", self.model_name)
         if not os.path.exists(self.model_folder):
@@ -56,30 +57,29 @@ class Config_Bert:
         self.warmup_proportion = 0.005
         # lr
         self.lr = 5e-5
-        self.weight_decay = 0.001
+        self.weight_decay = 0.01
         # differential lr settings
         self.differential_lr = True
         self.decay_factor = 0.9
-        self.min_lr = 2e-6
+        self.min_lr = 5e-6
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
-        self.batch_size = 8
+        self.batch_size = 16
         self.val_batch_size = 32
         self.num_workers = 4
         self.shuffle = True
         self.drop_last = True
         # gradient accumulation
-        self.accumulation_steps = 2
+        self.accumulation_steps = 1
         # epochs
-        self.num_epoch = 10
+        self.num_epoch = 8
         # early stopping
-        self.early_stopping = 10
+        self.early_stopping = 2
         # progress rate
         self.progress_rate = 1/20
         # inference setting
         self.n_best_size = 20
-        self.do_lower_case = True
         self.verbose_logging = False
         self.null_score_diff_threshold = 0
         self.version_2_with_negative = False

@@ -333,7 +333,7 @@ def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/twee
     df = pd.read_csv(df_path, encoding='utf8')
 
     if split == "StratifiedKFold":
-        kf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True).split(X=df.textID, y=df.sentiment)
+        kf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True).split(X=df.text, y=df.sentiment)
     elif split == "KFold":
         kf = KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(df.text)
     else:

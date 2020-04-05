@@ -31,16 +31,16 @@ class TweetBert(nn.Module):
         if model_type == "bert-large-uncased":
             self.config = BertConfig.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad")
             self.bert = BertModel.from_pretrained("bert-large-uncased-whole-word-masking-finetuned-squad",
-                                                  hidden_dropout_prob=0.1, output_hidden_states=True)
+                                                  hidden_dropout_prob=0.2, output_hidden_states=True)
         elif model_type == "bert-large-cased":
             self.config = BertConfig.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad")
             self.bert = BertModel.from_pretrained("bert-large-cased-whole-word-masking-finetuned-squad",
-                                                        hidden_dropout_prob=0.1, output_hidden_states=True)
+                                                        hidden_dropout_prob=0.2, output_hidden_states=True)
         elif model_type == "bert-base-uncased":
             self.config = AutoConfig.from_pretrained(
                 "bert-base-uncased",
             )
-            self.config.hidden_dropout_prob = 0.1
+            self.config.hidden_dropout_prob = 0.2
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -50,7 +50,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "bert-base-cased",
             )
-            self.config.hidden_dropout_prob = 0.1
+            self.config.hidden_dropout_prob = 0.2
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -60,7 +60,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "roberta-base",
             )
-            self.config.hidden_dropout_prob = 0.1
+            self.config.hidden_dropout_prob = 0.2
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -70,7 +70,7 @@ class TweetBert(nn.Module):
             self.config = AutoConfig.from_pretrained(
                 "roberta-large",
             )
-            self.config.hidden_dropout_prob = 0.1
+            self.config.hidden_dropout_prob = 0.2
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
@@ -82,7 +82,7 @@ class TweetBert(nn.Module):
         self.down = nn.Linear(len(hidden_layers), 1)
         self.qa_outputs = nn.Linear(self.config.hidden_size, self.config.num_labels)
 
-        self.activation = nn.SELU()
+        self.activation = nn.ReLU()
 
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
@@ -163,7 +163,7 @@ class TweetBert(nn.Module):
             end_positions.clamp_(0, ignored_index)
 
             # loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index)
-            loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75)
+            loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5)
             start_loss = loss_fct(start_logits, start_positions)
             end_loss = loss_fct(end_logits, end_positions)
             total_loss = (start_loss + end_loss) / 2
