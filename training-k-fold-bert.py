@@ -43,6 +43,10 @@ from config_bert import *
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
 parser.add_argument('--fold', type=int, default=1, required=False, help="specify the fold for training")
+parser.add_argument('--model_type', type=str, default="roberta-base", required=False, help="specify the model type")
+parser.add_argument('--seed', type=int, default=2020, required=False, help="specify the seed")
+parser.add_argument('--batch_size', type=int, default=16, required=False, help="specify the batch size")
+parser.add_argument('--accumulation_steps', type=int, default=1, required=False, help="specify the accumulation_steps")
 
 
 ############################################################################## seed All
@@ -399,7 +403,7 @@ class QA():
 
         self.writer = SummaryWriter()
         ############################################################################### eval setting
-        self.eval_step = len(self.train_data_loader)  # or len(train_data_loader)
+        self.eval_step = len(self.train_data_loader) / 4  # or len(train_data_loader)
         self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
         self.eval_count = 0
         self.count = 0
@@ -802,7 +806,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # update fold
-    config = Config_Bert(fold=args.fold)
+    config = Config_Bert(args.fold, model_type=args.model_type, seed=args.seed, batch_size=args.batch_size,
+                         accumulation_steps=args.accumulation_steps)
     seed_everything(config.seed)
     qa = QA(config)
     qa.train_op()

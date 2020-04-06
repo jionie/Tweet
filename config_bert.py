@@ -3,7 +3,7 @@ import os
 
 class Config_Bert:
     # config settings
-    def __init__(self, fold):
+    def __init__(self, fold, model_type="roberta-base", seed=2020, batch_size=16, accumulation_steps=1):
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
@@ -12,7 +12,7 @@ class Config_Bert:
         self.load_optimizer = False
         self.skip_layers = []
         # model
-        self.model_type = "roberta-base"
+        self.model_type = model_type
         self.do_lower_case = True
         self.model_name = 'TweetBert'
         self.hidden_layers = [-3, -4, -5, -6]
@@ -23,7 +23,7 @@ class Config_Bert:
         self.save_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # k fold setting
         self.split = "StratifiedKFold"
-        self.seed = 2020
+        self.seed = seed
         self.n_splits = 5
         self.fold = fold
         # path, specify the path for saving model
@@ -47,17 +47,17 @@ class Config_Bert:
         self.max_seq_length = 192
         self.max_query_length = 64
         self.max_answer_length = 30
-        self.doc_stride = 64
+        self.doc_stride = 128
         self.threads = 4
         # optimizer
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
         self.max_grad_norm = 1
         # lr scheduler
-        self.lr_scheduler_name = 'WarmupLinear'
-        self.warmup_proportion = 0.005
+        self.lr_scheduler_name = 'WarmupCosineAnealing'
+        self.warmup_proportion = 0.0
         # lr
-        self.lr = 2e-5
+        self.lr = 5e-5
         self.weight_decay = 0.1
         # differential lr settings
         self.differential_lr = True
@@ -66,17 +66,17 @@ class Config_Bert:
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
-        self.batch_size = 16
+        self.batch_size = batch_size
         self.val_batch_size = 32
         self.num_workers = 4
         self.shuffle = True
         self.drop_last = True
         # gradient accumulation
-        self.accumulation_steps = 1
+        self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 8
+        self.num_epoch = 12
         # early stopping
-        self.early_stopping = 2
+        self.early_stopping = 2 * 4
         # progress rate
         self.progress_rate = 1/20
         # inference setting
