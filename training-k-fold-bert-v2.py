@@ -442,12 +442,7 @@ class QA():
                 sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
                 sentiment_weight = torch.tensor(sentiment_weight).float().cuda()
 
-                if self.config.model_type in ["roberta-large", "roberta-base"]:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         start_positions=all_start_positions,
-                                         end_positions=all_end_positions, sentiment_weight=sentiment_weight)
-                else:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
                                          end_positions=all_end_positions, sentiment_weight=sentiment_weight)
 
@@ -491,7 +486,6 @@ class QA():
 
                 for px, tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
-                    tweet_sentiment = sentiment[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
                         target_string=selected_tweet,
@@ -565,12 +559,7 @@ class QA():
                 all_end_positions = all_end_positions.cuda()
                 sentiment = all_sentiment
 
-                if self.config.model_type in ["roberta-large", "roberta-base"]:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         start_positions=all_start_positions,
-                                         end_positions=all_end_positions)
-                else:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
                                          end_positions=all_end_positions)
 
@@ -593,7 +582,6 @@ class QA():
 
                 for px, tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
-                    tweet_sentiment = sentiment[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
                         target_string=selected_tweet,
@@ -640,7 +628,6 @@ class QA():
     def infer_op(self):
 
         all_results = []
-        my_results = []
 
         with torch.no_grad():
 
@@ -660,10 +647,7 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 sentiment = all_sentiment
 
-                if self.config.model_type in ["roberta-large", "roberta-base"]:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks)
-                else:
-                    outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids)
 
                 start_logits, end_logits = outputs[0], outputs[1]
@@ -676,7 +660,6 @@ class QA():
 
                 for px, tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
-                    tweet_sentiment = sentiment[px]
                     _, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
                         target_string=selected_tweet,

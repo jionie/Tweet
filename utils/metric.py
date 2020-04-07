@@ -25,5 +25,5 @@ def calculate_jaccard_score(
         if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
             filtered_output += " "
 
-    jac = jaccard(target_string.strip(), filtered_output.strip())
+    jac = jaccard(target_string, filtered_output)
     return jac, filtered_output
