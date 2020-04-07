@@ -181,7 +181,7 @@ class TweetBert(nn.Module):
             end_positions.clamp_(0, ignored_index)
 
             if self.training:
-                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5, reduction="mean")
+                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
                 if sentiment_weight is None:
                     start_loss = loss_fct(start_logits, start_positions)
                     end_loss = loss_fct(end_logits, end_positions)
