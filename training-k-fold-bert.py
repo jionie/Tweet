@@ -42,7 +42,7 @@ from config_bert import *
 
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
-parser.add_argument('--fold', type=int, default=1, required=False, help="specify the fold for training")
+parser.add_argument('--fold', type=int, default=0, required=False, help="specify the fold for training")
 parser.add_argument('--model_type', type=str, default="roberta-base", required=False, help="specify the model type")
 parser.add_argument('--seed', type=int, default=2020, required=False, help="specify the seed")
 parser.add_argument('--batch_size', type=int, default=16, required=False, help="specify the batch size")
@@ -129,6 +129,12 @@ class QA():
         self.finished = False
         self.valid_epoch = 0
         self.train_loss, self.valid_loss, self.valid_metric_optimal = float('-inf'), float('-inf'), float('-inf')
+        self.writer = SummaryWriter()
+        ############################################################################### eval setting
+        self.eval_step = int(len(self.train_data_loader) * self.config.saving_rate)
+        self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
+        self.eval_count = 0
+        self.count = 0
 
     def pick_model(self):
         # for switching model
@@ -401,13 +407,6 @@ class QA():
                                                                        self.config.accumulation_steps))
         self.log.write('   experiment  = %s\n' % str(__file__.split('/')[-2:]))
 
-        self.writer = SummaryWriter()
-        ############################################################################### eval setting
-        self.eval_step = len(self.train_data_loader) / 4  # or len(train_data_loader)
-        self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
-        self.eval_count = 0
-        self.count = 0
-
         while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
@@ -579,6 +578,8 @@ class QA():
         self.eval_metrics_no_postprocessing = []
         self.eval_metrics_postprocessing = []
 
+        all_result = []
+
         with torch.no_grad():
 
             # init cache
@@ -661,6 +662,8 @@ class QA():
 
                     final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
                                                 verbose_logging=self.config.verbose_logging)
+                    print(final_text)
+                    all_result.append(final_text)
 
                     if (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
                         self.eval_metrics_postprocessing.append(jaccard(label_text.strip(), actual_text.strip()))
@@ -698,10 +701,14 @@ class QA():
         else:
             self.count += 1
 
+        val_df = pd.DataFrame({'selected_text': all_result})
+        val_df.to_csv(os.path.join(self.config.checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
+                                                                                                    self.config.fold)),
+                      index=False)
+
     def infer_op(self):
 
         all_results = []
-        my_results = []
 
         with torch.no_grad():
 
@@ -731,71 +738,29 @@ class QA():
                 start_index = to_list(start_logits.argmax(dim=-1))
                 end_index = to_list(end_logits.argmax(dim=-1))
 
-                for i, example_index in enumerate(all_example_index):
-                    eval_feature = self.features_test[example_index.item()]
-                    # print(eval_feature.__dict__)
-                    unique_id = int(eval_feature.unique_id)
-
-                    start_logits_list = to_list(start_logits[i])
-                    end_logits_list = to_list(end_logits[i])
-
-                    result = SquadResult(unique_id, start_logits_list, end_logits_list)
-
-                    all_results.append(result)
-
                 for input_idx, example_index in enumerate(all_example_index):
-                    eval_feature = self.features_test[example_index.item()]
-                    my_prediction = eval_feature.tokens[start_index[input_idx]: end_index[input_idx] + 1]
-                    my_prediction = " ".join(my_prediction).replace(" ##", "").strip()
-                    my_results.append(my_prediction)
+                    test_feature = self.features_test[example_index.item()]
+                    test_example = self.examples_test[example_index.item()]
 
-        output_prediction_file = os.path.join(self.config.checkpoint_folder,
-                                              "predictions_{}.json".format(self.config.fold))
-        output_nbest_file = os.path.join(self.config.checkpoint_folder,
-                                         "nbest_predictions_{}.json".format(self.config.fold))
-        output_null_log_odds_file = os.path.join(self.config.checkpoint_folder,
-                                                 "null_odds_{}.json".format(self.config.fold))
+                    tok_tokens = test_feature.tokens[start_logits[input_idx]: end_logits[input_idx] + 1]
+                    orig_doc_start = test_feature.token_to_orig_map[start_logits[input_idx]]
+                    orig_doc_end = test_feature.token_to_orig_map[end_logits[input_idx]]
+                    orig_tokens = test_example.doc_tokens[orig_doc_start: (orig_doc_end + 1)]
+                    tok_text = self.tokenizer.convert_tokens_to_string(tok_tokens)
 
-        predictions = compute_predictions_logits(
-            self.examples_test,
-            self.features_test,
-            all_results,
-            self.config.n_best_size,
-            self.config.max_answer_length,
-            self.config.do_lower_case,
-            output_prediction_file,
-            output_nbest_file,
-            output_null_log_odds_file,
-            self.config.verbose_logging,
-            self.config.version_2_with_negative,
-            self.config.null_score_diff_threshold,
-            self.tokenizer,
-        )
+                    tok_text = tok_text.strip()
+                    tok_text = " ".join(tok_text.split())
+                    orig_text = " ".join(orig_tokens)
 
-        results = squad_evaluate(self.examples_test, predictions)
-        print(results)
+                    final_text = get_final_text(tok_text, orig_text, do_lower_case=self.config.do_lower_case,
+                                                verbose_logging=self.config.verbose_logging)
+                    all_results.append(final_text)
 
         # save csv
         submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
-        pd_test = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
-
-        predictions_ = json.load(open(output_prediction_file, 'r'))
-        for i in range(len(submission)):
-            id_ = submission['textID'][i]
-            if pd_test['sentiment'][i] == 'neutral':  # neutral postprocessing
-                submission.loc[i, 'selected_text'] = pd_test['text'][i]
-            else:
-                final_text = " ".join(set(predictions_[id_].lower().split()))
-                submission.loc[i, 'selected_text'] = final_text
-
-        submission.to_csv(os.path.join(self.config.checkpoint_folder, "predictions_{}.csv".format(self.config.fold)))
 
         for i in range(len(submission)):
-            if pd_test['sentiment'][i] == 'neutral':  # neutral postprocessing
-                submission.loc[i, 'selected_text'] = pd_test['text'][i]
-            else:
-                final_text = " ".join(set(my_results[i].lower().split()))
-                submission.loc[i, 'selected_text'] = final_text
+            submission.loc[i, 'selected_text'] = all_results[i]
 
         submission.to_csv(os.path.join(self.config.checkpoint_folder, "my_predictions_{}.csv".format(self.config.fold)))
 
@@ -810,5 +775,6 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps)
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
+    # qa.train_op()
+    qa.evaluate_op()
     # qa.infer_op()

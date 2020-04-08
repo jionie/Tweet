@@ -4,18 +4,15 @@ import os
 os.environ["OMP_NUM_THREADS"] = "1"
 
 # import common libraries
-import gc
 import random
 import argparse
 import pandas as pd
-import json
 import numpy as np
 
 # import pytorch related libraries
 import torch
 from tensorboardX import SummaryWriter
 from transformers import *
-from transformers.data.processors.squad import SquadResult
 
 # import apex for mix precision training
 from apex import amp
@@ -42,7 +39,7 @@ from config_bert import *
 
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
-parser.add_argument('--fold', type=int, default=1, required=False, help="specify the fold for training")
+parser.add_argument('--fold', type=int, default=0, required=False, help="specify the fold for training")
 parser.add_argument('--model_type', type=str, default="roberta-base", required=False, help="specify the model type")
 parser.add_argument('--seed', type=int, default=2020, required=False, help="specify the seed")
 parser.add_argument('--batch_size', type=int, default=16, required=False, help="specify the batch size")
@@ -122,6 +119,12 @@ class QA():
         self.finished = False
         self.valid_epoch = 0
         self.train_loss, self.valid_loss, self.valid_metric_optimal = float('-inf'), float('-inf'), float('-inf')
+        self.writer = SummaryWriter()
+        ############################################################################### eval setting
+        self.eval_step = int(len(self.train_data_loader) * self.config.saving_rate)
+        self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
+        self.eval_count = 0
+        self.count = 0
 
     def pick_model(self):
         # for switching model
@@ -392,13 +395,6 @@ class QA():
                                                                        self.config.accumulation_steps))
         self.log.write('   experiment  = %s\n' % str(__file__.split('/')[-2:]))
 
-        self.writer = SummaryWriter()
-        ############################################################################### eval setting
-        self.eval_step = len(self.train_data_loader) / 4  # or len(train_data_loader)
-        self.log_step = int(len(self.train_data_loader) * self.config.progress_rate)
-        self.eval_count = 0
-        self.count = 0
-
         while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
@@ -538,6 +534,8 @@ class QA():
         self.eval_metrics_no_postprocessing = []
         self.eval_metrics_postprocessing = []
 
+        all_result = []
+
         with torch.no_grad():
 
             # init cache
@@ -590,6 +588,8 @@ class QA():
                         offsets=all_offsets[px]
                     )
 
+                    all_result.append(final_text)
+
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 2):
                         self.eval_metrics_postprocessing.append(jaccard_score)
                     else:
@@ -624,6 +624,10 @@ class QA():
 
         else:
             self.count += 1
+
+        val_df = pd.DataFrame({'selected_text': all_result})
+        val_df.to_csv(os.path.join(self.config.checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
+                                                                                                    self.config.fold)), index=False)
 
     def infer_op(self):
 
@@ -673,18 +677,12 @@ class QA():
                     )
                     all_results.append(final_text)
 
-
-
         # save csv
         submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
-        pd_test = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
 
         for i in range(len(submission)):
-            if pd_test['sentiment'][i] == 'neutral' or len(pd_test['text'][i].split()) < 2:  # neutral postprocessing
-                submission.loc[i, 'selected_text'] = pd_test['text'][i]
-            else:
-                final_text = " ".join(set(all_results[i].lower().split()))
-                submission.loc[i, 'selected_text'] = final_text
+            final_text = " ".join(set(all_results[i].lower().split()))
+            submission.loc[i, 'selected_text'] = final_text
 
         submission.to_csv(os.path.join(self.config.checkpoint_folder, "submission_{}.csv".format(self.config.fold)))
 
@@ -699,5 +697,6 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps)
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
+    # qa.train_op()
+    qa.evaluate_op()
     # qa.infer_op()

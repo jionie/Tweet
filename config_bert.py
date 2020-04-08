@@ -15,7 +15,7 @@ class Config_Bert:
         self.model_type = model_type
         self.do_lower_case = True
         self.model_name = 'TweetBert'
-        self.hidden_layers = [-1, -2, -3, -4]
+        self.hidden_layers = [-3, -4, -5, -6]
         self.sentiment_weight_map = {"neutral": 0.1, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
@@ -75,8 +75,10 @@ class Config_Bert:
         self.accumulation_steps = accumulation_steps
         # epochs
         self.num_epoch = 12
+        # saving rate
+        self.saving_rate = 1 / 8
         # early stopping
-        self.early_stopping = 2 * 4
+        self.early_stopping = 2 / self.saving_rate
         # progress rate
         self.progress_rate = 1/20
         # inference setting
