@@ -536,10 +536,10 @@ class QA():
                                                 verbose_logging=self.config.verbose_logging)
 
                     if (train_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
-                        self.train_metrics_postprocessing.append(jaccard(label_text, actual_text))
+                        self.train_metrics_postprocessing.append(jaccard(label_text.strip(), actual_text.strip()))
                     else:
-                        self.train_metrics_no_postprocessing.append(jaccard(label_text, final_text))
-                    self.train_metrics.append(jaccard(label_text, final_text))
+                        self.train_metrics_no_postprocessing.append(jaccard(label_text.strip(), final_text.strip()))
+                    self.train_metrics.append(jaccard(label_text.strip(), final_text.strip()))
 
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
@@ -663,11 +663,11 @@ class QA():
                                                 verbose_logging=self.config.verbose_logging)
 
                     if (eval_feature.tokens[1] == "neutral" or len(actual_text.split()) < 2):
-                        self.eval_metrics_postprocessing.append(jaccard(label_text, actual_text))
+                        self.eval_metrics_postprocessing.append(jaccard(label_text.strip(), actual_text.strip()))
                     else:
-                        self.eval_metrics_no_postprocessing.append(jaccard(label_text, final_text))
-                        self.eval_metrics_postprocessing.append(jaccard(label_text, final_text))
-                    self.eval_metrics.append(jaccard(label_text, final_text))
+                        self.eval_metrics_no_postprocessing.append(jaccard(label_text.strip(), final_text.strip()))
+                        self.eval_metrics_postprocessing.append(jaccard(label_text.strip(), final_text.strip()))
+                    self.eval_metrics.append(jaccard(label_text.strip(), final_text.strip()))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])

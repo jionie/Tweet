@@ -33,6 +33,53 @@ class CrossEntropyLossOHEM(torch.nn.Module):
             else:
                 raise NotImplementedError
 
+
+def jaccard(pr, gt, eps=1e-7, threshold=None, activation='sigmoid'):
+    """
+    Source:
+        https://github.com/catalyst-team/catalyst/
+    Args:
+        pr (torch.Tensor): A list of predicted elements
+        gt (torch.Tensor):  A list of elements that are to be predicted
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: IoU (Jaccard) score
+    """
+
+    if activation is None or activation == "none":
+        activation_fn = lambda x: x
+    elif activation == "sigmoid":
+        activation_fn = torch.nn.Sigmoid()
+    elif activation == "softmax2d":
+        activation_fn = torch.nn.Softmax2d()
+    else:
+        raise NotImplementedError(
+            "Activation implemented for sigmoid and softmax2d"
+        )
+
+    pr = activation_fn(pr)
+
+    if threshold is not None:
+        pr = (pr > threshold).float()
+
+    intersection = torch.sum(gt * pr, dim=-1)
+    union = torch.sum(gt, dim=-1) + torch.sum(pr, dim=-1) - intersection + eps
+    return (intersection + eps) / union
+
+
+class JaccardLoss(nn.Module):
+    __name__ = 'jaccard_loss'
+
+    def __init__(self, eps=1e-7, activation='sigmoid'):
+        super().__init__()
+        self.activation = activation
+        self.eps = eps
+
+    def forward(self, y_pr, y_gt):
+        loss = 1 - jaccard(y_pr, y_gt, eps=self.eps, threshold=None, activation=self.activation)
+        return loss
+
 ############################################ Define Net Class
 class TweetBert(nn.Module):
     def __init__(self, model_type="bert-large-uncased", hidden_layers=None):
@@ -179,24 +226,41 @@ class TweetBert(nn.Module):
             ignored_index = start_logits.size(1)
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
+            label_mask = torch.zeros_like(start_logits)
+            for i in range(label_mask.shape[0]):
+                label_mask[i, start_positions[i].data : end_positions[i].data] = 1
 
             if self.training:
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
+                loss_jaccard = JaccardLoss()
+                start_jaccard_loss = loss_jaccard(start_logits, label_mask)
+                end_jaccard_loss = loss_jaccard(end_logits, label_mask)
                 if sentiment_weight is None:
                     start_loss = loss_fct(start_logits, start_positions)
                     end_loss = loss_fct(end_logits, end_positions)
                 else:
                     start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
                     end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
-                total_loss = (start_loss + end_loss) / 2
+                    start_jaccard_loss *= sentiment_weight
+                    end_jaccard_loss *= sentiment_weight
+                ce_loss = (start_loss + end_loss) / 2
+                jaccard_loss = (start_jaccard_loss + end_jaccard_loss) / 2
+                total_loss = ce_loss + jaccard_loss.mean() * 0.2
             else:
-                loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="mean")
+                loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
+                loss_jaccard = JaccardLoss()
                 start_loss = loss_fct(start_logits, start_positions)
                 end_loss = loss_fct(end_logits, end_positions)
+                start_jaccard_loss = loss_jaccard(start_logits, label_mask)
+                end_jaccard_loss = loss_jaccard(end_logits, label_mask)
                 if sentiment_weight is not None:
                     start_loss *= sentiment_weight
                     end_loss *= sentiment_weight
-                total_loss = (start_loss + end_loss) / 2
+                    start_jaccard_loss *= sentiment_weight
+                    end_jaccard_loss *= sentiment_weight
+                ce_loss = (start_loss + end_loss) / 2
+                jaccard_loss = (start_jaccard_loss + end_jaccard_loss) / 2
+                total_loss = ce_loss.mean() + jaccard_loss.mean() * 0.2
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)

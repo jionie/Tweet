@@ -523,7 +523,7 @@ class QA():
                 if (tr_batch_i + 1) % self.eval_step == 0:
                     self.evaluate_op()
 
-            if (self.count == self.config.early_stopping):
+            if self.count >= self.config.early_stopping:
                 break
 
             self.epoch += 1
@@ -634,7 +634,7 @@ class QA():
             # init cache
             torch.cuda.empty_cache()
 
-            for val_batch_i, (all_input_ids, alall_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
+            for test_batch_i, (all_input_ids, alall_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
                     all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.test_data_loader):
 
@@ -645,12 +645,16 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
-                sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids)
 
                 start_logits, end_logits = outputs[0], outputs[1]
+
+                start_logits = torch.softmax(start_logits, dim=-1)
+                end_logits = torch.softmax(end_logits, dim=-1)
+                start_logits = start_logits.argmax(dim=-1)
+                end_logits = end_logits.argmax(dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
