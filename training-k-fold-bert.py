@@ -138,11 +138,8 @@ class QA():
 
     def pick_model(self):
         # for switching model
-        self.model = TweetBert(model_type=self.config.model_type, hidden_layers=self.config.hidden_layers) \
-            .to(self.config.device)
-        # config = AutoConfig.from_pretrained("roberta-large")
-        # self.model = AutoModelForQuestionAnswering.from_pretrained("roberta-large", config=config).to(self.config.device)
-
+        self.model = TweetBert(model_type=self.config.model_type, max_seq_len=self.config.max_seq_length,
+                               hidden_layers=self.config.hidden_layers).to(self.config.device)
     def differential_lr(self):
 
         if self.config.differential_lr:
