@@ -213,8 +213,8 @@ class TweetBert(nn.Module):
             smoothed_end_position = torch.zeros_like(end_logits)
 
             for i in range(start_logits.shape[0]):
-                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.15)
-                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.15)
+                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.5)
+                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.5)
             smoothed_start_position = smoothed_start_position
             smoothed_end_position = smoothed_end_position
 

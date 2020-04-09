@@ -15,7 +15,7 @@ class Config_Bert:
         self.model_type = model_type
         self.do_lower_case = True
         self.model_name = 'TweetBert'
-        self.hidden_layers = [-3, -4, -5, -6]
+        self.hidden_layers = [-1, -2, -3, -4]
         self.sentiment_weight_map = {"neutral": 0.1, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
@@ -55,10 +55,10 @@ class Config_Bert:
         self.max_grad_norm = 1
         # lr scheduler
         self.lr_scheduler_name = 'WarmupCosineAnealing'
-        self.warmup_proportion = 0.0
+        self.warmup_proportion = 0.005
         # lr
         self.lr = 5e-5
-        self.weight_decay = 0.001
+        self.weight_decay = 0.01
         # differential lr settings
         self.differential_lr = True
         self.decay_factor = 0.9

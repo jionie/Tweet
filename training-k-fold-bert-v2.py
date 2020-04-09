@@ -274,7 +274,7 @@ class QA():
                                                              num_warmup_steps=int(num_train_optimization_steps *
                                                                                   self.config.warmup_proportion),
                                                              num_training_steps=num_train_optimization_steps)
-            self.lr_scheduler_each_iter = False
+            self.lr_scheduler_each_iter = True
         elif self.config.lr_scheduler_name == "WarmRestart":
             self.scheduler = WarmRestart(self.optimizer, T_max=5, T_mult=1, eta_min=1e-6)
             self.lr_scheduler_each_iter = False
@@ -697,6 +697,6 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps)
     seed_everything(config.seed)
     qa = QA(config)
-    # qa.train_op()
-    qa.evaluate_op()
+    qa.train_op()
+    # qa.evaluate_op()
     # qa.infer_op()
