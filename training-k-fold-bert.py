@@ -138,7 +138,7 @@ class QA():
 
     def pick_model(self):
         # for switching model
-        self.model = TweetBert(model_type=self.config.model_type, max_seq_len=self.config.max_seq_length,
+        self.model = TweetBert(model_type=self.config.model_type,
                                hidden_layers=self.config.hidden_layers).to(self.config.device)
     def differential_lr(self):
 
@@ -163,7 +163,8 @@ class QA():
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
                                self.model.down,
-                               self.model.qa_outputs
+                               self.model.qa_outputs,
+                               self.model.qa_segment,
                                ]
 
             elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
@@ -195,7 +196,8 @@ class QA():
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
                                self.model.down,
-                               self.model.qa_outputs
+                               self.model.qa_outputs,
+                               self.model.qa_segment,
                                ]
             else:
                 raise NotImplementedError

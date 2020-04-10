@@ -185,11 +185,10 @@ class TweetBert(nn.Module):
 
         self.down = nn.Linear(len(hidden_layers), 1)
         self.qa_outputs = nn.Linear(self.config.hidden_size, self.config.num_labels)
-        self.qa_segment = nn.Linear(self.config.hidden_size, 1)
-        self.qa_start = nn.Linear(max_seq_len, max_seq_len)
-        self.qa_end = nn.Linear(max_seq_len, max_seq_len)
+        self.qa_segment = nn.Linear(2 * max_seq_len, max_seq_len)
 
         self.activation = nn.ReLU()
+        self.activation_seg = nn.SELU()
 
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
@@ -250,15 +249,13 @@ class TweetBert(nn.Module):
 
         fuse_hidden = self.get_hidden_states(hidden_states)
         logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_outputs)
-        segment_logits = self.qa_segment(logits)
-        segment_logits = segment_logits.squeeze(-1)
 
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits = start_logits.squeeze(-1)
         end_logits = end_logits.squeeze(-1)
-        # start_logits = self.qa_start(self.activation(segment_logits))
-        # end_logits = self.qa_end(self.activation(segment_logits))
         seq_len = start_logits.shape[1]
+
+        segment_logits = self.qa_segment(self.activation_seg(torch.cat((start_logits, end_logits), dim=1)))
 
         outputs = (start_logits, end_logits,) + outputs[2:]
         if start_positions is not None and end_positions is not None:
@@ -279,8 +276,8 @@ class TweetBert(nn.Module):
                 label_mask[i, start_positions[i].data: end_positions[i].data] = 1
 
             for i in range(start_logits.shape[0]):
-                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.5)
-                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.5)
+                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.25)
+                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.25)
             smoothed_start_position = smoothed_start_position
             smoothed_end_position = smoothed_end_position
 
@@ -301,7 +298,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.2 * ce_loss + 0.8 * heapmap_loss.mean() + segment_loss
+                total_loss = 0.2 * ce_loss + 0.8 * heapmap_loss.mean() + 0.1 * segment_loss
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_heatmap = KLDivLoss(reduction="none")
@@ -318,7 +315,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.2 * ce_loss.mean() + 0.8* heapmap_loss.mean() + segment_loss
+                total_loss = 0.2 * ce_loss.mean() + 0.8 * heapmap_loss.mean() + 0.1 * segment_loss
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
