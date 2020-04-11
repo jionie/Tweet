@@ -614,12 +614,12 @@ class QA():
             print("Validating ground truth: ", selected_tweet)
             print("Validating prediction: ", final_text)
 
-        if (mean_eval_metric_no_postprocessing >= self.valid_metric_optimal):
+        if (mean_eval_metric >= self.valid_metric_optimal):
 
             self.log.write('Validation metric improved ({:.6f} --> {:.6f}).  Saving model ...'.format(
-                self.valid_metric_optimal, mean_eval_metric_no_postprocessing))
+                self.valid_metric_optimal, mean_eval_metric))
 
-            self.valid_metric_optimal = mean_eval_metric_no_postprocessing
+            self.valid_metric_optimal = mean_eval_metric
             self.save_check_point()
 
             self.count = 0

@@ -298,7 +298,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.2 * ce_loss + 0.8 * heapmap_loss.mean() + 0.1 * segment_loss
+                total_loss = 0.7 * ce_loss + 0.3 * heapmap_loss.mean() + 0.1 * segment_loss
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_heatmap = KLDivLoss(reduction="none")
@@ -315,7 +315,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.2 * ce_loss.mean() + 0.8 * heapmap_loss.mean() + 0.1 * segment_loss
+                total_loss = 0.7 * ce_loss.mean() + 0.3 * heapmap_loss.mean() + 0.1 * segment_loss
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
