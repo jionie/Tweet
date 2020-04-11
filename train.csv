@@ -91,7 +91,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 89,9339ee8e0b, Well what im working on isn`t QUITE ready to post about publicly (still beta testing) but its a cool new script I coded,cool,positive
 90,a76f9cf8ce, SWEEEEET - San Fran is awesome!!!!  Love it there,Love it there,positive
 91,4ce121e2ad,_Mounce yes and it lasts way past my bedtime!,_Mounce yes and it lasts way past my bedtime!,neutral
-92,a3de81e1ba, Hi  how are you doing ???  *just joined twitter...*,Hi how are you doing ??? *just joined twitter�*,neutral
+92,a3de81e1ba, Hi  how are you doing ???  *just joined twitter...*, Hi  how are you doing ???  *just joined twitter...*,neutral
 93,55bacda5eb,waiting for sleeping pills to kick in... gonna be so tired at work tomorrow,tired,negative
 94,b63ed6da62,eating ice cream and then getting ready for graduation.,eating ice cream and then getting ready for graduation.,neutral
 95,4c41a35a2a,Happy Mothers day to all you Mums out there,Happy Mothers day to all you Mums out there,positive
@@ -195,7 +195,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 193,3e880ec28d,  WHAT ABOUT ME ??  I VOTE EVERY DAY FOR YOU !!!!!,WHAT ABOUT ME ?? I VOTE EVERY DAY FOR YOU !!!!!,negative
 194,38271074d1,I`m starving!! This diet is killing me but I can`t eat after 8pm,This diet is killing me,negative
 195,ef12a3d183, i talk to you,i talk to you,neutral
-196,f0db54f5bf,im soo bored...im deffo missing my music channels,im soo bored�,negative
+196,f0db54f5bf,im soo bored...im deffo missing my music channels,im soo bored...,negative
 197,e651d415c6, nite nite bday girl  have fun at concert,fun,positive
 198,931a866d3f,"Had nicotine replacement patch on for 4 hours. So far, so good, but I did sleep for most of those 4 hours. Getting a bit twitchy now","So far, so good, but I did sleep for most of those 4 hours. Getting a bit twitchy now",neutral
 199,7a718b23ef,_Sanderson What`s with Twatter lately?  Either I can`t get on or the replies don`t turn up!,What`s with Twatter lately? Either I can`t get on or the replies don`t turn up!,neutral
@@ -1297,7 +1297,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 1295,b642906cab,Home from work. A few hours of sleep then putting some miles on the new bike.,Home from work. A few hours of sleep then putting some miles on the new bike.,neutral
 1296,c01f2329db,"says livejournal is being a bee-eye-tee-see-hedge. Dum dee dum, ok back to work!","says livejournal is being a bee-eye-tee-see-hedge. Dum dee dum, ok back to work!",neutral
 1297,8c1c2b26a4,always excited for a new chapter in my life. just didnt expect it to be so emotional.,so emotional.,negative
-1298,094218c2e7,in about half a hour i`m going to my english lesson...guess i`ll have to wait...and wait for a couple hours so i`m over with it.(( :S   )),i`ll have to wait�,negative
+1298,094218c2e7,in about half a hour i`m going to my english lesson...guess i`ll have to wait...and wait for a couple hours so i`m over with it.(( :S   )),i`ll have to wait...,negative
 1299,f854b71b06, hell yeah! Belgian beer is the bomb!!  :p,hell yeah!,positive
 1300,1ef247a527," hahahaha. im listening to my iTunes library, a bit of Sonia Dada atm,  ITs good",good,positive
 1301,ba786311f9,http://twitpic.com/4we4j - Speed lessons on the main screens on center court! I had to take this pic,http://twitpic.com/4we4j - Speed lessons on the main screens on center court! I had to take this pic,neutral
@@ -1446,7 +1446,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 1444,de904e3f4f,life`s good,good,positive
 1445,aeb55e479d,"_B I don`t know but they aren`t worth it, only 6 people actually showed up lol","_B I don`t know but they aren`t worth it, only 6 people actually showed up lol",neutral
 1446,abb86761cf, p.s. There is such thing as having too much sushi! Bleeeeah!,p.s. There is such thing as having too much sushi! Bleeeeah!,neutral
-1447,2b6bd43b14, oh ok. Well good for you...can I get some weather updates instead??  jk.,good for you�,positive
+1447,2b6bd43b14, oh ok. Well good for you...can I get some weather updates instead??  jk.,good for you...,positive
 1448,95b0d4bdfa,Rescued two adorable pit mix pups today.  LC and Brody.  Looking to adopt?  E-mail me for more info and pics!,Rescued two adorable pit mix pups today.,positive
 1449,a71ecf3bcc,Suddenly I remember all the memories with him  ohhh please,ohhh please,negative
 1450,ca3b1dae3f,I think my cheap sunglasses are falling apart. Oh well,falling apart.,negative
@@ -3018,7 +3018,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 3016,f92434b1e2, Going to see Star Trek,Going to see Star Trek,neutral
 3017,c0c9eaa968,"is aching from rugby, good game","is aching from rugby, good game",neutral
 3018,ff26920ecc, its almost your birthday!!,its almost your birthday!!,neutral
-3019,3ade80fe74,"may gray, coldplay, and nice showers...work at 2",nice showers�,positive
+3019,3ade80fe74,"may gray, coldplay, and nice showers...work at 2",nice showers...,positive
 3020,a3603b45fb,its funny you said we`d never make it and look how far we`ve come....  IM BACK ON HEAHHH!  um. yeah. school :/,funny,positive
 3021,f71e92064e,aww i feel bad cause i dunno if nicole is in the city looking for me. she`s probably worried  srry hun,she`s probably worried srry hun,negative
 3022,d7cc763f8a, me toooooo! Thank u,Thank u,positive
@@ -3100,7 +3100,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 3098,896f138772, Yep- same here. I have to be in the mood 4 it.,Yep- same here. I have to be in the mood 4 it.,neutral
 3099,eda19b9526," T, im sooooo bored right now",bored,negative
 3100,983d7b7aaa, Sis...I dont think I will be up 4 2nite sadly  Im in alot of pain 2day & had bad nite...can we go out anotha week soon?****,sadly,negative
-3101,c74fafdb94,THIS twitter is driving me nuts...WONT LET ME DOWNLOAD A PROFILE PIC!! ...guess i`ll keep trying!!,driving me nuts�,negative
+3101,c74fafdb94,THIS twitter is driving me nuts...WONT LET ME DOWNLOAD A PROFILE PIC!! ...guess i`ll keep trying!!,driving me nuts...,negative
 3102,032bb2eb50,"reaons not worth it; drunk for no reason, depressed about revision, nothing happened. Reason`s worth it:Matt, ...after that? i dunno",depressed,negative
 3103,5abbf5d8a2,Twitter is slowing me down today.,Twitter is slowing me down today.,negative
 3104,92207dfecf, say a hi to me tom  please please,say a hi to me tom please please,neutral
@@ -4092,7 +4092,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 4090,f107f7256e,Def wants to cuddle it out maybe play but has no one to do it with the bc is far away,no one to do it,negative
 4091,a2f1cb807d,Off to work now apparently sun shining not a valid excuse to stay home,Off to work now apparently sun shining not a valid excuse to stay home,neutral
 4092,5aba7bc014,I`m grounded til tomorrow. Sorry to anyone I made plans with.  It`ll have to be tomorrow. (annoyed) http://plurk.com/p/x332r,Sorry to anyone,negative
-4093,6c344c1dac,Watching my fav movie...Two Can Play That Game! 'Ever notice how men start to act up around Spring time?' Shante Smith,my fav movie�,positive
+4093,6c344c1dac,Watching my fav movie...Two Can Play That Game! 'Ever notice how men start to act up around Spring time?' Shante Smith,my fav movie...,positive
 4094,0195ac1050,Hope my roommates having a good morning without TP and soap!,Hope,positive
 4095,2b69b98ee6," No, I`m in the US for the weekend not the UK","No, I`m in the US for the weekend not the UK",neutral
 4096,2005f1cf47, yeah... i guess my password was also changed... i was not able to login my FB  cahnge my pw again ...ufff,yeah... i guess my password was also changed... i was not able to login my FB cahnge my pw again ...ufff,neutral
@@ -4264,7 +4264,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 4262,7c7fa0cd3c,Seeing `Love at the Club` actually made me,Seeing `Love at the Club` actually made me,neutral
 4263,abaed895f6,"Wait - No Wind in Hair - that would be I-L-L-E-G-A-L!!  I would Never break the law!! No, never.","I would Never break the law!! No, never.",positive
 4264,9ed722766b," You`re not the only one surprised that FreeTDS and UTF-8 don`t 'just work'. But you`ll get it right, eventually.","But you`ll get it right,",positive
-4265,af921ea141,what a wonderful day...i am going to sleep so well tonight,what a wonderful day�,positive
+4265,af921ea141,what a wonderful day...i am going to sleep so well tonight,what a wonderful day...,positive
 4266,86ad37ee29, Morning Sunshine,Morning Sunshine,neutral
 4267,15d527d485, yes... nice. I missed a lot of fun. **** exams. you are looking good...hair,yes... nice. I missed a lot of fun. **** exams. you are looking good...hair,neutral
 4268,3a9bdb7666, hopefully I`ll get to see HTB next week and LA really soon!! Can`t wait!!!,hopefully,positive
@@ -4698,14 +4698,14 @@ Unnamed: 0,textID,text,selected_text,sentiment
 4696,a61b26ff39,"On way to the wimbledon with  to watch star trek, IMAX baby","On way to the wimbledon with to watch star trek, IMAX baby",neutral
 4697,aaf786894b," aw, gutted",gutted,negative
 4698,92d4e5b85a,Ok so this shower has been calling my name for about an hour I think I`ll indulge & respond now while I allow Robin Thicke to serenade me,Ok so this shower has been calling my name for about an hour I think I`ll indulge & respond now while I allow Robin Thicke to serenade me,neutral
-4699,f2262dc310,apple fritters are like the perfect after food...don`t you think?,the perfect after food�,positive
+4699,f2262dc310,apple fritters are like the perfect after food...don`t you think?,the perfect after food...,positive
 4700,f6030d65a4, I`m learning to,I`m learning to,neutral
 4701,66561d0e29,_radio yeah :S i feel all funny cause i haven`t slept enough  i woke my mum up cause i was singing she`s not impressed :S you?,i feel all funny cause i,negative
 4702,aeba57e3f0," babe  ive been aight, urselff?","babe ive been aight, urselff?",neutral
 4703,d07423d091,at work,at work,neutral
 4704,c5bed42662,"I told andrew that JT is going to cameo @ MTV movie awards. He said, 'he`s pissing me off.' guess they`re in a fight",'he`s pissing me off.',negative
 4705,b6609e0a52," actually, i really do. mostly when i forget to take off my makeup before bed","actually, i really do. mostly when i forget to take off my makeup before bed",neutral
-4706,bca2d9c495,Gud nite all...will catch you all again tomorrow,Gud nite all�,positive
+4706,bca2d9c495,Gud nite all...will catch you all again tomorrow,Gud nite all...,positive
 4707,7fdc880eb9, oh i like this idea,i like,positive
 4708,cb80225be4,"I`m so sleepy now...g`night! HAPPY MOTHER`S DAY to your Mother, Mama, Ma, Mommy (whatever you call them. LoL) from Mie!",HAPPY,positive
 4709,ff37752541, who is ....lili homie...LILI.... and i am black  75% to be exact lol,who is ....lili homie...LILI.... and i am black 75% to be exact lol,neutral
@@ -4843,7 +4843,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 4841,79337a7309," Thanks, Brad!  Looking forward to chatting with you too.. btw, like your new pix!",like your new pix!,positive
 4842,9f050c0452,'your true theatre calling? - musical theatre actor'  i wish :`( ****,musical theatre actor' i wish :`(,positive
 4843,f16554ab38,The dj`s and partypeople were great again at CC. Kicking  Next one June 7,were great,positive
-4844,ab09f5dc86,"dinner smells good...man i`m hungry. so sunny outside, wish i was at wonderland",dinner smells good�,positive
+4844,ab09f5dc86,"dinner smells good...man i`m hungry. so sunny outside, wish i was at wonderland",dinner smells good...,positive
 4845,148d78d525,Going to revise for physics.,Going to revise for physics.,neutral
 4846,4b3eac45a1,Happy mother`s day to all mothers here!,Happy,positive
 4847,a0ab8bdb84,hmmm i neeeddd foooddd  nd is looking forward 2 playing with the puppy 2 day nd seeing lewishhh,hmmm i neeeddd foooddd nd is looking forward 2 playing with the puppy 2 day nd seeing lewishhh,neutral
@@ -5821,7 +5821,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 5819,4d6e71e475,`You Are What U Eat` isn`t EXACTLY true.. `You Are What U Digest` TodayISaProsperous &Productive Day! ThankUJesus!  BeYEBlessed! hee hee,ThankUJesus! BeYEBlessed!,positive
 5820,f070621511,omg! i didnt even know my friend knew  !!! lol its a small world,omg! i didnt even know my friend knew !!! lol its a small world,neutral
 5821,ddf6fd773d,"aaauuuggghhh! in n out, check! mcdonald`s, check! haha, next is hot cheetos!","aaauuuggghhh! in n out, check! mcdonald`s, check! haha, next is hot cheetos!",neutral
-5822,5bada8d821,shud realy go 2 bed  proper tired bt cnt b boverd...x,cnt b boverd�,negative
+5822,5bada8d821,shud realy go 2 bed  proper tired bt cnt b boverd...x,cnt b boverd...,negative
 5823,d6e037a5c7,Watching wizard of waverly place,Watching wizard of waverly place,neutral
 5824,2ef7abb5d4,I was just asked by a suit where i was heading to. I didn`t think i looked that much like a ****,I was just asked by a suit where i was,negative
 5825,dd2ca87e9b, That`s just how babies are  Their little rhythms are still in sinc with when they were inutero.,That`s just how babies are Their little rhythms are still in sinc with when they were inutero.,neutral
@@ -5912,7 +5912,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 5910,026ef8e8d5, DSi is the latest Nintendo DS with 2 cameras + stuff built in. We are a Gadget house. Luckily I get my blackberrys free from work,Luckily,positive
 5911,8fa50c76fa,_dave meany,_dave meany,neutral
 5912,b40b711cc2,"well i guess it all depends,undergarments.","well i guess it all depends,undergarments.",neutral
-5913,f3a9b9a3f8,this week has been fun...i hope next week will be even better  NYC in 19 days,has been fun�,positive
+5913,f3a9b9a3f8,this week has been fun...i hope next week will be even better  NYC in 19 days,has been fun...,positive
 5914,d5048db173,Worried about the reply after sending THE SMS to 78277.,Worried,negative
 5915,ba8de71491,Happy Mother`s Day mommy and grandma haha  ily,Happy Mother`s Day mommy and grandma haha ily,positive
 5916,9f17044414, I want to know who is that ??.6  I tried to ask P`KIA but he still not reply me  but now he change his status to `away`,I want to know who is that ??.6 I tried to ask P`KIA but he still not reply me but now he change his status to `away`,neutral
@@ -7183,7 +7183,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 7181,33f75c1951,WGN is playing old episodes of Rocky & Bullwinkle. Fractured Fairy Tales for the win,WGN is playing old episodes of Rocky & Bullwinkle. Fractured Fairy Tales for the win,neutral
 7182,846e092fd8,"_idiots hahaha! I don`t work in a **** you know  alrighty mister, have YOU done any public may dancing today?","_idiots hahaha! I don`t work in a **** you know alrighty mister, have YOU done any public may dancing today?",neutral
 7183,52b2a66104,Im bumbed though cuz ima miss da laker game        |double sad face|,Im bumbed though cuz ima miss da laker game |double sad,neutral
-7184,295ec1c7e8,i hate the bus...any donations toward my car fund?,i hate the bus�,negative
+7184,295ec1c7e8,i hate the bus...any donations toward my car fund?,i hate the bus...,negative
 7185,3d0df33cbb, Bad rum experience in college - still haven`t recovered,Bad,negative
 7186,949c5ae7a1,"Tired, But glad its a bank holiday","Tired, But glad its a bank holiday",neutral
 7187,28b7b971ff,1 month ahaha. AND i dunno if I can go tomorrow LMAO cause i went today   Freakin filipino parents AHA,1 month ahaha. AND i dunno if I can go tomorrow LMAO cause i went today Freakin filipino parents AHA,neutral
@@ -7226,7 +7226,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 7224,75318ceaff,"Charter is pissing me off, the rest of the internet can access my blog except me   should have it fixed soon they say, we will see...","Charter is pissing me off,",negative
 7225,02fdfe48a0,  _c    Thank you for the FFs my friends!,Thank,positive
 7226,1bd579e2a6,Finally on my way home,Finally on my way home,neutral
-7227,b084bce92a,"Great meeting...lunch on the patio in the sunshine...nothing more perfect  busy day...time for bed, ahhhhh",Great meeting�,positive
+7227,b084bce92a,"Great meeting...lunch on the patio in the sunshine...nothing more perfect  busy day...time for bed, ahhhhh",Great meeting...,positive
 7228,c76f329b65,wishing I was anywhere but here...,wishing I was anywhere but here...,negative
 7229,898e818617,Hats off to a slightly unexpected yet very successful end to a grouling day!!! Night all,successful,positive
 7230,d6933febc3, whuahahhaha you need to cut down on them Bram Ladages/Applejacks/pancakes,whuahahhaha,positive
@@ -8004,7 +8004,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 8002,8a9cc6366b,"seriously my parents are non stop  minniapolis, newport for a week, and now this weekend in San Diego  i miss them ",i miss,negative
 8003,9ad738db4f,_d awww glad to know Little Sweet D and Leigh are doing good...thanks for the updates Howie,Little Sweet D and Leigh are doing good...thanks for the updates Howie,positive
 8004,fde0716b44,_sims do you know of any inside scoop on a station that`s anything what kwod was? there`s nothing for us now,_sims do you know of any inside scoop on a station that`s anything what kwod was? there`s nothing for us now,neutral
-8005,40d3b2d03c, You right...we are 'arguing' about nothing...I thought it was healthy conversation,we are 'arguing' about nothing�,negative
+8005,40d3b2d03c, You right...we are 'arguing' about nothing...I thought it was healthy conversation,we are 'arguing' about nothing...,negative
 8006,de48016595,", i missed everyone tonight",missed,negative
 8007,8ef86d7684," Yeah, but you`ve got admire someone who takes job satisfaction to the Nth degree",satisfaction,positive
 8008,1bfbfda136,"sigh.. stayed up late cause was on a role w/ assessment, now I`m so tired my eyes r stinging & my head hurts.. & I still need 500 words",tired,negative
@@ -8050,7 +8050,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 8048,c24baacbde, it`s ok lol  I think we might do the same dates.,it`s ok lol I think we might do the same dates.,positive
 8049,c1c67d1a99,Smiling!  These guys are!    Turn up your speakers and SMILE~life is good! http://www.imtiredonline.com/smile/,SMILE~life is good!,positive
 8050,0e094f77c9,"wants to move to QLD already, this cold weather is killing me",this cold weather is killing me,negative
-8051,dc124a304c,"_mcsupergirl ok, finished set u free, and i am sooooo mad rite now...it cant end like that, i dont want him to be the bad guy",i am sooooo mad rite now�,negative
+8051,dc124a304c,"_mcsupergirl ok, finished set u free, and i am sooooo mad rite now...it cant end like that, i dont want him to be the bad guy",i am sooooo mad rite now...,negative
 8052,7c17aea36e," ..ok brother...did you change your num and not give it to me, AGAIN??? smh..you no good dude",smh..you no good dude,negative
 8053,5f40b0f0d6,_Claire its sunny here  I will send some over to you,_Claire its sunny here I will send some over to you,neutral
 8054,83a62e207f,i think i need a drink,i think i need a drink,neutral
@@ -8084,7 +8084,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 8082,7d41dbe15c, ... but i could barely speak! He was probably thinking `who is the weirdo?` LOOOOL. Say sorry to him for me please?  x <3,sorry,negative
 8083,6bef62794c,It`s tough being a thick chik,tough,negative
 8084,1343254dd6,"http://pic.gd/63ef My college, My friends","My college, My friends",neutral
-8085,5da55949f3, I`m bummed...you`re gonna be only 30 minutes from me on Sunday & I can`t come hear ya.,I`m bummed�,negative
+8085,5da55949f3, I`m bummed...you`re gonna be only 30 minutes from me on Sunday & I can`t come hear ya.,I`m bummed...,negative
 8086,5f24dc2184,"working away just now, hopefully it stays nice for the afternoon and evening! possible BBQ weather!",hopefully it,positive
 8087,55fc57b1fb, Nothing like alone time with your handheld device,Nothing like alone time with your handheld device,positive
 8088,8149539efe,be back later!  HAPPY MOTHER`S DAY TO ALL THE MOTHERS IN THE WORLD! ï¿½ GOD LOVES US ALL!,HAPPY MOTHER`S DAY,positive
@@ -8169,7 +8169,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 8167,80b2ebd8dc, HAHAH you know you loved the hannah montana movie  it was aweesome,it was aweesome,positive
 8168,5f4484b1e4,mcfly anit been on here in ages  z,mcfly anit been on here in ages z,neutral
 8169,19fc16acac,Another long walk in the heat... I hate this...,in the heat... I hate this...,negative
-8170,c17fc0478b, I like that...gonna have to re-tell,I like that�,positive
+8170,c17fc0478b, I like that...gonna have to re-tell,I like that...,positive
 8171,5c07c9e0e0," Aw, sorry about your cat   No worries about the blankets, I was just wondering, I`m in no rush, take your time!","Aw, sorry about your cat No worries about the blankets, I was just wondering, I`m in no rush, take your time!",neutral
 8172,54c993d3dd," Who knows, maybe someday you`ll come home and find... *gasp* DINNER in your FRIDGE!","Who knows, maybe someday you`ll come home and find... *gasp* DINNER in your FRIDGE!",neutral
 8173,56984d8822,Wanna see Up in 2D but everyone wants to see it in 3D,Wanna see Up in 2D but everyone wants to see it in 3D,neutral
@@ -8768,7 +8768,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 8766,f1ec1d56cf,I can has cheeseburger,I can has cheeseburger,neutral
 8767,7f37ccff0a, awww,awww,neutral
 8768,d053fd5269,"Soo tired, couldn`t get enough sleep","Soo tired,",negative
-8769,55127eb379,Everyone MUST watch this...it`s Snowball the dancing bird & he will make your day...I promise!  http://tinyurl.com/37wt5f,he will make your day�,positive
+8769,55127eb379,Everyone MUST watch this...it`s Snowball the dancing bird & he will make your day...I promise!  http://tinyurl.com/37wt5f,he will make your day...,positive
 8770,e538779c55,  Sorry to hear that.,Sorry to hear that.,negative
 8771,ff07476941, Well....not the Spurs!!!,Well....not the Spurs!!!,neutral
 8772,ff2c2e8d32, It would still involve me standing up. lol. Windows are too high up. Guess im just gonna have to go out,It would still involve me standing up. lol. Windows are too high up. Guess im just gonna have to go out,neutral
@@ -9189,7 +9189,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 9187,e343440850,Wish I was @ wembley,Wish,positive
 9188,3d37d0aa09, sounds like you`ve had a nice weekend lady!,nice,positive
 9189,6f8bd2c26d,wee. done with advance audit paper,wee. done with advance audit paper,neutral
-9190,e57133818c, Hello pal..nice 2 c u today...have a gr8 week,nice 2 c u today�,positive
+9190,e57133818c, Hello pal..nice 2 c u today...have a gr8 week,nice 2 c u today...,positive
 9191,ca4e865b8d,just got home and counting the days till friday,just got home and counting the days till friday,neutral
 9192,4addc5dfa8,watching matilda with a bowl of noodles,watching matilda with a bowl of noodles,neutral
 9193,67a8fd1f5b,doin homework ugh,doin homework ugh,negative
@@ -9246,7 +9246,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 9244,38a6051ceb,It`s too hot to be sat in an office!  I wanna be out in the sun shineeeee.,It`s too hot to be sat in an office! I wanna be out in the sun shineeeee.,negative
 9245,f014e4ca6e,I need to look at apartments tomorrow,I need to look at apartments tomorrow,neutral
 9246,0bb63d09a5,_y_Tony I had Pad Thai 3 times last night  ragoons LOL yumb,_y_Tony I had Pad Thai 3 times last night ragoons LOL yumb,neutral
-9247,f8a771d8ac, Aww thanks jon that`s very thoughtful...u know how to make the ladies feel special,Aww thanks jon that`s very thoughtful�,positive
+9247,f8a771d8ac, Aww thanks jon that`s very thoughtful...u know how to make the ladies feel special,Aww thanks jon that`s very thoughtful...,positive
 9248,08479f6d59,Youtube is made of fail right now. Or maybe it`s just me that it hates.,Youtube is made of fail right now.,negative
 9249,ee9db39840,Huh  ? What`s wrong with UNIX environment dev`s ?,? What`s wrong,negative
 9250,079e161937,"just installed Windows 7 RC, so far no mushroom cloud yet.","just installed Windows 7 RC, so far no mushroom cloud yet.",neutral
@@ -10376,7 +10376,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 10374,71640c7482,put a pot of eggs on the stove to boil..and forgot about them..then remembered them 45 min later! wonder if they`ll still b good,put a pot of eggs on the stove to boil..and forgot about them..then remembered them 45 min later! wonder if they`ll still b good,neutral
 10375,97f1a30e59,hates continually getting sick whenever he has exams,hates continually getting sick,negative
 10376,2702dbee20, @_anniemay OMG No fair,OMG No fair,negative
-10377,89b6e4feb0,I`m feeling so frustrated...I just can`t get things to work!!,I`m feeling so frustrated�,negative
+10377,89b6e4feb0,I`m feeling so frustrated...I just can`t get things to work!!,I`m feeling so frustrated...,negative
 10378,cb6f3f3bce,Omg soo tired! On my way home! Long busy day ; had fun meeting new people and catching up with some people!,Omg soo tired! On my way home! Long busy day ; had fun meeting new people and catching up with some people!,neutral
 10379,1a7b921e43,My dreams have been crushed...Spock does not like the ladies.,crushed...,negative
 10380,6f94bcaf92,"wishes zak wuld trust me enough to give me bac my necklace  i want it back, but he thinks i`ll cut with it..... http://plurk.com/p/x2qkb","wishes zak wuld trust me enough to give me bac my necklace i want it back, but he thinks i`ll cut with it..... http://plurk.com/p/x2qkb",neutral
@@ -10577,7 +10577,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 10575,48e6b2c0f4," haha, it`s okay to be different!","haha, it`s okay to be different!",neutral
 10576,034335a913," I asked mum bout going out tommorow, she laughed in my face lmao",she laughed in my face,negative
 10577,bc559492a6,"[Wrong!] #liesboystell Your the only one, I love (they really have several women)  http://tinyurl.com/nl6pct",#liesboystell,negative
-10578,8dd204ec21,I am so hungry...if my arm were on the core diet I would eat it!  Guess I have to wait until dinner is ready,I am so hungry�,negative
+10578,8dd204ec21,I am so hungry...if my arm were on the core diet I would eat it!  Guess I have to wait until dinner is ready,I am so hungry...,negative
 10579,c4aafdb23b," Good Evening Terri! Have missed you lately, hope life is being good to you. Have a wonderful evening !","Good Evening Terri! Have missed you lately, hope life is being good to you. Have a wonderful evening !",neutral
 10580,a4f7c6001a, ah. I lived all over the Baltimore/DC suburbs the last 5 yes then finally made it back to my home state,ah. I lived all over the Baltimore/DC suburbs the last 5 yes then finally made it back to my home state,neutral
 10581,0a576112da, you should come over before friday and teach me how,you should come over before friday and teach me how,neutral
@@ -11299,7 +11299,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 11297,df34c5a6a5," Would you travel to the UK for one?  The big US meets sound great, I`d love to go to one of those, so many furs & so much art","sound great, I`d love to go",positive
 11298,60b54035fc, glad u liked post  looking at the back end now...the sub 2 your blog is automatic. send url and i`ll verify.,glad,positive
 11299,415660cb0e, you should.,you should.,neutral
-11300,08ce617c8a, Well thank you darling...it was a pleasure shopping with you...you will see the first pics!,it was a pleasure shopping with you�,positive
+11300,08ce617c8a, Well thank you darling...it was a pleasure shopping with you...you will see the first pics!,it was a pleasure shopping with you...,positive
 11301,1de90cbb83, what do i have? lots of stuff.,what do i have? lots of stuff.,neutral
 11302,4d4488f2d4,Just updated #Tweetie and open in browser is still broken.,broken.,negative
 11303,26ac912cc5,"CSI NY comes back to aus with `****, lies and silicone` (s05e04) EVRYONE ON EAST COAST TUNE IN TONIGHT  pleaseee","CSI NY comes back to aus with `****, lies and silicone` (s05e04) EVRYONE ON EAST COAST TUNE IN TONIGHT pleaseee",neutral
@@ -11698,7 +11698,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 11696,0f06411054, dont you think this tour went fast? i do,dont you think this tour went fast? i do,neutral
 11697,4838235f8a," I agree - they will start - and I forgot, all that news is HT ","I agree - they will start - and I forgot, all that news is HT",neutral
 11698,357613d98c,   Goodnite sexy twiggas,Goodnite,positive
-11699,7b033330b9," dont be gloomy...go out and get urself ice-cream.or gin,whichever",dont be gloomy�,positive
+11699,7b033330b9," dont be gloomy...go out and get urself ice-cream.or gin,whichever",dont be gloomy...,positive
 11700,f4386df020,I wish my grandmother had taken me to the US with her,wish,positive
 11701,662c025def,Chilling with my baybee sarah!  i love this girl,love,positive
 11702,7223003443, chillin wassup ma?? ayo in cali my day just started idk where u r but u have a gud day YA diggg,have a gud day,positive
@@ -11827,7 +11827,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 11825,21b30c3749, good stuff!  I`m great thanks! x,good stuff!,positive
 11826,9fb230b118,Still stupidly sick...cancelled our Philly trip. Sad day,Still stupidly sick...cancelled our Philly trip. Sad day,negative
 11827,e836da8cd9,My Degree  [Tear] happy moment!  http://mypict.me/1ZpF,happy,positive
-11828,2f328b7883,Shelf from Ikea fell off the wall. damage done...about $78.95 worth. Or at least thats my estimate.,damage done�,negative
+11828,2f328b7883,Shelf from Ikea fell off the wall. damage done...about $78.95 worth. Or at least thats my estimate.,damage done...,negative
 11829,07b2c97893,Anyone want to stop by Carl`s Jr and bring me a chicken club?  Can barely walk...,Can barely walk...,negative
 11830,e87dc64a93, i have started saving my Tumblr drafts because that happened to me this week and i was so sad,so sad,negative
 11831,08a2cb5129,"Auditions are good but, Iam super nervous! That is one of my virtues","Auditions are good but, Iam super nervous! That is one of my virtues",neutral
@@ -14597,7 +14597,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 14595,1484dd2416,yum - mother`s day lunch at The Food Business in Burnside was delicious! such a gorgeous day,delicious! such a gorgeous day,positive
 14596,89e401fb16," That was pretty awesome on both our parts, but a person on a bike behind you said hello and left before I recognized him",pretty awesome,positive
 14597,e63b781902,SNL with Justin Timberlake!,SNL with Justin Timberlake!,neutral
-14598,7ee4a176dc, http://twitpic.com/4wkym - Looks Yummy...I can haz smal pies pleess??,Looks Yummy�,positive
+14598,7ee4a176dc, http://twitpic.com/4wkym - Looks Yummy...I can haz smal pies pleess??,Looks Yummy...,positive
 14599,040d1d9dcb,"Gonna WoW for a bit. Later, Twitter <3",Twitter <3,positive
 14600,9bb3de975c,"PINKPOP weekend & I`ve got NO tickets, meaning no BRUCE Springsteen  Oh well, it`s WWWWWEEEEEEEEEEEEEEEKKKKKEEEENNNNDDDD!!!!!","NO tickets,",negative
 14601,571e0828f8," yes, at an upgraded consumption rate, too","yes, at an upgraded consumption rate, too",neutral
@@ -16260,7 +16260,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 16258,92a62054fe, back to the lovely land of the north,lovely,positive
 16259,9b2f1deeaa, My pleasure and sorry to hear about the pollen thing,My pleasure and sorry,neutral
 16260,c78383dabe,im really sleepy and i want to go to bed...but its upstairs and its a mess and i know im gonna have to clean it  nooooo,mess,negative
-16261,4da8b3dd3a,I hate that I am so stinkin tired everyday!  It`s so hard to get up...I thought I was supposed to start getting energy back now.,It`s so hard to get up�,negative
+16261,4da8b3dd3a,I hate that I am so stinkin tired everyday!  It`s so hard to get up...I thought I was supposed to start getting energy back now.,It`s so hard to get up...,negative
 16262,b19b0e9a54,finally seventeen,finally seventeen,neutral
 16263,2145618884,It`s gonna suck being the only sober one tonight,It`s gonna suck being the only sober one tonight,negative
 16264,d1bcd71f83,_ I got 71! That`s more than I`m following... I feel special now,I got 71! That`s,positive
@@ -16649,7 +16649,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 16647,e854031165, Tell me about it. I spend 20 of the 45 min in the morning on computer. Doesn`t leave a lot of time 4 showering & hair-do`ing.,Tell me about it. I spend 20 of the 45 min in the morning on computer. Doesn`t leave a lot of time 4 showering & hair-do`ing.,neutral
 16648,18788e7bb5, That`s true.  It still sucks though `cause I was all 'LOLOL I AM SO ORIGINAL--ohshit' so. But yeah. Thanks!,That`s true. It still sucks though `cause I was all 'LOLOL I AM SO ORIGINAL--ohshit' so. But yeah. Thanks!,neutral
 16649,4be88a24fa, left.  so sad. waiting for mom to come home. want to have papa johns for dinner.,so sad.,negative
-16650,16025e2359,_WOCKEEZ  Don`t wanna miss ANY of your shows...you guys kick it! Sad to say...my plane is in the shop...,Sad to say�,negative
+16650,16025e2359,_WOCKEEZ  Don`t wanna miss ANY of your shows...you guys kick it! Sad to say...my plane is in the shop...,Sad to say...,negative
 16651,42f06d4f04," that sucks  I seriously hope you feel better soon, you need to come over next week!!!","that sucks I seriously hope you feel better soon, you need to come over next week!!!",neutral
 16652,f57bab7028, I was thinking there should be a thumbs down button for Cry me a river.,should be a thumbs down,negative
 16653,200d44db72, Wish you were doing one in San Francisco!,Wish you were doing one in San Francisco!,neutral
@@ -16860,7 +16860,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 16858,175ea6566b,  & to you matey,& to you matey,neutral
 16859,e3a57af7fc,may the forth be with you,may the forth be with you,neutral
 16860,f95a37748e,"amazing, my brand new PARI neb broke. go figure. and it`s the weekend. looks like i won`t be getting another one until next week.  *sigh*","amazing,",positive
-16861,3a58fe626c, really? awesome! we love it...and I work at buckhead church too. I love it all around.,awesome! we love it�,positive
+16861,3a58fe626c, really? awesome! we love it...and I work at buckhead church too. I love it all around.,we love it...,positive
 16862,5c618e0858," catching up on my tweets, I saw AC`s promo of your new blog before yours, I knew immediately it would be yours by the title","catching up on my tweets, I saw AC`s promo of your new blog before yours, I knew immediately it would be yours by the title",neutral
 16863,03836a329c, wow... you`re doing this all through text?  I would get tired after a while,tired,negative
 16864,1cd4fc9cbf, would get u some if u were here,would get u some if u were here,neutral
@@ -17182,7 +17182,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 17180,d90d97782d,off to Sacto to take babies to kennel,off to Sacto to take babies to kennel,neutral
 17181,3aa991cf71, i want her more on Survivor!!,i want her more on Survivor!!,neutral
 17182,76f29e1afa, I am very angry at this information Marcos!!!!!!,very angry,negative
-17183,5752133fc3, Just ignore it.....and get sum rest...get rid of that headache,get sum rest�,positive
+17183,5752133fc3, Just ignore it.....and get sum rest...get rid of that headache,get sum rest...,positive
 17184,153b7c3b9d, why windows vista,why windows vista,neutral
 17185,cc5a4ab96a,thinks Aaron is pretty darn awesome,awesome,positive
 17186,638272e500, we just missd each otha again! I was at disney all day YESTERday!,missd,negative
@@ -17295,7 +17295,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 17293,dff828fb76," Hope you find a nice and healthy, also cheap, breakfast!",nice,positive
 17294,c16ef9fda5," thankfully, no  why are you still up??","thankfully,",positive
 17295,b7506bd30c, something we all need sometime,something we all need sometime,neutral
-17296,650bd3dc03,Just gave my mommy her Mother`s Day present...a purple ipod  http://twitpic.com/4wcpt,Mother`s Day present�,positive
+17296,650bd3dc03,Just gave my mommy her Mother`s Day present...a purple ipod  http://twitpic.com/4wcpt,Mother`s Day present...,positive
 17297,13fe858af2, Happy mothers day,Happy,positive
 17298,fc167204f9,_i_girl that`s why you are #twitterbff,_i_girl that`s why you are #twitterbff,neutral
 17299,83ea91fe2c,says ...tomorrow is another day...  http://plurk.com/p/x1pxh,says ...tomorrow is another day...,neutral
@@ -17923,7 +17923,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 17921,ef2800f3fc, I hate June gloom. I was getting so excited for the beach.,I hate June gloom. I was getting so excited for the beach.,neutral
 17922,c903600ded,Came out of my house this morning to the stink of cat poo. I have cats doing their business in my little bit of garden.,Came out of my house this morning to the stink of cat poo. I have cats doing their business in my little bit of garden.,neutral
 17923,ab41356c44,is back from TAFE and has bowling in about an hour,is back from TAFE and has bowling in about an hour,neutral
-17924,fe2236d866,love for vintage books...old books shopping this morning,love for vintage books�,positive
+17924,fe2236d866,love for vintage books...old books shopping this morning,love for vintage books...,positive
 17925,59a1baecc5,I need some plugs. for real. my ears want to stretch. and I have no money,I need some plugs.,negative
 17926,e06bc00a87, lol very much appreciated!!!  so excited!!!,appreciated!!!,positive
 17927,ddd476e4b0, it was apparently a request by the guests,it was apparently a request by the guests,neutral
@@ -18932,7 +18932,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 18930,534ffa95e9,Hey where my left ****? She never respond bacc..,never respond bacc..,negative
 18931,0ef4aaff38,Watch Jay Leno tonite!!!  It`s his last day as the Tonite Show Host and  Late Nite Leader,Watch Jay Leno tonite!!! It`s his last day as the Tonite Show Host and Late Nite Leader,neutral
 18932,05e37864e2,i`m soooo tired i have to study for all of my subjects ..... history is gonna be SO hard!!!! >.< help me!,soooo tired i,negative
-18933,c829b69a74,needs shows before wednesay!!! oh well... come one come all... Irvine Improv live @ Gotham Showcase 8pm  lots of good comics...then me.,good comics�,positive
+18933,c829b69a74,needs shows before wednesay!!! oh well... come one come all... Irvine Improv live @ Gotham Showcase 8pm  lots of good comics...then me.,good comics...,positive
 18934,7d47e5f7ef, it`s the non-www fail  http://www.mymunchies.net/ that works,fail,negative
 18935,533b97be64,"OK. Happy Star Wars Day, everyone. As they say, May the 4th be with you","OK. Happy Star Wars Day, everyone. As they say, May the 4th be with you",positive
 18936,e581f2ed14, the video on myspace is so funny...u run a lot hahaha i voted,funny...,positive
@@ -19468,7 +19468,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 19466,f564a00b26,"right, caffeine levels topped up, few more hours revision then #f1 time  `mon the jenson.","right, caffeine levels topped up, few more hours revision then #f1 time `mon the jenson.",neutral
 19467,5dc1d78656,"Had a neat mothers day - nothing flash, just some chillin time with my girls",neat,positive
 19468,55f7247651,"Is taking a moment to reflect...I want my annonymity back,FB!!!!  Is it safe to say anything about someone else to another friend again?",safe,positive
-19469,b90a68e78d," Hmm... it`s a miracle you`re using twitter, and it`s fun... so... Tweet!",it`s fun�,positive
+19469,b90a68e78d," Hmm... it`s a miracle you`re using twitter, and it`s fun... so... Tweet!",it`s fun...,positive
 19470,16a09e66ff, shelaaaaaaaa,shelaaaaaaaa,neutral
 19471,1613b8b2d7," though I have to admit that seems less & less tempting. who has time, when there are more complete packages to be had?","though I have to admit that seems less & less tempting. who has time, when there are more complete packages to be had?",neutral
 19472,6e376214e9,_says ha ha funny,ha ha funny,positive
@@ -19714,7 +19714,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 19712,d6a572f589,   hi holly  i`ll volunteer to try it out first for u! hope ur having a fab weekend xoxox...,a,positive
 19713,6fe8bdcd2d, i used to be!! i`ve done a few different jobs in yj. currently i`m a court officer,i used to be!! i`ve done a few different jobs in yj. currently i`m a court officer,neutral
 19714,7b153dd5d7,  I`m starting to feel depressed with this hurricane talk... I`m on the front lines down here!,depressed,negative
-19715,6d58faa39a," ****, so many good deals...you guys have a conspiracy to steal all my money",so many good deals�,positive
+19715,6d58faa39a," ****, so many good deals...you guys have a conspiracy to steal all my money",so many good deals...,positive
 19716,7e1f3e69b6, Hope the train remembers the way - they can go a bit loopy on bank holidays,they can go a bit loopy,negative
 19717,e7ec3be194,elliott claims steak and shake has been doing this for months...not exciting anymore...,not exciting anymore...,negative
 19718,ddba1b860a,is still amazed at the awesomness of last night. The discussion was great! Looking forward to a great week! Only 10days until I go home,Looking forward to a great week!,positive
@@ -20662,7 +20662,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 20660,cd2cc739a1,"im in pain, ****","im in pain, ****",negative
 20661,0f9290e97e,just got home. im so effin sad,sad,negative
 20662,057b982878,"Really good concepts at #mozconcept. I *really* love to send something mine, but no time","Really good concepts at #mozconcept. I *really* love to send something mine,",positive
-20663,0ccd60e505,nooo i cant be sick...not now! im about to go see my new nephew,nooo i cant be sick�,negative
+20663,0ccd60e505,nooo i cant be sick...not now! im about to go see my new nephew,nooo i cant be sick...,negative
 20664,50abea1a42," strangely enough, yes.  but then it works for me, may not for everyone.","strangely enough, yes. but then it works for me, may not for everyone.",neutral
 20665,03f5d78195,Goodmorning world!,Goodmorning,positive
 20666,a89641679b,_ILL I <3 my blackberry,I <3 my blackberry,positive
@@ -20945,7 +20945,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 20943,5ef9928cec, oops. Cy`s place is too near. Trouble for me.,Trouble,negative
 20944,9670063c71,i wish it was summer,i wish it was summer,neutral
 20945,316a447aa4,Wow. Way to be discouraged  idk anymore... fml.,discouraged,negative
-20946,aa43fdcef2, funny you should say...am filling it out as we speak ;) cheers!,funny you should say�,positive
+20946,aa43fdcef2, funny you should say...am filling it out as we speak ;) cheers!,funny you should say...,positive
 20947,908be3b590,"????? ,my latest obession.",",my latest obession.",positive
 20948,9ebdc801cd," Yvonne, thanks 4 the #FFrecommend! Lovely profile photo, you have! And I agree w/u on the 'what is sleep?'  LOL! It`s 5:46 am!","Lovely profile photo,",positive
 20949,283c1fd3d8,eating my tito`s home made ice cream  yum!,yum!,positive
@@ -22427,7 +22427,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 22425,a274e12fa5,"I miss my dog  r.i.p.Batman... Yeah, Batman (I really hope `all dogs go to heaven` is true)",miss,negative
 22426,28a815dc90," Yes babe, you`re so welcome!",welcome!,positive
 22427,605cb06fc8,Me just sign up Twitter...,Me just sign up Twitter...,neutral
-22428,eebd5237de, I`m with you...been up till 5-6 for the last few nights...,I`m with you�,positive
+22428,eebd5237de, I`m with you...been up till 5-6 for the last few nights...,I`m with you...,positive
 22429,51e7f13c14, Wow - that`s one deep sleep!  Wish I could sleep like that -one little noise and I`m awake,Wow,positive
 22430,c54fd3a21d,****! tying run is on 2nd!  let`s hold em` Raiders!,****!,negative
 22431,d1175f1255,T9R8AM booked. im arriving medan on 27th june. 1155hours,T9R8AM booked. im arriving medan on 27th june. 1155hours,neutral
@@ -22924,7 +22924,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 22922,39436449c0,Went to see Wolverine with the husband (who is off work today) - was pretty good,good,positive
 22923,413ee8a459,"It`s patio weather in Kirkland!  It`s also launch-yer-boat weather, except I`m missing the boat part",I`m missing the boat part,negative
 22924,b67c6fe84c, Just got it a few hours ago! So not yet!,Just got it a few hours ago! So not yet!,neutral
-22925,e916c7a279,I`m an incredibly happy person with 100% energy. Love to dance & laugh...the only thing that I know.I`m one of the most down to earth ppl,I`m an incredibly happy person with 100% energy. Love to dance & laugh�,positive
+22925,e916c7a279,I`m an incredibly happy person with 100% energy. Love to dance & laugh...the only thing that I know.I`m one of the most down to earth ppl,I`m an incredibly happy person with 100% energy. Love to dance & laugh...,positive
 22926,8b204ef449,Just had a lovely walk with my dog ( all on my own! )...In the dark  But it was a nice walk though HEHE x.,lovely,positive
 22927,40a90f23cd, ME TOO! hehe i hate colds. totaly annoying...,hate,negative
 22928,3c68f6963c," lol,  on blip.fm is not the  on twitter! i hate that song btw",twitter! i hate that song,negative
@@ -23414,7 +23414,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 23412,d25fdec21d, starbuck,starbuck,neutral
 23413,08bd94ccad, ME TOO UGH,ME TOO UGH,neutral
 23414,b8fd4e60d8,Reading and taking notes but undertanding none of it  ... HELP!,undertanding none of it ... HELP!,negative
-23415,0dac65e546," arnold, california.  aka the best place ever...wish you could come with!!!",the best place ever�,positive
+23415,0dac65e546," arnold, california.  aka the best place ever...wish you could come with!!!",the best place ever...,positive
 23416,67ae9cad7f,Cats: unimpressed by thunderstorm. Dog: wishes  would come home,Cats: unimpressed by thunderstorm. Dog: wishes would come home,neutral
 23417,9deb3de75e, man I can cut my hair now. I mean not with cory.  procuts here I come.,man I can cut my hair now. I mean not with cory. procuts here I come.,neutral
 23418,b1b7d7ccb8, Having an awesome day? You should... I expect as much out of you  #awesomeupdater,#awesomeupdater,positive
@@ -24571,7 +24571,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 24569,287f13dea8,This GAR keeps going out - 3rd relight,This GAR keeps going out - 3rd relight,neutral
 24570,a19ec0b5fb,"_2 Hey, Thanks 4 The Advice & Support",Thanks 4 The Advice & Support,positive
 24571,a12912d037,"_oliver whats for breaky then, russtle something up for my hangover please our jamie lmao","whats for breaky then, russtle something up for my hangover please our jamie lmao",neutral
-24572,4994f93bd6,i bit my tongue sooo bad...it`s swollen.,sooo bad�,negative
+24572,4994f93bd6,i bit my tongue sooo bad...it`s swollen.,sooo bad...,negative
 24573,02874866a3,http://tinyurl.com/67sk5r Follow my blog and I`ll follow yours,Follow my blog and I`ll follow yours,neutral
 24574,d7d5016497,_and_Easy when will these stores in Sacramento open? Been waiting and nothing,Been waiting and nothing,neutral
 24575,90162f9656,Just took $10 off a guy who thinks he can bluff three times in a row and get away with it. Now back to showing how **** my work is,Just took $10 off a guy who thinks he can bluff three times in a row and get away with it. Now back to showing how **** my work is,negative
@@ -24631,7 +24631,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 24629,2f1216b6ae,Is dreading going to work  BUT....its friiiiiday!! whoop!!!,whoop!!!,positive
 24630,36e5ad4719,  I told ya`ll I am a good girl. You can see my halo and everything,I told ya`ll I am a good girl. You can see my halo and everything,positive
 24631,b30e49daa9,  heheheheh... lol... I always figured he`d send them your way if he got any dupes... I felt bad not sending him stuff...,I always figured he`d send them,negative
-24632,3dd571f461,mothers day..didnt do anything exciting...saw a movie,didnt do anything exciting�,negative
+24632,3dd571f461,mothers day..didnt do anything exciting...saw a movie,didnt do anything exciting...,negative
 24633,1853e112a6,"Its awsome... when you know, that you know, that you know!",Its awsome...,positive
 24634,2a781b7114,cleaning and packing,cleaning and packing,neutral
 24635,c8b25bc79f, Something like that!,Something like that!,neutral
@@ -25042,7 +25042,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 25040,a618df4c69," Hahah, thanks for the Tradewinds Odyssey bump.",thanks,positive
 25041,d757623954, I`ll have to add your shop to my favorites! I love your needle wraps. Right now my needles are all in a mess in a basket,love,positive
 25042,bcca61e577, Why aren`t you at blue martini with me??,Why aren`t you at blue martini with me??,neutral
-25043,cd051bbe44,hearing the birds chirp makes me think its nice outside...well its not  rain rain go away!!!,nice outside�,positive
+25043,cd051bbe44,hearing the birds chirp makes me think its nice outside...well its not  rain rain go away!!!,nice outside...,positive
 25044,127b127c19,Trying to stay awake  Anyone have any tips how to keep yourself awake ?,Trying to stay awake Anyone have any tips how to keep yourself awake ?,neutral
 25045,ad7aa869b6,yeah .... just bought tickets for Pearl Jam in August,yeah .... just bought tickets for Pearl Jam in August,neutral
 25046,d387ba5369,Can`t sleep. **** morning will come to soon. Have to rest! It will be a new day. A perfect day to start new changes,Can`t sleep. **** morning will come to soon. Have to rest! It will be a new day. A perfect day to start new changes,neutral
@@ -25058,7 +25058,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 25056,baa0a17c15, thank you dearie -- I just followed dome of them on there too!,thank,positive
 25057,c0db8835a5,Today was fun  I <3 meeting boardies! The acoustic set was just soo phenomenal!,fun,positive
 25058,30cd7e7f6b,doesn`t kno wat to do now ER is over  saddo,saddo,negative
-25059,43c9e2ebbf,  i hope you hoes are having so much fun...not TOO much without me though lol,so much fun�,positive
+25059,43c9e2ebbf,  i hope you hoes are having so much fun...not TOO much without me though lol,so much fun...,positive
 25060,a8dbe94316, I`m sorry darling... I`m all over the place tonight.. I didn`t mean to neglect you..,I`m sorry,negative
 25061,99ee365e3b,"Apple is also rotten in the center, just my luck",Apple is also rotten in,negative
 25062,4810d1a2ba,i want so bad to go to the mcfly`s concert  anybody up to go with me?,i want so,positive
@@ -26240,7 +26240,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 26238,68036f7944, Nice musli bars!,Nice,positive
 26239,a766a8719c,i think they are working why eyes are drooping  its so weird being under drugs i dont like it ... cant wait for tomorrow though,so weird being under drugs i dont like it ...,negative
 26240,d883e319bd,"Just woke up. I dreamed I had 9 new emails! Sadly, it was just a dream","Sadly, it was just a dream",negative
-26241,2dff366260,Going to shawnee........I hate the long drive there...i just want to get all this paper work over with,hate the long drive there�,negative
+26241,2dff366260,Going to shawnee........I hate the long drive there...i just want to get all this paper work over with,hate the long drive there...,negative
 26242,9eaa82d788,"Watching 1971 edition if Old Grey Whistle Test. Fanny, Mamas and the Papas & Isaac Hayes. Don`t make shows like this anymore",Don`t make shows like this,negative
 26243,19c2805636," pfft, cydia apps ftw, code on the phone, make, reload springboard","pfft, cydia apps ftw, code on the phone, make, reload springboard",neutral
 26244,582cbc5dcb,is MySpace mobile free? or do u have 2 have credit... cause they are liers,cause they are liers,negative
@@ -26532,7 +26532,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 26530,ebdf4604ab, They have a list of 50 state parks here in PA that are under consideration for closing. Nice ones too.,closing.,negative
 26531,0ae06be8ae, hahaha my uncle does that coz my aunty is a **** who left her kids,hahaha my uncle does that coz my aunty is a **** who left her kids,neutral
 26532,7b4e00002d, Oh so nooooowwww youre too busy for me...dam I see how it is! How long we known each other?!?!?,youre too busy for me...dam,negative
-26533,2fd0de39b2, oh the noon? I don`t know if I can make that one...I only get 30 min for lunch,I don`t know if I can make that one�,negative
+26533,2fd0de39b2, oh the noon? I don`t know if I can make that one...I only get 30 min for lunch,I don`t know if I can make that one...,negative
 26534,f7bd9f704a,1 week and 1 one day to go.,1 week and 1 one day to go.,neutral
 26535,4b9e94e2d8,  lol yep sure do... although I must get out the house today !!!,lol yep sure do... although I must get out the house today !!!,neutral
 26536,22982a3021, I adoreeeee Matt Nathanson!! I am so jealous of you right now.,I adoreeeee Matt Nathanson!! I am so jealous of you right now.,neutral
@@ -26759,7 +26759,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 26757,eb6f587edb,Can`t I just be a stay at home mom already,Can`t I just be a stay at home mom already,neutral
 26758,3d1f9bd366, im so jealous! I want to go to ny,jealous!,negative
 26759,26624abe86,checkin twitter out!,checkin twitter out!,neutral
-26760,b01214538a,#myweawkness chocolate...i can`t say no,#myweawkness chocolate�,negative
+26760,b01214538a,#myweawkness chocolate...i can`t say no,#myweawkness chocolate...,negative
 26761,1877dcd25d,hanging out with Dan and Brian in my room for my last night,hanging out with Dan and Brian in my room for my last night,neutral
 26762,76d03aa370, so my friends are coming to see you on NYC...but im on stupid vaca in the stupid cayman islands so i cnt go  iloveyou<3,NYC...but im on stupid vaca in the stupid cayman islands so i cnt go iloveyou<3,neutral
 26763,947398994a, flo can spell antidisestablishmentarianism off the top of her head. wait i just did,flo can spell antidisestablishmentarianism off the top of her head. wait i just did,neutral
@@ -27177,7 +27177,7 @@ Unnamed: 0,textID,text,selected_text,sentiment
 27175,a4c9ada978, can`t you write a song without your guitar? i thought you could  look for something to do!,can`t you write a song without your guitar? i thought you could look for something to do!,neutral
 27176,bc4eebb5c5,follow friday.. follow me coz i only have 26 followers...  (it`s not 2am),follow friday.. follow me coz i only have 26 followers... (it`s not 2am),neutral
 27177,98a33d6b6a," great to finally meet you last night! Wish we had more time to talk. Can`t go to the coffee GTGs, though... Day job.","great to finally meet you last night! Wish we had more time to talk. Can`t go to the coffee GTGs, though... Day job.",positive
-27178,56dbadc51c,"hey Tweeties, my auntie jus got n a bad car accident...pls keep her yall prayers  ...thanx",bad car accident�,negative
+27178,56dbadc51c,"hey Tweeties, my auntie jus got n a bad car accident...pls keep her yall prayers  ...thanx",bad car accident...,negative
 27179,b6d69c77f3, I look forward to having one very soon,I look forward,positive
 27180,74165b8c7f, haha!! someone with an axe just popped up at you Scenie!! what did you do???,haha!! someone with an axe just popped up at you Scenie!! what did you do???,neutral
 27181,0a8403864f, Oh no  I hope you reach him!,I hope,positive

@@ -66,11 +66,15 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len):
             target_idx.append(j)
 
     if len(target_idx) == 0:
-        targets_start = 0
-        targets_end = len(tweet_offsets)
-    else:
-        targets_start = target_idx[0]
-        targets_end = target_idx[-1]
+        # targets_start = 0
+        # targets_end = len(tweet_offsets)
+        print(tweet, selected_text)
+    # else:
+    #     targets_start = target_idx[0]
+    #     targets_end = target_idx[-1]
+
+    targets_start = target_idx[0]
+    targets_end = target_idx[-1]
 
     sentiment_id = {
         'positive': 1313,
