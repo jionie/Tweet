@@ -65,8 +65,12 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len):
         if sum(char_targets[offset1: offset2]) > 0:
             target_idx.append(j)
 
-    targets_start = target_idx[0]
-    targets_end = target_idx[-1]
+    if len(target_idx) == 0:
+        targets_start = 0
+        targets_end = len(tweet_offsets)
+    else:
+        targets_start = target_idx[0]
+        targets_end = target_idx[-1]
 
     sentiment_id = {
         'positive': 1313,
