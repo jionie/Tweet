@@ -1,6 +1,7 @@
 import argparse
 import os
 import pandas as pd
+import numpy as np
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -37,7 +38,7 @@ parser.add_argument('--model_type', type=str, default="roberta-base", required=F
 
 
 ############################################ Define process data functions
-def process_data(tweet, selected_text, sentiment, tokenizer, max_len):
+def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=True):
     tweet = " " + " ".join(str(tweet).split())
     selected_text = " " + " ".join(str(selected_text).split())
 
@@ -66,12 +67,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len):
             target_idx.append(j)
 
     if len(target_idx) == 0:
-        # targets_start = 0
-        # targets_end = len(tweet_offsets)
         print(tweet, selected_text)
-    # else:
-    #     targets_start = target_idx[0]
-    #     targets_end = target_idx[-1]
 
     targets_start = target_idx[0]
     targets_end = target_idx[-1]
