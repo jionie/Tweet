@@ -1,5 +1,6 @@
 from transformers import *
 import numpy as np
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -120,6 +121,21 @@ class LovaszLoss(nn.Module):
     def forward(self, logits, labels):
         return lovasz_hinge_flat(logits, labels, self.ignore_index)
 
+
+def swish(x):
+    return x * torch.sigmoid(x)
+
+
+def gelu(x):
+    """ Original Implementation of the gelu activation function in Google Bert repo when initially created.
+        For information: OpenAI GPT's gelu is slightly different (and gives slightly different results):
+        0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+        This is now written in C in torch.nn.functional
+        Also see https://arxiv.org/abs/1606.08415
+    """
+    return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
+
+
 ############################################ Define Net Class
 class TweetBert(nn.Module):
     def __init__(self, model_type="bert-large-uncased", max_seq_len=192, hidden_layers=None):
@@ -127,6 +143,7 @@ class TweetBert(nn.Module):
 
         self.model_name = 'TweetBert'
         self.model_type = model_type
+        self.max_seq_len = max_seq_len
 
         if hidden_layers is None:
             hidden_layers = [-1]
@@ -184,11 +201,19 @@ class TweetBert(nn.Module):
             raise NotImplementedError
 
         self.down = nn.Linear(len(hidden_layers), 1)
-        self.qa_outputs = nn.Linear(self.config.hidden_size, self.config.num_labels)
-        self.qa_segment = nn.Linear(2 * max_seq_len, max_seq_len)
+        self.qa_segment = nn.Linear(self.config.hidden_size, 1)
+        # self.qa_start_end = nn.Sequential(
+        #     nn.Linear(max_seq_len, 2 * max_seq_len),
+        #   )
+        #
+        # def init_weights(m):
+        #     if type(m) == nn.Linear:
+        #         torch.nn.init.xavier_uniform(m.weight)
+        #         m.bias.data.fill_(0)
+        #
+        # self.qa_start_end.apply(init_weights)
 
         self.activation = nn.ReLU()
-        self.activation_seg = nn.SELU()
 
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
@@ -246,16 +271,22 @@ class TweetBert(nn.Module):
         )
 
         hidden_states = outputs[2]
-
         fuse_hidden = self.get_hidden_states(hidden_states)
-        logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_outputs)
+        batch_size = fuse_hidden.shape[0]
+        segment_logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_segment)
+        segment_logits = segment_logits.squeeze(-1)
 
-        start_logits, end_logits = logits.split(1, dim=-1)
-        start_logits = start_logits.squeeze(-1)
-        end_logits = end_logits.squeeze(-1)
+        length = torch.arange(1, self.max_seq_len+1).float().unsqueeze(0).cuda()
+        normalized_length = F.normalize(length, p=2, dim=-1)
+        length_penalty = torch.repeat_interleave(normalized_length, repeats=batch_size, dim=0)
+
+        start_logits = torch.softmax(segment_logits, dim=-1) / length_penalty
+        end_logits = torch.softmax(segment_logits, dim=-1) * length_penalty
+
+        # logits = self.qa_start_end(segment_logits).reshape(batch_size, -1, 2)
+        # start_logits = logits[:, :, 0].squeeze(-1)
+        # end_logits = logits[:, :, 1].squeeze(-1)
         seq_len = start_logits.shape[1]
-
-        segment_logits = self.qa_segment(self.activation_seg(torch.cat((start_logits, end_logits), dim=1)))
 
         outputs = (start_logits, end_logits,) + outputs[2:]
         if start_positions is not None and end_positions is not None:
@@ -274,10 +305,12 @@ class TweetBert(nn.Module):
             label_mask = torch.zeros_like(start_logits)
             for i in range(label_mask.shape[0]):
                 label_mask[i, start_positions[i].data: end_positions[i].data] = 1
+            # label smoothing
+            label_mask = label_mask * 0.95 + torch.ones_like(label_mask) * 0.05
 
             for i in range(start_logits.shape[0]):
-                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.25)
-                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.25)
+                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.15)
+                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.15)
             smoothed_start_position = smoothed_start_position
             smoothed_end_position = smoothed_end_position
 
@@ -298,7 +331,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.7 * ce_loss + 0.3 * heapmap_loss.mean() + 0.1 * segment_loss
+                total_loss = 0.8 * ce_loss + 0.2 * heapmap_loss.mean() + 2 * segment_loss
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_heatmap = KLDivLoss(reduction="none")
@@ -315,7 +348,7 @@ class TweetBert(nn.Module):
                     smoothed_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
                 heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.7 * ce_loss.mean() + 0.3 * heapmap_loss.mean() + 0.1 * segment_loss
+                total_loss = 0.8 * ce_loss.mean() + 0.2 * heapmap_loss.mean() + 2 * segment_loss
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
