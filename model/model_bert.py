@@ -122,6 +122,66 @@ class LovaszLoss(nn.Module):
         return lovasz_hinge_flat(logits, labels, self.ignore_index)
 
 
+##################################################### LovaszLoss
+def jaccard(pr, gt, eps=1e-7, threshold=None, activation='sigmoid'):
+    """
+    Source:
+        https://github.com/catalyst-team/catalyst/
+    Args:
+        pr (torch.Tensor): A list of predicted elements
+        gt (torch.Tensor):  A list of elements that are to be predicted
+        eps (float): epsilon to avoid zero division
+        threshold: threshold for outputs binarization
+    Returns:
+        float: IoU (Jaccard) score
+    """
+
+    if activation is None or activation == "none":
+        activation_fn = lambda x: x
+    elif activation == "sigmoid":
+        activation_fn = torch.nn.Sigmoid()
+    elif activation == "softmax2d":
+        activation_fn = torch.nn.Softmax2d()
+    else:
+        raise NotImplementedError(
+            "Activation implemented for sigmoid and softmax2d"
+        )
+
+    pr = activation_fn(pr)
+
+    if threshold is not None:
+        pr = (pr > threshold).float()
+
+    intersection = torch.sum(gt * pr)
+    union = torch.sum(gt) + torch.sum(pr) - intersection + eps
+    return (intersection + eps) / union
+
+
+
+class JaccardLoss(nn.Module):
+    __name__ = 'jaccard_loss'
+
+    def __init__(self, eps=1e-7, activation='sigmoid'):
+        super().__init__()
+        self.activation = activation
+        self.eps = eps
+
+    def forward(self, y_pr, y_gt):
+        return 1 - jaccard(y_pr, y_gt, eps=self.eps, threshold=None, activation=self.activation)
+
+
+class BCEJaccardLoss(JaccardLoss):
+    __name__ = 'bce_jaccard_loss'
+
+    def __init__(self, eps=1e-7, activation='sigmoid'):
+        super().__init__(eps, activation)
+        self.bce = nn.BCEWithLogitsLoss(reduction='mean')
+
+    def forward(self, y_pr, y_gt):
+        jaccard = super().forward(y_pr, y_gt)
+        bce = self.bce(y_pr, y_gt)
+        return jaccard + bce
+
 def swish(x):
     return x * torch.sigmoid(x)
 
@@ -202,18 +262,17 @@ class TweetBert(nn.Module):
 
         self.down = nn.Linear(len(hidden_layers), 1)
         self.qa_segment = nn.Linear(self.config.hidden_size, 1)
-        # self.qa_start_end = nn.Sequential(
-        #     nn.Linear(max_seq_len, 2 * max_seq_len),
-        #   )
-        #
-        # def init_weights(m):
-        #     if type(m) == nn.Linear:
-        #         torch.nn.init.xavier_uniform(m.weight)
-        #         m.bias.data.fill_(0)
-        #
-        # self.qa_start_end.apply(init_weights)
+        self.qa_start_end = nn.Linear(self.config.hidden_size, self.config.num_labels)
 
-        self.activation = nn.ReLU()
+        def init_weights(m):
+            if type(m) == nn.Linear:
+                torch.nn.init.xavier_uniform(m.weight)
+                m.bias.data.fill_(0)
+
+        self.qa_start_end.apply(init_weights)
+        self.qa_segment.apply(init_weights)
+
+        self.activation = nn.Tanh()
 
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
@@ -237,7 +296,7 @@ class TweetBert(nn.Module):
     def get_logits_by_random_dropout(self, fuse_hidden, down, fc):
 
         logit = None
-        h = self.activation(down(fuse_hidden)).squeeze(-1)
+        h = gelu(down(fuse_hidden)).squeeze(-1)
 
         for j, dropout in enumerate(self.dropouts):
 
@@ -246,7 +305,7 @@ class TweetBert(nn.Module):
             else:
                 logit += fc(dropout(h))
 
-        return logit / len(self.dropouts)
+        return gelu(logit / len(self.dropouts))
 
     def forward(
             self,
@@ -272,23 +331,23 @@ class TweetBert(nn.Module):
 
         hidden_states = outputs[2]
         fuse_hidden = self.get_hidden_states(hidden_states)
-        batch_size = fuse_hidden.shape[0]
+
         segment_logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_segment)
         segment_logits = segment_logits.squeeze(-1)
 
-        length = torch.arange(1, self.max_seq_len+1).float().unsqueeze(0).cuda()
-        normalized_length = F.normalize(length, p=2, dim=-1)
-        length_penalty = torch.repeat_interleave(normalized_length, repeats=batch_size, dim=0)
-
-        start_logits = torch.softmax(segment_logits, dim=-1) / length_penalty
-        end_logits = torch.softmax(segment_logits, dim=-1) * length_penalty
-
-        # logits = self.qa_start_end(segment_logits).reshape(batch_size, -1, 2)
-        # start_logits = logits[:, :, 0].squeeze(-1)
-        # end_logits = logits[:, :, 1].squeeze(-1)
+        logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_start_end)
+        start_logits, end_logits = logits.split(1, dim=-1)
+        start_logits = start_logits.squeeze(-1)
+        end_logits = end_logits.squeeze(-1)
         seq_len = start_logits.shape[1]
 
-        outputs = (start_logits, end_logits,) + outputs[2:]
+        # add segment mask
+        start_logits_masked = start_logits * segment_logits
+        end_logits_masked = end_logits * segment_logits
+
+        # outputs = (start_logits_masked, end_logits_masked,) + outputs[2:]
+        outputs = (start_logits_masked, end_logits_masked,) + outputs[2:]
+
         if start_positions is not None and end_positions is not None:
             # If we are on multi-GPU, split add a dimension
             if len(start_positions.size()) > 1:
@@ -299,56 +358,52 @@ class TweetBert(nn.Module):
             ignored_index = start_logits.size(1)
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
-            smoothed_start_position = torch.zeros_like(start_logits)
-            smoothed_end_position = torch.zeros_like(end_logits)
+
             # for segmentation
             label_mask = torch.zeros_like(start_logits)
             for i in range(label_mask.shape[0]):
                 label_mask[i, start_positions[i].data: end_positions[i].data] = 1
             # label smoothing
-            label_mask = label_mask * 0.95 + torch.ones_like(label_mask) * 0.05
-
-            for i in range(start_logits.shape[0]):
-                smoothed_start_position[i] = get_smooth_gt(start_positions[i].item(), seq_len, 0.15)
-                smoothed_end_position[i] = get_smooth_gt(end_positions[i].item(), seq_len, 0.15)
-            smoothed_start_position = smoothed_start_position
-            smoothed_end_position = smoothed_end_position
+            label_mask = label_mask * 0.99 + torch.ones_like(label_mask) * 0.01
 
             if self.training:
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
-                loss_heatmap = KLDivLoss(reduction="none")
-                loss_lovasz = LovaszLoss(ignore_index=ignored_index)
-                smoothed_start_loss = loss_heatmap(start_logits, smoothed_start_position).mean(dim=1)
-                smoothed_end_loss = loss_heatmap(end_logits, smoothed_end_position).mean(dim=1)
-                segment_loss = loss_lovasz(segment_logits, label_mask)
+                loss_masked = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
+                loss_seg = BCEJaccardLoss()
+                segment_loss = loss_seg(segment_logits, label_mask)
+
                 if sentiment_weight is None:
                     start_loss = loss_fct(start_logits, start_positions)
                     end_loss = loss_fct(end_logits, end_positions)
+                    masked_start_loss = loss_masked(start_logits_masked, start_positions)
+                    masked_end_loss = loss_masked(end_logits_masked, end_positions)
                 else:
                     start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
                     end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
-                    smoothed_start_loss *= sentiment_weight
-                    smoothed_end_loss *= sentiment_weight
+                    masked_start_loss = loss_masked(start_logits_masked, start_positions, sentiment_weight)
+                    masked_end_loss = loss_masked(end_logits_masked, end_positions, sentiment_weight)
                 ce_loss = (start_loss + end_loss) / 2
-                heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.8 * ce_loss + 0.2 * heapmap_loss.mean() + 2 * segment_loss
+                masked_loss = (masked_start_loss + masked_end_loss) / 2
+                total_loss = masked_loss + ce_loss + segment_loss
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
-                loss_heatmap = KLDivLoss(reduction="none")
-                loss_lovasz = LovaszLoss(ignore_index=ignored_index)
+                loss_masked = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
+                loss_seg = BCEJaccardLoss()
+
                 start_loss = loss_fct(start_logits, start_positions)
                 end_loss = loss_fct(end_logits, end_positions)
-                smoothed_start_loss = loss_heatmap(start_logits, smoothed_start_position).mean(dim=1)
-                smoothed_end_loss = loss_heatmap(end_logits, smoothed_end_position).mean(dim=1)
-                segment_loss = loss_lovasz(segment_logits, label_mask)
+                masked_start_loss = loss_masked(start_logits_masked, start_positions)
+                masked_end_loss = loss_masked(end_logits_masked, end_positions)
+                segment_loss = loss_seg(segment_logits, label_mask)
+
                 if sentiment_weight is not None:
                     start_loss *= sentiment_weight
                     end_loss *= sentiment_weight
-                    smoothed_start_loss *= sentiment_weight
-                    smoothed_end_loss *= sentiment_weight
+                    masked_start_loss *= sentiment_weight
+                    masked_end_loss *= sentiment_weight
                 ce_loss = (start_loss + end_loss) / 2
-                heapmap_loss = (smoothed_start_loss + smoothed_end_loss) / 2
-                total_loss = 0.8 * ce_loss.mean() + 0.2 * heapmap_loss.mean() + 2 * segment_loss
+                masked_loss = (masked_start_loss + masked_end_loss) / 2
+                total_loss = masked_loss.mean() + ce_loss.mean() + segment_loss
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)

@@ -62,7 +62,7 @@ class Config_Bert:
         # differential lr settings
         self.differential_lr = True
         self.decay_factor = 0.9
-        self.min_lr = 8e-6
+        self.min_lr = 1e-5
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings

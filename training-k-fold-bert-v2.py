@@ -154,7 +154,7 @@ class QA():
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
                                self.model.qa_segment,
-                               # self.model.qa_start_end,
+                               self.model.qa_start_end,
                                ]
 
             elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
@@ -187,7 +187,7 @@ class QA():
                                self.model.bert.encoder.layer[23],
                                self.model.down,
                                self.model.qa_segment,
-                               # self.model.qa_start_end,
+                               self.model.qa_start_end,
                                ]
             else:
                 raise NotImplementedError
