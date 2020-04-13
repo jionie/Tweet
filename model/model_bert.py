@@ -204,7 +204,7 @@ class TweetBert(nn.Module):
 
         # get classification result by masked prediction, bs x seq len x hidden size
         fuse_hidden_masked = (label_mask * fuse_hidden).reshape(label_mask.shape[0], -1)
-        classification_logits = self.qa_classifier(fuse_hidden_masked)
+        classification_logits = self.get_logits_by_random_dropout(fuse_hidden_masked, self.qa_classifier)
 
         outputs = (start_logits, end_logits,) + outputs[2:]
         # outputs = (start_logits, end_logits,) + outputs[2:]
