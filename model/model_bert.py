@@ -261,8 +261,7 @@ class TweetBert(nn.Module):
             raise NotImplementedError
 
         self.down = nn.Linear(len(hidden_layers), 1)
-        self.qa_segment = nn.Linear(self.config.hidden_size, 1)
-        self.qa_start_end = nn.Linear(self.config.hidden_size, self.config.num_labels)
+        self.qa_start_end = nn.Linear(self.config.hidden_size, 3)
 
         def init_weights(m):
             if type(m) == nn.Linear:
@@ -270,12 +269,11 @@ class TweetBert(nn.Module):
                 m.bias.data.fill_(0)
 
         self.qa_start_end.apply(init_weights)
-        self.qa_segment.apply(init_weights)
 
         self.activation = nn.Tanh()
 
         self.dropouts = nn.ModuleList([
-            nn.Dropout(0.5) for _ in range(5)
+            nn.Dropout(0.25) for _ in range(5)
         ])
 
     def get_hidden_states(self, hidden_states):
@@ -305,7 +303,7 @@ class TweetBert(nn.Module):
             else:
                 logit += fc(dropout(h))
 
-        return gelu(logit / len(self.dropouts))
+        return logit / len(self.dropouts)
 
     def forward(
             self,
@@ -332,14 +330,12 @@ class TweetBert(nn.Module):
         hidden_states = outputs[2]
         fuse_hidden = self.get_hidden_states(hidden_states)
 
-        segment_logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_segment)
-        segment_logits = segment_logits.squeeze(-1)
-
         logits = self.get_logits_by_random_dropout(fuse_hidden, self.down, self.qa_start_end)
-        start_logits, end_logits = logits.split(1, dim=-1)
+
+        start_logits, end_logits, segment_logits = logits.split(1, dim=-1)
         start_logits = start_logits.squeeze(-1)
         end_logits = end_logits.squeeze(-1)
-        seq_len = start_logits.shape[1]
+        segment_logits = segment_logits.squeeze(-1)
 
         # add segment mask
         start_logits_masked = start_logits * segment_logits

@@ -153,7 +153,7 @@ class QA():
                                self.model.bert.encoder.layer[9],
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
-                               self.model.qa_segment,
+                               self.model.down,
                                self.model.qa_start_end,
                                ]
 
@@ -186,7 +186,6 @@ class QA():
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
                                self.model.down,
-                               self.model.qa_segment,
                                self.model.qa_start_end,
                                ]
             else:
