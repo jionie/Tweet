@@ -153,8 +153,8 @@ class QA():
                                self.model.bert.encoder.layer[9],
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
-                               self.model.down,
                                self.model.qa_start_end,
+                               self.model.qa_classifier,
                                ]
 
             elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
@@ -185,8 +185,8 @@ class QA():
                                self.model.bert.encoder.layer[21],
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
-                               self.model.down,
                                self.model.qa_start_end,
+                               self.model.qa_classifier,
                                ]
             else:
                 raise NotImplementedError
@@ -238,12 +238,23 @@ class QA():
 
         else:
             param_optimizer = list(self.model.named_parameters())
+
+            prefix = "bert"
+            def is_backbone(n):
+                return prefix in n
+
             no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
             self.optimizer_grouped_parameters = [
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and is_backbone(n)],
+                 'lr': self.config.min_lr,
+                 'weight_decay': self.config.weight_decay},
+                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and not is_backbone(n)],
                  'lr': self.config.lr,
                  'weight_decay': self.config.weight_decay},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and is_backbone(n)],
+                 'lr': self.config.min_lr,
+                 'weight_decay': 0.0},
+                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and not is_backbone(n)],
                  'lr': self.config.lr,
                  'weight_decay': 0.0}
             ]
@@ -271,8 +282,7 @@ class QA():
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_cosine_schedule_with_warmup(self.optimizer,
-                                                             num_warmup_steps=int(num_train_optimization_steps *
-                                                                                  self.config.warmup_proportion),
+                                                             num_warmup_steps=self.config.warmup_steps,
                                                              num_training_steps=num_train_optimization_steps)
             self.lr_scheduler_each_iter = True
         elif self.config.lr_scheduler_name == "WarmRestart":
@@ -282,8 +292,7 @@ class QA():
             num_train_optimization_steps = self.config.num_epoch * len(self.train_data_loader) \
                                            // self.config.accumulation_steps
             self.scheduler = get_linear_schedule_with_warmup(self.optimizer,
-                                                             num_warmup_steps=int(num_train_optimization_steps *
-                                                                                  self.config.warmup_proportion),
+                                                             num_warmup_steps=self.config.warmup_steps,
                                                              num_training_steps=num_train_optimization_steps)
             self.lr_scheduler_each_iter = True
         else:
@@ -417,7 +426,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_sentiment, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -433,6 +442,7 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
+                all_onthot_sentiment = all_onthot_sentiment.cuda()
 
                 sentiment = all_sentiment
                 sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
@@ -440,7 +450,8 @@ class QA():
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, sentiment_weight=sentiment_weight)
+                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
+                                     sentiment_weight=sentiment_weight)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -543,7 +554,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_sentiment, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -555,11 +566,12 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
+                all_onthot_sentiment = all_onthot_sentiment.cuda()
                 sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions)
+                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -638,8 +650,9 @@ class QA():
             # init cache
             torch.cuda.empty_cache()
 
-            for test_batch_i, (all_input_ids, alall_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+            for test_batch_i, (all_input_ids, alall_input_ids, all_attention_masks, all_token_type_ids,
+                               all_start_positions, all_end_positions, all_onthot_sentiment, all_orig_tweet,
+                               all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.test_data_loader):
 
                 # set model to eval mode
@@ -649,9 +662,10 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
+                all_onthot_sentiment = all_onthot_sentiment.cuda()
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids)
+                                         token_type_ids=all_token_type_ids, onthot_sentiment=all_onthot_sentiment)
 
                 start_logits, end_logits = outputs[0], outputs[1]
 

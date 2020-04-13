@@ -16,7 +16,7 @@ class Config_Bert:
         self.do_lower_case = True
         self.model_name = 'TweetBert'
         self.hidden_layers = [-1, -2, -3, -4]
-        self.sentiment_weight_map = {"neutral": 0.25, "positive": 1, "negative": 1}
+        self.sentiment_weight_map = {"neutral": 0.5, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
@@ -53,16 +53,17 @@ class Config_Bert:
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
         self.max_grad_norm = 1
-        # lr scheduler
-        self.lr_scheduler_name = 'WarmupCosineAnealing'
+        # lr scheduler, can choose to use proportion or steps
+        self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0.005
+        self.warmup_steps = 200
         # lr
-        self.lr = 5e-5
-        self.weight_decay = 0.01
+        self.lr = 2e-4
+        self.weight_decay = 0
         # differential lr settings
-        self.differential_lr = True
+        self.differential_lr = False
         self.decay_factor = 0.9
-        self.min_lr = 2e-6
+        self.min_lr = 5e-6
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
@@ -74,11 +75,11 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 30
+        self.num_epoch = 7
         # saving rate
         self.saving_rate = 1 / 2
         # early stopping
-        self.early_stopping = 4 / self.saving_rate
+        self.early_stopping = 3 / self.saving_rate
         # progress rate
         self.progress_rate = 1/20
         # inference setting

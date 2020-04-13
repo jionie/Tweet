@@ -126,11 +126,21 @@ class TweetDataset:
             self.max_len
         )
 
-        return torch.tensor(data["ids"], dtype=torch.long), torch.tensor(data["mask"], dtype=torch.long), \
+        onthot_sentiment = {
+            'positive': torch.tensor([1, 0, 0], dtype=torch.float),
+            'negative': torch.tensor([0, 1, 0], dtype=torch.float),
+            'neutral': torch.tensor([0, 0, 1], dtype=torch.float),
+        }
+
+        return torch.tensor(data["ids"], dtype=torch.long), \
+               torch.tensor(data["mask"], dtype=torch.long), \
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
                torch.tensor(data["targets_start"], dtype=torch.long),\
                torch.tensor(data["targets_end"], dtype=torch.long),\
-               data["orig_tweet"], data["orig_selected"], data["sentiment"], \
+               onthot_sentiment[data["sentiment"]], \
+               data["orig_tweet"], \
+               data["orig_selected"], \
+               data["sentiment"], \
                torch.tensor(data["offsets"], dtype=torch.long)
 
 
