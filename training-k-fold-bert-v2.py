@@ -295,6 +295,10 @@ class QA():
                                                              num_warmup_steps=self.config.warmup_steps,
                                                              num_training_steps=num_train_optimization_steps)
             self.lr_scheduler_each_iter = True
+        elif self.config.lr_scheduler_name == "ReduceLROnPlateau":
+            self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.6,
+                                                                        patience=1, min_lr=1e-7)
+            self.lr_scheduler_each_iter = False
         else:
             raise NotImplementedError
 
@@ -411,7 +415,8 @@ class QA():
             self.train_metrics_postprocessing = []
 
             # update lr and start from start_epoch
-            if (self.epoch > 1) and (not self.lr_scheduler_each_iter):
+            if (self.epoch >= 1) and (not self.lr_scheduler_each_iter) \
+                    and (self.config.lr_scheduler_name != "ReduceLROnPlateau"):
                 self.scheduler.step()
 
             self.log.write("Epoch%s\n" % self.epoch)
@@ -623,6 +628,9 @@ class QA():
                            (valid_loss[0], mean_eval_metric, mean_eval_metric_postprocessing, mean_eval_metric_no_postprocessing))
             print("Validating ground truth: ", selected_tweet)
             print("Validating prediction: ", final_text)
+
+        if self.config.lr_scheduler_name == "ReduceLROnPlateau":
+            self.scheduler.step(mean_eval_metric)
 
         if (mean_eval_metric >= self.valid_metric_optimal):
 
