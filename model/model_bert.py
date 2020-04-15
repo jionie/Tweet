@@ -116,9 +116,8 @@ class TweetBert(nn.Module):
         else:
             raise NotImplementedError
 
-        self.qa_start_end = nn.Linear(self.config.hidden_size * len(hidden_layers) + 3, 2)
-        self.pool = nn.AdaptiveAvgPool1d(1)
-        self.qa_classifier = nn.Linear(self.max_seq_len, 3)
+        self.qa_start_end = nn.Linear(self.config.hidden_size * len(hidden_layers), 2)
+        self.qa_classifier = nn.Linear(self.config.hidden_size * len(hidden_layers), 3)
 
         def init_weights(m):
             if type(m) == nn.Linear:
@@ -187,27 +186,13 @@ class TweetBert(nn.Module):
         hidden_states = outputs[2]
         fuse_hidden = self.get_hidden_states(hidden_states)
 
-        onthot_sentiment_mask = torch.repeat_interleave(onthot_sentiment.unsqueeze(1), fuse_hidden.shape[1], dim=1)
-        logits = self.get_logits_by_random_dropout(torch.cat([fuse_hidden, onthot_sentiment_mask], dim=-1), self.qa_start_end)
+        logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_start_end)
 
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits = start_logits.squeeze(-1)
         end_logits = end_logits.squeeze(-1)
 
-        start_idx = start_logits.argmax(dim=-1)
-        end_idx = end_logits.argmax(dim=-1)
-
-        # for segmentation
-        label_mask = torch.zeros_like(fuse_hidden)
-        for i in range(label_mask.shape[0]):
-            label_mask[i, start_idx[i].data:end_idx[i].data + 1, :] = 1
-        # label smoothing
-        # label_mask = label_mask * 0.99 + torch.ones_like(label_mask) * 0.01
-
-        # get classification result by masked prediction, bs x seq len x hidden size x 4
-        fuse_hidden_masked = (label_mask * fuse_hidden) + fuse_hidden
-        fuse_hidden_masked = self.pool(fuse_hidden_masked).reshape(label_mask.shape[0], -1)
-        classification_logits = self.qa_classifier(fuse_hidden_masked)
+        classification_logits = self.qa_classifier(fuse_hidden[:, 0, :])
 
         outputs = (start_logits, end_logits, classification_logits) + outputs[2:]
         # outputs = (start_logits, end_logits,) + outputs[2:]
@@ -234,7 +219,7 @@ class TweetBert(nn.Module):
                 else:
                     start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
                     end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
-                total_loss = (start_loss + end_loss)/2 + 0.2 * classification_loss
+                total_loss = (start_loss + end_loss) / 2 + classification_loss
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_classification = nn.BCEWithLogitsLoss()
@@ -247,7 +232,7 @@ class TweetBert(nn.Module):
                     start_loss *= sentiment_weight
                     end_loss *= sentiment_weight
 
-                total_loss = (start_loss.mean() + end_loss.mean())/2 + 0.2 * classification_loss
+                total_loss = (start_loss.mean() + end_loss.mean()) / 2 + classification_loss
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)

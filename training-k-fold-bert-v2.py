@@ -97,13 +97,13 @@ class QA():
                             seed=self.config.seed,
                             split=self.config.split)
 
-        self.test_data_loader = get_test_loader(data_path=self.config.data_path,
+        self.test_data_loader, self.tokenizer = get_test_loader(data_path=self.config.data_path,
                                                 max_seq_length=self.config.max_seq_length,
                                                 model_type=self.config.model_type,
                                                 batch_size=self.config.val_batch_size,
                                                 num_workers=self.config.num_workers)
 
-        self.train_data_loader, self.val_data_loader = get_train_val_loaders(data_path=self.config.data_path,
+        self.train_data_loader, self.val_data_loader, _ = get_train_val_loaders(data_path=self.config.data_path,
                                                                   seed=self.config.seed,
                                                                   fold=self.config.fold,
                                                                   max_seq_length=self.config.max_seq_length,
@@ -503,7 +503,8 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        offsets=all_offsets[px]
+                        sentiment=all_sentiment[px],
+                        tokenizer=self.tokenizer,
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 2):
@@ -602,7 +603,8 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        offsets=all_offsets[px]
+                        sentiment=all_sentiment[px],
+                        tokenizer=self.tokenizer,
                     )
 
                     all_result.append(final_text)
@@ -695,7 +697,8 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        offsets=all_offsets[px]
+                        sentiment=all_sentiment[px],
+                        tokenizer=self.tokenizer,
                     )
                     all_results.append(final_text)
 

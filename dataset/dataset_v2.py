@@ -242,7 +242,7 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     )
     # print(len(ds_test.tensors))
     loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=False)
-    return loader
+    return loader, tokenizer
 
 
 def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/",
@@ -329,7 +329,7 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=False, num_workers=num_workers,
                                              drop_last=False)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, tokenizer
 
 
 ############################################ Define test function
