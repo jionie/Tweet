@@ -121,8 +121,9 @@ class TweetBert(nn.Module):
 
         def init_weights(m):
             if type(m) == nn.Linear:
-                torch.nn.init.xavier_uniform(m.weight)
-                m.bias.data.fill_(0)
+                # torch.nn.init.xavier_uniform(m.weight)
+                # m.bias.data.fill_(0)
+                torch.nn.init.normal_(m.weight, std=0.02)
 
         self.qa_start_end.apply(init_weights)
         self.qa_classifier.apply(init_weights)
@@ -130,6 +131,24 @@ class TweetBert(nn.Module):
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
         ])
+
+        self.backup = {}
+
+    def attack(self, epsilon=5., emb_name='word_embeddings'):
+        for name, param in self.bert.named_parameters():
+            if param.requires_grad and emb_name in name:
+                self.backup[name] = param.data.clone()
+                norm = torch.norm(param.grad)
+                if norm != 0:
+                    r_at = epsilon * param.grad / norm
+                    param.data.add_(r_at)
+
+    def restore(self, emb_name='word_embeddings'):
+        for name, param in self.bert.named_parameters():
+            if param.requires_grad and emb_name in name:
+                assert name in self.backup
+                param.data = self.backup[name]
+            self.backup = {}
 
     def get_hidden_states(self, hidden_states):
 

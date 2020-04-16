@@ -467,6 +467,23 @@ class QA():
                 else:
                     loss.backward()
 
+                # adversarial training
+                self.model.attack()
+                outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
+                                     sentiment_weight=sentiment_weight)
+                loss_adv = outputs_adv[0]
+
+                # use apex
+                if self.config.apex:
+                    with amp.scale_loss(loss_adv / self.config.accumulation_steps, self.optimizer) as scaled_loss_adv:
+                        scaled_loss_adv.backward()
+                        self.model.restore()
+                else:
+                    loss_adv.backward()
+                    self.model.restore()
+
                 if ((tr_batch_i + 1) % self.config.accumulation_steps == 0):
                     if self.config.apex:
                         torch.nn.utils.clip_grad_norm_(amp.master_params(self.optimizer), self.config.max_grad_norm)
@@ -507,11 +524,12 @@ class QA():
                         tokenizer=self.tokenizer,
                     )
 
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 2):
-                        self.train_metrics_postprocessing.append(jaccard_score)
+                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
+                        self.train_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        self.train_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
                     else:
                         self.train_metrics_no_postprocessing.append(jaccard_score)
-                    self.train_metrics.append(jaccard_score)
+                        self.train_metrics.append(jaccard_score)
 
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
@@ -609,11 +627,12 @@ class QA():
 
                     all_result.append(final_text)
 
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 2):
-                        self.eval_metrics_postprocessing.append(jaccard_score)
+                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
+                        self.eval_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
                     else:
                         self.eval_metrics_no_postprocessing.append(jaccard_score)
-                    self.eval_metrics.append(jaccard_score)
+                        self.eval_metrics.append(jaccard_score)
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
