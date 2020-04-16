@@ -126,11 +126,21 @@ class TweetDataset:
             self.max_len
         )
 
-        return torch.tensor(data["ids"], dtype=torch.long), torch.tensor(data["mask"], dtype=torch.long), \
+        onthot_sentiment = {
+            'positive': torch.tensor([1, 0, 0], dtype=torch.float),
+            'negative': torch.tensor([0, 1, 0], dtype=torch.float),
+            'neutral': torch.tensor([0, 0, 1], dtype=torch.float),
+        }
+
+        return torch.tensor(data["ids"], dtype=torch.long), \
+               torch.tensor(data["mask"], dtype=torch.long), \
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
                torch.tensor(data["targets_start"], dtype=torch.long),\
                torch.tensor(data["targets_end"], dtype=torch.long),\
-               data["orig_tweet"], data["orig_selected"], data["sentiment"], \
+               onthot_sentiment[data["sentiment"]], \
+               data["orig_tweet"], \
+               data["orig_selected"], \
+               data["sentiment"], \
                torch.tensor(data["offsets"], dtype=torch.long)
 
 
@@ -232,7 +242,7 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     )
     # print(len(ds_test.tensors))
     loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=num_workers, drop_last=False)
-    return loader
+    return loader, tokenizer
 
 
 def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/",
@@ -319,7 +329,7 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     val_loader = torch.utils.data.DataLoader(ds_val, batch_size=val_batch_size, shuffle=False, num_workers=num_workers,
                                              drop_last=False)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, tokenizer
 
 
 ############################################ Define test function

@@ -16,7 +16,7 @@ class Config_Bert:
         self.do_lower_case = True
         self.model_name = 'TweetBert'
         self.hidden_layers = [-1, -2, -3, -4]
-        self.sentiment_weight_map = {"neutral": 0.5, "positive": 1, "negative": 1}
+        self.sentiment_weight_map = {"neutral": 1, "positive": 1, "negative": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
@@ -52,17 +52,18 @@ class Config_Bert:
         # optimizer
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
-        self.max_grad_norm = 1
-        # lr scheduler
-        self.lr_scheduler_name = 'WarmupCosineAnealing'
+        self.max_grad_norm = 2
+        # lr scheduler, can choose to use proportion or steps
+        self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0.005
+        self.warmup_steps = 200
         # lr
-        self.lr = 3e-5
-        self.weight_decay = 0.01
+        self.lr = 2e-4
+        self.weight_decay = 0.001
         # differential lr settings
-        self.differential_lr = True
+        self.differential_lr = False
         self.decay_factor = 0.9
-        self.min_lr = 2e-6
+        self.min_lr = 1e-5
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
@@ -74,15 +75,15 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 5
+        self.num_epoch = 8
         # saving rate
-        self.saving_rate = 1 / 2
+        self.saving_rate = 1 / 3
         # early stopping
-        self.early_stopping = 2 / self.saving_rate
+        self.early_stopping = 3 / self.saving_rate
         # progress rate
-        self.progress_rate = 1/20
+        self.progress_rate = 1/10
         # inference setting
-        self.n_best_size = 20
+        self.n_best_size = 10
         self.verbose_logging = False
         self.null_score_diff_threshold = 0
         self.version_2_with_negative = False
