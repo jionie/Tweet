@@ -4,11 +4,14 @@ import pandas as pd
 import numpy as np
 
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 from transformers import *
 from transformers.data.processors.squad import *
 import tokenizers
 from sklearn.model_selection import StratifiedKFold, KFold
+
+import nlpaug.augmenter.word as naw
+import nlpaug.flow as naf
 
 ############################################ Define augments for test
 
@@ -38,7 +41,37 @@ parser.add_argument('--model_type', type=str, default="roberta-base", required=F
 
 
 ############################################ Define process data functions
-def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=True):
+def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
+    augs = []
+
+    if insert:
+        aug = naw.WordEmbsAug(
+            model_type='word2vec',
+            model_path='/media/jionie/my_disk/Kaggle/Tweet/model/word2vec/GoogleNews-vectors-negative300.bin',
+            action="insert")
+        augs.append(aug)
+
+    if substitute:
+        aug_sub = naw.SynonymAug(aug_src='wordnet')
+        augs.append(aug_sub)
+
+    if swap:
+        aug_swap = naw.RandomWordAug(action="swap")
+        augs.append(aug_swap)
+
+    if delete:
+        aug_del = naw.RandomWordAug()
+        augs.append(aug_del)
+
+    aug = naf.Sometimes(augs, aug_p=0.5, pipeline_p=0.5)
+    # print("before aug:", text)
+    text = aug.augment(text, n=1)
+    # print("after aug:", text)
+
+    return text
+
+
+def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=False):
     tweet = " " + " ".join(str(tweet).split())
     selected_text = " " + " ".join(str(selected_text).split())
 
@@ -51,6 +84,27 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Tr
             idx0 = ind
             idx1 = ind + len_st - 1
             break
+
+    if augment:
+        # augment for non-select text
+        start_str = tweet[:idx0]
+        end_str = tweet[idx1+1:]
+
+        if (len(start_str) > 0):
+            if np.random.uniform(0, 1, 1) < 0.1:
+                start_str = augmentation(start_str, insert=False, substitute=False, swap=False, delete=True)
+        if (len(end_str) > 0):
+            if np.random.uniform(0, 1, 1) < 0.1:
+                end_str = augmentation(end_str, insert=False, substitute=False, swap=False, delete=True)
+
+        tweet = start_str + selected_text + end_str
+
+        # after augment we need to search again
+        for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
+            if " " + tweet[ind: ind + len_st] == selected_text:
+                idx0 = ind
+                idx1 = ind + len_st - 1
+                break
 
     char_targets = [0] * len(tweet)
     if idx0 != None and idx1 != None:
@@ -71,6 +125,9 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Tr
 
     targets_start = target_idx[0]
     targets_end = target_idx[-1]
+
+    # ... i kinda lost respect  . i kinda lost respect
+    # print(tokenizer.decode(input_ids_orig[targets_start:targets_end+1]), selected_text)
 
     sentiment_id = {
         'positive': 1313,
@@ -107,12 +164,13 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Tr
 
 ############################################ Define Tweet Dataset class
 class TweetDataset:
-    def __init__(self, tweet, sentiment, selected_text, tokenizer, max_len):
+    def __init__(self, tweet, sentiment, selected_text, tokenizer, max_len, augment=False):
         self.tweet = tweet
         self.sentiment = sentiment
         self.selected_text = selected_text
         self.tokenizer = tokenizer
         self.max_len = max_len
+        self.augment = augment
 
     def __len__(self):
         return len(self.tweet)
@@ -123,7 +181,8 @@ class TweetDataset:
             self.selected_text[item],
             self.sentiment[item],
             self.tokenizer,
-            self.max_len
+            self.max_len,
+            self.augment
         )
 
         onthot_sentiment = {
@@ -314,7 +373,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         sentiment=df_train.sentiment.values,
         selected_text=df_train.selected_text.values,
         tokenizer=tokenizer,
-        max_len=max_seq_length
+        max_len=max_seq_length,
+        augment=False
     )
     train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                                drop_last=True)
@@ -384,7 +444,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                       val_batch_size=4,
                       num_workers=2):
 
-    train_loader, val_loader = get_train_val_loaders(data_path=data_path, seed=seed, fold=fold,
+    train_loader, val_loader, _ = get_train_val_loaders(data_path=data_path, seed=seed, fold=fold,
                                                      max_seq_length=max_seq_length, model_type=model_type,
                                                      batch_size=batch_size, val_batch_size=val_batch_size,
                                                      num_workers=num_workers)

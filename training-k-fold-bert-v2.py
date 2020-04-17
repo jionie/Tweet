@@ -428,6 +428,8 @@ class QA():
             # init optimizer
             torch.cuda.empty_cache()
             self.model.zero_grad()
+            if self.config.adversarial:
+                fgm = FGM(self.model)
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
@@ -468,21 +470,26 @@ class QA():
                     loss.backward()
 
                 # adversarial training
-                self.model.attack()
-                outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
-                                     sentiment_weight=sentiment_weight)
-                loss_adv = outputs_adv[0]
+                if self.config.adversarial:
+                    try:
+                        with torch.autograd.detect_anomaly():
+                            fgm.attack()
+                            outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
+                                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                                     end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
+                                                 sentiment_weight=sentiment_weight)
+                            loss_adv = outputs_adv[0]
 
-                # use apex
-                if self.config.apex:
-                    with amp.scale_loss(loss_adv / self.config.accumulation_steps, self.optimizer) as scaled_loss_adv:
-                        scaled_loss_adv.backward()
-                        self.model.restore()
-                else:
-                    loss_adv.backward()
-                    self.model.restore()
+                            # use apex
+                            if self.config.apex:
+                                with amp.scale_loss(loss_adv / self.config.accumulation_steps, self.optimizer) as scaled_loss_adv:
+                                    scaled_loss_adv.backward()
+                                    fgm.restore()
+                            else:
+                                loss_adv.backward()
+                                fgm.restore()
+                    except:
+                        print("NAN loss detected")
 
                 if ((tr_batch_i + 1) % self.config.accumulation_steps == 0):
                     if self.config.apex:

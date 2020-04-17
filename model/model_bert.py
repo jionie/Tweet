@@ -52,6 +52,28 @@ def gelu(x):
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
 
+class FGM():
+    def __init__(self, model):
+        self.model = model
+        self.backup = {}
+
+    def attack(self, epsilon=1., emb_name='word_embeddings'):
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                self.backup[name] = param.data.clone()
+                norm = torch.norm(param.grad)
+                if norm != 0 and not torch.isnan(norm):
+                    r_at = epsilon * param.grad / norm
+                    param.data.add_(r_at)
+
+    def restore(self, emb_name='word_embeddings'):
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                assert name in self.backup
+                param.data = self.backup[name]
+            self.backup = {}
+
+
 ############################################ Define Net Class
 class TweetBert(nn.Module):
     def __init__(self, model_type="bert-large-uncased", max_seq_len=192, hidden_layers=None):
@@ -133,22 +155,6 @@ class TweetBert(nn.Module):
         ])
 
         self.backup = {}
-
-    def attack(self, epsilon=5., emb_name='word_embeddings'):
-        for name, param in self.bert.named_parameters():
-            if param.requires_grad and emb_name in name:
-                self.backup[name] = param.data.clone()
-                norm = torch.norm(param.grad)
-                if norm != 0:
-                    r_at = epsilon * param.grad / norm
-                    param.data.add_(r_at)
-
-    def restore(self, emb_name='word_embeddings'):
-        for name, param in self.bert.named_parameters():
-            if param.requires_grad and emb_name in name:
-                assert name in self.backup
-                param.data = self.backup[name]
-            self.backup = {}
 
     def get_hidden_states(self, hidden_states):
 
