@@ -84,7 +84,7 @@ class TweetBert(nn.Module):
         self.max_seq_len = max_seq_len
 
         if hidden_layers is None:
-            hidden_layers = [-1]
+            hidden_layers = [-1, -2, -3]
         self.hidden_layers = hidden_layers
 
         if model_type == "bert-large-uncased":
@@ -138,8 +138,22 @@ class TweetBert(nn.Module):
         else:
             raise NotImplementedError
 
-        self.qa_start_end = nn.Linear(self.config.hidden_size * len(hidden_layers), 2)
-        self.qa_classifier = nn.Linear(self.config.hidden_size * len(hidden_layers), 3)
+        # hidden states fusion
+        weights_init = torch.zeros(len(hidden_layers)).float()
+        weights_init.data[:-1] = -3
+        self.layer_weights = torch.nn.Parameter(weights_init)
+
+        self.question_projection_start = nn.Linear(self.config.hidden_size, self.config.hidden_size)
+        self.context_projection_start = nn.Linear(self.config.hidden_size, self.config.hidden_size)
+        self.question_projection_end = nn.Linear(self.config.hidden_size, self.config.hidden_size)
+        self.context_projection_end = nn.Linear(self.config.hidden_size, self.config.hidden_size)
+
+        self.aoa_s_start_projection = nn.Linear(max_seq_len - 4, max_seq_len)
+        self.aoa_s_end_projection = nn.Linear(max_seq_len - 4, max_seq_len)
+
+        self.qa_start = nn.Linear(self.config.hidden_size, 1)
+        self.qa_end = nn.Linear(self.config.hidden_size, 1)
+        self.qa_classifier = nn.Linear(self.config.hidden_size, 3)
 
         def init_weights(m):
             if type(m) == nn.Linear:
@@ -147,7 +161,16 @@ class TweetBert(nn.Module):
                 # m.bias.data.fill_(0)
                 torch.nn.init.normal_(m.weight, std=0.02)
 
-        self.qa_start_end.apply(init_weights)
+        self.question_projection_start.apply(init_weights)
+        self.context_projection_start.apply(init_weights)
+        self.question_projection_end.apply(init_weights)
+        self.context_projection_end.apply(init_weights)
+
+        self.aoa_s_start_projection.apply(init_weights)
+        self.aoa_s_end_projection.apply(init_weights)
+
+        self.qa_start.apply(init_weights)
+        self.qa_end.apply(init_weights)
         self.qa_classifier.apply(init_weights)
 
         self.dropouts = nn.ModuleList([
@@ -163,11 +186,13 @@ class TweetBert(nn.Module):
         for i in range(len(self.hidden_layers)):
             if i == 0:
                 hidden_layer = self.hidden_layers[i]
-                fuse_hidden = hidden_states[hidden_layer]
+                fuse_hidden = hidden_states[hidden_layer].unsqueeze(-1)
             else:
                 hidden_layer = self.hidden_layers[i]
-                hidden_state = hidden_states[hidden_layer]
+                hidden_state = hidden_states[hidden_layer].unsqueeze(-1)
                 fuse_hidden = torch.cat([fuse_hidden, hidden_state], dim=-1)
+
+        fuse_hidden = (torch.softmax(self.layer_weights, dim=0) * fuse_hidden).sum(-1)
 
         return fuse_hidden
 
@@ -190,7 +215,7 @@ class TweetBert(nn.Module):
             input_ids=None,
             attention_mask=None,
             token_type_ids=None,
-            onthot_sentiment=None,
+            onthot_ans_type=None,
             position_ids=None,
             head_mask=None,
             inputs_embeds=None,
@@ -209,15 +234,69 @@ class TweetBert(nn.Module):
         )
 
         hidden_states = outputs[2]
+        # bs, seq len, hidden size
         fuse_hidden = self.get_hidden_states(hidden_states)
 
-        logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_start_end)
+        # hidden for question
+        fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
+        # hidden for context, padding added
+        fuse_hidden_context = fuse_hidden[:, 4:, :]
 
-        start_logits, end_logits = logits.split(1, dim=-1)
-        start_logits = start_logits.squeeze(-1)
-        end_logits = end_logits.squeeze(-1)
+        ###################################################################### aoa, attention over attention
+        # # bs, hidden size, question seq len
+        # question_start = self.question_projection_start(fuse_hidden_question).permute(0, 2, 1)
+        # question_end = self.question_projection_end(fuse_hidden_question).permute(0, 2, 1)
+        #
+        # # bs, context seq len, hidden size
+        # context_start = self.context_projection_start(fuse_hidden_context)
+        # context_end = self.context_projection_end(fuse_hidden_context)
+        #
+        # # Attention-over-Attention, bs, context seq len, question seq len
+        # aoa_M_start = context_start.bmm(question_start)
+        # aoa_M_end = context_end.bmm(question_end)
+        #
+        # # query to document attention, aoa alpha, bs, question seq len, context seq len, over query
+        # aoa_alpha_start = torch.softmax(aoa_M_start.clone().permute(0, 2, 1), dim=1)
+        # aoa_alpha_end = torch.softmax(aoa_M_end.clone().permute(0, 2, 1), dim=1)
+        #
+        # # document to query attention, aoa beta, bs, 1, question seq len, over context then take mean
+        # aoa_beta_start = torch.softmax(aoa_M_start, dim=1).mean(1).unsqueeze(1)
+        # aoa_beta_end = torch.softmax(aoa_M_end, dim=1).mean(1).unsqueeze(1)
+        #
+        # # aos s, bs, context seq len len
+        # aoa_s_start = aoa_alpha_start.permute(0, 2, 1).bmm(aoa_beta_start.permute(0, 2, 1)).squeeze(-1)
+        # aoa_s_end = aoa_alpha_end.permute(0, 2, 1).bmm(aoa_beta_end.permute(0, 2, 1)).squeeze(-1)
+        #
+        # aoa_s_start_all = self.aoa_s_start_projection(aoa_s_start)
+        # aoa_s_end_all = self.aoa_s_end_projection(aoa_s_end)
 
-        classification_logits = self.qa_classifier(fuse_hidden[:, 0, :])
+        # start_logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_start).squeeze(-1) * aoa_s_start_all
+        # end_logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_end).squeeze(-1) * aoa_s_end_all
+
+        ###################################################################### modified attention, only keep query to document attention
+        # bs, hidden size, question seq len
+        question_start = self.question_projection_start(fuse_hidden_question).permute(0, 2, 1)
+        question_end = self.question_projection_end(fuse_hidden_question).permute(0, 2, 1)
+
+        # bs, context seq len, hidden size
+        context_start = self.context_projection_start(fuse_hidden_context)
+        context_end = self.context_projection_end(fuse_hidden_context)
+
+        # Attention-over-Attention, bs, context seq len, question seq len
+        aoa_M_start = context_start.bmm(question_start)
+        aoa_M_end = context_end.bmm(question_end)
+
+        # query to document attention, aoa alpha, bs, context seq len, 1, over query, mean
+        aoa_alpha_start = aoa_M_start.mean(2)
+        aoa_alpha_end = aoa_M_end.mean(2)
+
+        aoa_alpha_start_all = self.aoa_s_start_projection(aoa_alpha_start)
+        aoa_alpha_end_all = self.aoa_s_end_projection(aoa_alpha_end)
+
+        start_logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_start).squeeze(-1) * aoa_alpha_start_all
+        end_logits = self.get_logits_by_random_dropout(fuse_hidden, self.qa_end).squeeze(-1) * aoa_alpha_end_all
+
+        classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
 
         outputs = (start_logits, end_logits, classification_logits) + outputs[2:]
         # outputs = (start_logits, end_logits,) + outputs[2:]
@@ -236,7 +315,7 @@ class TweetBert(nn.Module):
             if self.training:
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
                 loss_classification = nn.BCEWithLogitsLoss()
-                classification_loss = loss_classification(classification_logits, onthot_sentiment)
+                classification_loss = loss_classification(classification_logits, onthot_ans_type)
 
                 if sentiment_weight is None:
                     start_loss = loss_fct(start_logits, start_positions)
@@ -244,20 +323,20 @@ class TweetBert(nn.Module):
                 else:
                     start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
                     end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
-                total_loss = (start_loss + end_loss) / 2 + classification_loss
+                total_loss = (start_loss + end_loss + classification_loss) / 3
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_classification = nn.BCEWithLogitsLoss()
 
                 start_loss = loss_fct(start_logits, start_positions)
                 end_loss = loss_fct(end_logits, end_positions)
-                classification_loss = loss_classification(classification_logits, onthot_sentiment)
+                classification_loss = loss_classification(classification_logits, onthot_ans_type)
 
                 if sentiment_weight is not None:
                     start_loss *= sentiment_weight
                     end_loss *= sentiment_weight
 
-                total_loss = (start_loss.mean() + end_loss.mean()) / 2 + classification_loss
+                total_loss = (start_loss.mean() + end_loss.mean() + classification_loss) / 3
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
@@ -273,13 +352,13 @@ def test_Net():
     all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
     all_start_positions = torch.tensor([0, 1])
     all_end_positions =  torch.tensor([3, 4])
-    all_onthot_sentiment = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
+    all_onthot_ans_type = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
     print(all_start_positions.shape)
 
     model = TweetBert(max_seq_len=7)
 
     y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
-              start_positions=all_start_positions, end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment)
+              start_positions=all_start_positions, end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
 
     print("loss: ", y[0])
     print("start_logits: ", y[1])

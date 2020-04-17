@@ -57,7 +57,7 @@ class Config_Bert:
         # lr scheduler, can choose to use proportion or steps
         self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0.005
-        self.warmup_steps = 200
+        self.warmup_steps = 600
         # lr
         self.lr = 2e-4
         self.weight_decay = 0.001
@@ -76,7 +76,7 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 8
+        self.num_epoch = 16
         # saving rate
         self.saving_rate = 1 / 3
         # early stopping

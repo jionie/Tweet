@@ -153,7 +153,12 @@ class QA():
                                self.model.bert.encoder.layer[9],
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
-                               self.model.qa_start_end,
+                               self.model.question_projection_start,
+                               self.model.context_projection_end,
+                               self.model.question_projection_start,
+                               self.model.context_projection_end,
+                               self.model.qa_start,
+                               self.model.qa_end,
                                self.model.qa_classifier,
                                ]
 
@@ -185,7 +190,12 @@ class QA():
                                self.model.bert.encoder.layer[21],
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
-                               self.model.qa_start_end,
+                               self.model.question_projection_start,
+                               self.model.context_projection_end,
+                               self.model.question_projection_start,
+                               self.model.context_projection_end,
+                               self.model.qa_start,
+                               self.model.qa_end,
                                self.model.qa_classifier,
                                ]
             else:
@@ -433,7 +443,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_sentiment, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -449,7 +459,7 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
-                all_onthot_sentiment = all_onthot_sentiment.cuda()
+                all_onthot_ans_type = all_onthot_ans_type.cuda()
 
                 sentiment = all_sentiment
                 sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
@@ -457,7 +467,7 @@ class QA():
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
+                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
                                      sentiment_weight=sentiment_weight)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
@@ -476,7 +486,7 @@ class QA():
                             fgm.attack()
                             outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                                      token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                                     end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment,
+                                                     end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
                                                  sentiment_weight=sentiment_weight)
                             loss_adv = outputs_adv[0]
 
@@ -585,7 +595,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_sentiment, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -597,12 +607,12 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
-                all_onthot_sentiment = all_onthot_sentiment.cuda()
+                all_onthot_ans_type = all_onthot_ans_type.cuda()
                 sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_sentiment=all_onthot_sentiment)
+                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
@@ -687,7 +697,7 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, alall_input_ids, all_attention_masks, all_token_type_ids,
-                               all_start_positions, all_end_positions, all_onthot_sentiment, all_orig_tweet,
+                               all_start_positions, all_end_positions, all_onthot_ans_type, all_orig_tweet,
                                all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.test_data_loader):
 
@@ -698,10 +708,10 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
-                all_onthot_sentiment = all_onthot_sentiment.cuda()
+                all_onthot_ans_type = all_onthot_ans_type.cuda()
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, onthot_sentiment=all_onthot_sentiment)
+                                         token_type_ids=all_token_type_ids, onthot_ans_type=all_onthot_ans_type)
 
                 start_logits, end_logits = outputs[0], outputs[1]
 

@@ -75,6 +75,13 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
     tweet = " " + " ".join(str(tweet).split())
     selected_text = " " + " ".join(str(selected_text).split())
 
+    if len(tweet) == len(selected_text):
+        ans_type = "long"
+    elif len(selected_text) == 0:
+        ans_type = "none"
+    else:
+        ans_type = "short"
+
     len_st = len(selected_text) - 1
     idx0 = None
     idx1 = None
@@ -158,7 +165,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
         'orig_tweet': tweet,
         'orig_selected': selected_text,
         'sentiment': sentiment,
-        'offsets': tweet_offsets
+        'offsets': tweet_offsets,
+        'ans_type': ans_type
     }
 
 
@@ -185,10 +193,10 @@ class TweetDataset:
             self.augment
         )
 
-        onthot_sentiment = {
-            'positive': torch.tensor([1, 0, 0], dtype=torch.float),
-            'negative': torch.tensor([0, 1, 0], dtype=torch.float),
-            'neutral': torch.tensor([0, 0, 1], dtype=torch.float),
+        onthot_ans_type = {
+            'long': torch.tensor([1, 0, 0], dtype=torch.float),
+            'none': torch.tensor([0, 1, 0], dtype=torch.float),
+            'short': torch.tensor([0, 0, 1], dtype=torch.float),
         }
 
         return torch.tensor(data["ids"], dtype=torch.long), \
@@ -196,7 +204,7 @@ class TweetDataset:
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
                torch.tensor(data["targets_start"], dtype=torch.long),\
                torch.tensor(data["targets_end"], dtype=torch.long),\
-               onthot_sentiment[data["sentiment"]], \
+               onthot_ans_type[data["ans_type"]], \
                data["orig_tweet"], \
                data["orig_selected"], \
                data["sentiment"], \
