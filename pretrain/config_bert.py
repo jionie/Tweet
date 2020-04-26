@@ -3,8 +3,7 @@ import os
 
 class Config_Bert:
     # config settings
-    def __init__(self, fold, model_type="roberta-base", seed=2020, batch_size=16, accumulation_steps=1,
-                 Datasampler="ImbalancedDatasetSampler"):
+    def __init__(self, fold, model_type="roberta-base", seed=2020, batch_size=16, accumulation_steps=1):
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
@@ -29,7 +28,7 @@ class Config_Bert:
         self.n_splits = 5
         self.fold = fold
         # path, specify the path for saving model
-        self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/model", self.model_name)
+        self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/pretrain/model", self.model_name)
         if not os.path.exists(self.model_folder):
             os.mkdir(self.model_folder)
         self.checkpoint_folder_all_fold = os.path.join(self.model_folder, self.model_type + '-' + str(self.seed))
@@ -46,7 +45,6 @@ class Config_Bert:
         else:
             self.reuse_model = False
         # dataset setting
-        self.Datasampler = Datasampler
         self.max_seq_length = 192
         self.max_query_length = 64
         self.max_answer_length = 30

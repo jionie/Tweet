@@ -1,0 +1,138 @@
+
+Loading data...
+*General Setting*
+seed: 42
+model: TweetBert
+trainable parameters:127,011,849
+model's state_dict:
+device: cuda
+use gpu: True
+device num: 2
+optimizer: AdamW (
+Parameter Group 0
+    betas: (0.9, 0.999)
+    correct_bias: True
+    eps: 1e-08
+    initial_lr: 1e-05
+    lr: 0.0
+    weight_decay: 0.001
+
+Parameter Group 1
+    betas: (0.9, 0.999)
+    correct_bias: True
+    eps: 1e-08
+    initial_lr: 0.0002
+    lr: 0.0
+    weight_decay: 0.001
+
+Parameter Group 2
+    betas: (0.9, 0.999)
+    correct_bias: True
+    eps: 1e-08
+    initial_lr: 1e-05
+    lr: 0.0
+    weight_decay: 0.0
+
+Parameter Group 3
+    betas: (0.9, 0.999)
+    correct_bias: True
+    eps: 1e-08
+    initial_lr: 0.0002
+    lr: 0.0
+    weight_decay: 0.0
+)
+reuse model: False
+adversarial training: False
+** start training here! **
+   batch_size=16,  accumulation_steps=1
+   experiment  = ['training-k-fold-bert-v2.py']
+Epoch0
+
+lr: 0.000071 train loss: 2.543352 train_jaccard: 0.515050 train_jaccard_postprocessing: 0.964883 train_jaccard_no_postprocessing: 0.208721
+lr: 0.000104 train loss: 1.327243 train_jaccard: 0.566182 train_jaccard_postprocessing: 0.969404 train_jaccard_no_postprocessing: 0.285829
+lr: 0.000103 train loss: 1.144921 train_jaccard: 0.589883 train_jaccard_postprocessing: 0.969434 train_jaccard_no_postprocessing: 0.320804
+validation loss: 0.727888 eval_jaccard: 0.680835 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.472508
+Validation metric improved (-inf --> 0.680835).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/458_step_0_epoch.pth.lr: 0.000102 train loss: 0.961510 train_jaccard: 0.608999 train_jaccard_postprocessing: 0.969056 train_jaccard_no_postprocessing: 0.350525
+lr: 0.000100 train loss: 0.906926 train_jaccard: 0.620503 train_jaccard_postprocessing: 0.969801 train_jaccard_no_postprocessing: 0.371255
+lr: 0.000099 train loss: 0.875611 train_jaccard: 0.629890 train_jaccard_postprocessing: 0.969708 train_jaccard_no_postprocessing: 0.387011
+validation loss: 0.658796 eval_jaccard: 0.696181 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.498845
+Validation metric improved (0.680835 --> 0.696181).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/916_step_0_epoch.pth.lr: 0.000098 train loss: 0.884108 train_jaccard: 0.637506 train_jaccard_postprocessing: 0.969544 train_jaccard_no_postprocessing: 0.400230
+lr: 0.000096 train loss: 0.859919 train_jaccard: 0.643040 train_jaccard_postprocessing: 0.969811 train_jaccard_no_postprocessing: 0.410652
+lr: 0.000095 train loss: 0.824301 train_jaccard: 0.648391 train_jaccard_postprocessing: 0.970690 train_jaccard_no_postprocessing: 0.419375
+lr: 0.000094 train loss: 0.830938 train_jaccard: 0.653971 train_jaccard_postprocessing: 0.970686 train_jaccard_no_postprocessing: 0.428650
+validation loss: 0.637982 eval_jaccard: 0.697451 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.501024
+Validation metric improved (0.696181 --> 0.697451).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/1374_step_0_epoch.pth.Epoch1
+
+lr: 0.000092 train loss: 0.789956 train_jaccard: 0.703369 train_jaccard_postprocessing: 0.968538 train_jaccard_no_postprocessing: 0.510500
+lr: 0.000091 train loss: 0.768697 train_jaccard: 0.708456 train_jaccard_postprocessing: 0.972777 train_jaccard_no_postprocessing: 0.511478
+lr: 0.000090 train loss: 0.800220 train_jaccard: 0.703251 train_jaccard_postprocessing: 0.969309 train_jaccard_no_postprocessing: 0.508889
+validation loss: 0.641914 eval_jaccard: 0.699427 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.504416
+Validation metric improved (0.697451 --> 0.699427).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/1832_step_1_epoch.pth.lr: 0.000088 train loss: 0.777466 train_jaccard: 0.704983 train_jaccard_postprocessing: 0.970708 train_jaccard_no_postprocessing: 0.512521
+lr: 0.000087 train loss: 0.775793 train_jaccard: 0.706719 train_jaccard_postprocessing: 0.971332 train_jaccard_no_postprocessing: 0.515476
+lr: 0.000086 train loss: 0.783341 train_jaccard: 0.705607 train_jaccard_postprocessing: 0.971849 train_jaccard_no_postprocessing: 0.513643
+validation loss: 0.617139 eval_jaccard: 0.704136 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.512497
+Validation metric improved (0.699427 --> 0.704136).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/2290_step_1_epoch.pth.lr: 0.000084 train loss: 0.789025 train_jaccard: 0.705752 train_jaccard_postprocessing: 0.971624 train_jaccard_no_postprocessing: 0.515503
+lr: 0.000083 train loss: 0.776563 train_jaccard: 0.704796 train_jaccard_postprocessing: 0.971257 train_jaccard_no_postprocessing: 0.515075
+lr: 0.000082 train loss: 0.799517 train_jaccard: 0.703614 train_jaccard_postprocessing: 0.970738 train_jaccard_no_postprocessing: 0.514358
+lr: 0.000080 train loss: 0.772901 train_jaccard: 0.704258 train_jaccard_postprocessing: 0.970633 train_jaccard_no_postprocessing: 0.514714
+validation loss: 0.611276 eval_jaccard: 0.707746 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.518693
+Validation metric improved (0.704136 --> 0.707746).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/2748_step_1_epoch.pth.Epoch2
+
+lr: 0.000079 train loss: 0.741819 train_jaccard: 0.708991 train_jaccard_postprocessing: 0.969433 train_jaccard_no_postprocessing: 0.523077
+lr: 0.000078 train loss: 0.740206 train_jaccard: 0.712069 train_jaccard_postprocessing: 0.967462 train_jaccard_no_postprocessing: 0.534834
+lr: 0.000076 train loss: 0.701909 train_jaccard: 0.719477 train_jaccard_postprocessing: 0.969377 train_jaccard_no_postprocessing: 0.542534
+validation loss: 0.620284 eval_jaccard: 0.712344 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.526584
+Validation metric improved (0.707746 --> 0.712344).  Saving model ...Model saved as /media/jionie/my_disk/Kaggle/Tweet/model/TweetBert/roberta-base-42/fold_1/3206_step_2_epoch.pth.lr: 0.000075 train loss: 0.716660 train_jaccard: 0.720997 train_jaccard_postprocessing: 0.969500 train_jaccard_no_postprocessing: 0.546089
+lr: 0.000074 train loss: 0.734276 train_jaccard: 0.718970 train_jaccard_postprocessing: 0.970635 train_jaccard_no_postprocessing: 0.542867
+lr: 0.000072 train loss: 0.735769 train_jaccard: 0.719051 train_jaccard_postprocessing: 0.971386 train_jaccard_no_postprocessing: 0.542168
+validation loss: 0.610570 eval_jaccard: 0.705541 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.514908
+lr: 0.000071 train loss: 0.728698 train_jaccard: 0.719604 train_jaccard_postprocessing: 0.970902 train_jaccard_no_postprocessing: 0.543796
+lr: 0.000070 train loss: 0.721026 train_jaccard: 0.719950 train_jaccard_postprocessing: 0.970590 train_jaccard_no_postprocessing: 0.543081
+lr: 0.000068 train loss: 0.726147 train_jaccard: 0.720506 train_jaccard_postprocessing: 0.970898 train_jaccard_no_postprocessing: 0.543807
+lr: 0.000067 train loss: 0.699313 train_jaccard: 0.721986 train_jaccard_postprocessing: 0.970701 train_jaccard_no_postprocessing: 0.544676
+validation loss: 0.607024 eval_jaccard: 0.706473 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.516508
+Epoch3
+
+lr: 0.000066 train loss: 0.675772 train_jaccard: 0.737874 train_jaccard_postprocessing: 0.964343 train_jaccard_no_postprocessing: 0.574994
+lr: 0.000064 train loss: 0.674073 train_jaccard: 0.737918 train_jaccard_postprocessing: 0.969308 train_jaccard_no_postprocessing: 0.569144
+lr: 0.000063 train loss: 0.682738 train_jaccard: 0.733860 train_jaccard_postprocessing: 0.970423 train_jaccard_no_postprocessing: 0.562547
+validation loss: 0.617033 eval_jaccard: 0.710923 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.524145
+lr: 0.000062 train loss: 0.666711 train_jaccard: 0.735185 train_jaccard_postprocessing: 0.969673 train_jaccard_no_postprocessing: 0.567562
+lr: 0.000060 train loss: 0.686946 train_jaccard: 0.732494 train_jaccard_postprocessing: 0.970074 train_jaccard_no_postprocessing: 0.564359
+lr: 0.000059 train loss: 0.660777 train_jaccard: 0.735384 train_jaccard_postprocessing: 0.970375 train_jaccard_no_postprocessing: 0.567481
+validation loss: 0.617838 eval_jaccard: 0.705017 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.514010
+lr: 0.000058 train loss: 0.686823 train_jaccard: 0.735100 train_jaccard_postprocessing: 0.970293 train_jaccard_no_postprocessing: 0.568109
+lr: 0.000056 train loss: 0.656294 train_jaccard: 0.736437 train_jaccard_postprocessing: 0.970846 train_jaccard_no_postprocessing: 0.569106
+lr: 0.000055 train loss: 0.685606 train_jaccard: 0.735613 train_jaccard_postprocessing: 0.970861 train_jaccard_no_postprocessing: 0.568069
+lr: 0.000054 train loss: 0.668617 train_jaccard: 0.736084 train_jaccard_postprocessing: 0.970609 train_jaccard_no_postprocessing: 0.569079
+validation loss: 0.614439 eval_jaccard: 0.710258 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.523004
+Epoch4
+
+lr: 0.000052 train loss: 0.627624 train_jaccard: 0.752591 train_jaccard_postprocessing: 0.965151 train_jaccard_no_postprocessing: 0.600858
+lr: 0.000051 train loss: 0.604031 train_jaccard: 0.756322 train_jaccard_postprocessing: 0.970862 train_jaccard_no_postprocessing: 0.602455
+lr: 0.000049 train loss: 0.638814 train_jaccard: 0.752977 train_jaccard_postprocessing: 0.969824 train_jaccard_no_postprocessing: 0.599054
+validation loss: 0.642131 eval_jaccard: 0.705892 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.515511
+lr: 0.000048 train loss: 0.613617 train_jaccard: 0.753396 train_jaccard_postprocessing: 0.970703 train_jaccard_no_postprocessing: 0.600948
+lr: 0.000047 train loss: 0.649620 train_jaccard: 0.752089 train_jaccard_postprocessing: 0.970901 train_jaccard_no_postprocessing: 0.598686
+lr: 0.000045 train loss: 0.667079 train_jaccard: 0.750061 train_jaccard_postprocessing: 0.971190 train_jaccard_no_postprocessing: 0.595151
+validation loss: 0.629973 eval_jaccard: 0.710365 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.523187
+lr: 0.000044 train loss: 0.639860 train_jaccard: 0.749681 train_jaccard_postprocessing: 0.971129 train_jaccard_no_postprocessing: 0.594464
+lr: 0.000043 train loss: 0.615085 train_jaccard: 0.750880 train_jaccard_postprocessing: 0.970700 train_jaccard_no_postprocessing: 0.596415
+lr: 0.000041 train loss: 0.649633 train_jaccard: 0.751263 train_jaccard_postprocessing: 0.970763 train_jaccard_no_postprocessing: 0.596461
+lr: 0.000040 train loss: 0.636176 train_jaccard: 0.751042 train_jaccard_postprocessing: 0.970621 train_jaccard_no_postprocessing: 0.594857
+validation loss: 0.625766 eval_jaccard: 0.705696 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.515175
+Epoch5
+
+lr: 0.000039 train loss: 0.594305 train_jaccard: 0.764409 train_jaccard_postprocessing: 0.974677 train_jaccard_no_postprocessing: 0.622839
+lr: 0.000037 train loss: 0.606270 train_jaccard: 0.762095 train_jaccard_postprocessing: 0.973329 train_jaccard_no_postprocessing: 0.615088
+lr: 0.000036 train loss: 0.589873 train_jaccard: 0.765873 train_jaccard_postprocessing: 0.972369 train_jaccard_no_postprocessing: 0.618468
+validation loss: 0.641240 eval_jaccard: 0.709829 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.522268
+lr: 0.000035 train loss: 0.584601 train_jaccard: 0.765974 train_jaccard_postprocessing: 0.971521 train_jaccard_no_postprocessing: 0.618004
+lr: 0.000033 train loss: 0.604817 train_jaccard: 0.764448 train_jaccard_postprocessing: 0.971560 train_jaccard_no_postprocessing: 0.617158
+lr: 0.000032 train loss: 0.615753 train_jaccard: 0.764700 train_jaccard_postprocessing: 0.970927 train_jaccard_no_postprocessing: 0.618681
+validation loss: 0.656472 eval_jaccard: 0.702935 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.510435
+lr: 0.000031 train loss: 0.592619 train_jaccard: 0.763973 train_jaccard_postprocessing: 0.970919 train_jaccard_no_postprocessing: 0.618647
+lr: 0.000029 train loss: 0.602383 train_jaccard: 0.762986 train_jaccard_postprocessing: 0.970589 train_jaccard_no_postprocessing: 0.616589
+lr: 0.000028 train loss: 0.615394 train_jaccard: 0.761813 train_jaccard_postprocessing: 0.971339 train_jaccard_no_postprocessing: 0.614723
+lr: 0.000027 train loss: 0.568464 train_jaccard: 0.762486 train_jaccard_postprocessing: 0.970611 train_jaccard_no_postprocessing: 0.614475
+validation loss: 0.649474 eval_jaccard: 0.705192 eval_jaccard_postprocessing: 0.971712 eval_jaccard_no_postprocessing: 0.514310

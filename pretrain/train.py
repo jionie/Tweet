@@ -8,6 +8,7 @@ import random
 import argparse
 import pandas as pd
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 # import pytorch related libraries
 import torch
@@ -44,7 +45,6 @@ parser.add_argument('--model_type', type=str, default="roberta-base", required=F
 parser.add_argument('--seed', type=int, default=2020, required=False, help="specify the seed")
 parser.add_argument('--batch_size', type=int, default=16, required=False, help="specify the batch size")
 parser.add_argument('--accumulation_steps', type=int, default=1, required=False, help="specify the accumulation_steps")
-parser.add_argument('--Datasampler', type=str, default="ImbalancedDatasetSampler", required=False, help="specify the datasampler")
 
 
 ############################################################################## seed All
@@ -424,8 +424,6 @@ class QA():
         while self.epoch <= self.config.num_epoch:
 
             self.train_metrics = []
-            self.train_metrics_no_postprocessing = []
-            self.train_metrics_postprocessing = []
 
             # update lr and start from start_epoch
             if (self.epoch >= 1) and (not self.lr_scheduler_each_iter) \
@@ -443,8 +441,7 @@ class QA():
             self.model.zero_grad()
 
             for tr_batch_i, (
-                    all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_input_ids, all_attention_masks, all_token_type_ids, all_onthot_sentiment) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -458,20 +455,12 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
-                all_start_positions = all_start_positions.cuda()
-                all_end_positions = all_end_positions.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
-
-                sentiment = all_sentiment
-                sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
-                sentiment_weight = torch.tensor(sentiment_weight).float().cuda()
+                all_onthot_sentiment = all_onthot_sentiment.cuda()
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
-                                     sentiment_weight=sentiment_weight)
+                                    token_type_ids=all_token_type_ids, onthot_sentiments_type=all_onthot_sentiment)
 
-                loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
+                loss, classification_logits = outputs[0], outputs[1]
 
                 # use apex
                 if self.config.apex:
@@ -486,9 +475,7 @@ class QA():
                         with torch.autograd.detect_anomaly():
                             self.model.attack()
                             outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                                     end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
-                                                 sentiment_weight=sentiment_weight)
+                                    token_type_ids=all_token_type_ids, onthot_sentiments_type=all_onthot_sentiment)
                             loss_adv = outputs_adv[0]
 
                             # use apex
@@ -520,34 +507,10 @@ class QA():
                     self.step += 1
 
                 # translate to predictions
-                start_logits = torch.softmax(start_logits, dim=-1)
-                end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
+                classification_logits = classification_logits.detach().cpu().numpy()
+                all_onthot_sentiment = all_onthot_sentiment.detach().cpu().numpy()
 
-                def to_numpy(tensor):
-                    return tensor.detach().cpu().numpy()
-
-                start_logits = to_numpy(start_logits)
-                end_logits = to_numpy((end_logits))
-
-                for px, tweet in enumerate(all_orig_tweet):
-                    selected_tweet = all_orig_selected[px]
-                    jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
-                        target_string=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
-                        tokenizer=self.tokenizer,
-                    )
-
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.train_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.train_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                    else:
-                        self.train_metrics_no_postprocessing.append(jaccard_score)
-                        self.train_metrics.append(jaccard_score)
+                self.train_metrics.append(accuracy_score(np.argmax(all_onthot_sentiment, -1), np.argmax(classification_logits, -1)))
 
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
@@ -560,14 +523,9 @@ class QA():
                     sum_train_loss[...] = 0
                     sum_train[...] = 0
                     mean_train_metric = np.mean(self.train_metrics)
-                    mean_train_metric_postprocessing = np.mean(self.train_metrics_postprocessing)
-                    mean_train_metric_no_postprocessing = np.mean(self.train_metrics_no_postprocessing)
 
-                    self.log.write('lr: %f train loss: %f train_jaccard: %f train_jaccard_postprocessing: %f train_jaccard_no_postprocessing: %f\n' % \
-                                   (rate, train_loss[0], mean_train_metric, mean_train_metric_postprocessing, mean_train_metric_no_postprocessing))
-
-                    print("Training ground truth: ", selected_tweet)
-                    print("Training prediction: ", final_text)
+                    self.log.write('lr: %f train loss: %f train_acc: %f\n' % \
+                                   (rate, train_loss[0], mean_train_metric))
 
                 if (tr_batch_i + 1) % self.eval_step == 0:
                     self.evaluate_op()
@@ -584,8 +542,6 @@ class QA():
         valid_num = np.zeros_like(valid_loss)
 
         self.eval_metrics = []
-        self.eval_metrics_no_postprocessing = []
-        self.eval_metrics_postprocessing = []
 
         all_result = []
 
@@ -594,9 +550,7 @@ class QA():
             # init cache
             torch.cuda.empty_cache()
 
-            for val_batch_i, (
-                    all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+            for val_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_onthot_sentiment) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -609,64 +563,32 @@ class QA():
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
                 all_onthot_ans_type = all_onthot_ans_type.cuda()
-                sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
+                                     token_type_ids=all_token_type_ids, onthot_sentiments_type=all_onthot_sentiment)
 
-                loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
+                loss, classification_logits = outputs[0], outputs[1]
 
                 self.writer.add_scalar('val_loss_' + str(self.config.fold), loss.item(), (self.eval_count - 1) * len(
                     self.val_data_loader) * self.config.val_batch_size + val_batch_i * self.config.val_batch_size)
 
                 # translate to predictions
-                start_logits = torch.softmax(start_logits, dim=-1)
-                end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
+                classification_logits = classification_logits.detach().cpu().numpy()
+                all_onthot_sentiment = all_onthot_sentiment.detach().cpu().numpy()
 
-                def to_numpy(tensor):
-                    return tensor.detach().cpu().numpy()
-
-                start_logits = to_numpy(start_logits)
-                end_logits = to_numpy((end_logits))
-
-                for px, tweet in enumerate(all_orig_tweet):
-                    selected_tweet = all_orig_selected[px]
-                    jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
-                        target_string=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
-                        tokenizer=self.tokenizer,
-                    )
-
-                    all_result.append(final_text)
-
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.eval_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.eval_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                    else:
-                        self.eval_metrics_no_postprocessing.append(jaccard_score)
-                        self.eval_metrics.append(jaccard_score)
+                self.eval_metrics.append(
+                    accuracy_score(np.argmax(all_onthot_sentiment, -1), np.argmax(classification_logits, -1)))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
-                n = np.array([self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
                 valid_loss = valid_loss + l
                 valid_num = valid_num + n
 
             valid_loss = valid_loss / valid_num
             mean_eval_metric = np.mean(self.eval_metrics)
-            mean_eval_metric_postprocessing = np.mean(self.eval_metrics_postprocessing)
-            mean_eval_metric_no_postprocessing = np.mean(self.eval_metrics_no_postprocessing)
 
-            self.log.write('validation loss: %f eval_jaccard: %f eval_jaccard_postprocessing: %f eval_jaccard_no_postprocessing: %f\n' % \
-                           (valid_loss[0], mean_eval_metric, mean_eval_metric_postprocessing, mean_eval_metric_no_postprocessing))
-            print("Validating ground truth: ", selected_tweet)
-            print("Validating prediction: ", final_text)
+            self.log.write('validation loss: %f eval_acc: %f\n' % \
+                           (valid_loss[0], mean_eval_metric))
 
         if self.config.lr_scheduler_name == "ReduceLROnPlateau":
             self.scheduler.step(mean_eval_metric)
@@ -684,78 +606,13 @@ class QA():
         else:
             self.count += 1
 
-        val_df = pd.DataFrame({'selected_text': all_result})
-        val_df.to_csv(os.path.join(self.config.checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
-                                                                                                    self.config.fold)), index=False)
-
-    def infer_op(self):
-
-        all_results = []
-
-        with torch.no_grad():
-
-            # init cache
-            torch.cuda.empty_cache()
-
-            for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
-                               all_offsets) in enumerate(self.test_data_loader):
-
-                # set model to eval mode
-                self.model.eval()
-
-                # set input to cuda mode
-                all_input_ids = all_input_ids.cuda()
-                all_attention_masks = all_attention_masks.cuda()
-                all_token_type_ids = all_token_type_ids.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
-
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, onthot_ans_type=all_onthot_ans_type)
-
-                start_logits, end_logits = outputs[0], outputs[1]
-
-                start_logits = torch.softmax(start_logits, dim=-1)
-                end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
-
-                def to_numpy(tensor):
-                    return tensor.detach().cpu().numpy()
-
-                start_logits = to_numpy(start_logits)
-                end_logits = to_numpy((end_logits))
-
-                for px, tweet in enumerate(all_orig_tweet):
-                    selected_tweet = all_orig_selected[px]
-                    _, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
-                        target_string=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
-                        tokenizer=self.tokenizer,
-                    )
-                    all_results.append(final_text)
-
-        # save csv
-        submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
-
-        for i in range(len(submission)):
-            final_text = " ".join(set(all_results[i].lower().split()))
-            submission.loc[i, 'selected_text'] = final_text
-
-        submission.to_csv(os.path.join(self.config.checkpoint_folder, "submission_{}.csv".format(self.config.fold)))
-
-        return
-
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
     # update fold
     config = Config_Bert(args.fold, model_type=args.model_type, seed=args.seed, batch_size=args.batch_size,
-                         accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
+                         accumulation_steps=args.accumulation_steps)
     seed_everything(config.seed)
     qa = QA(config)
     qa.train_op()
