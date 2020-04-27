@@ -2,7 +2,6 @@ from transformers import *
 import math
 import torch
 import torch.nn as nn
-from .Attention import *
 
 
 ##################################################### CrossEntropyLossOHEM
@@ -132,7 +131,7 @@ class TweetBert(nn.Module):
 
         self.qa_start = nn.Linear(self.config.hidden_size, 1)
         self.qa_end = nn.Linear(self.config.hidden_size, 1)
-        self.qa_classifier = nn.Linear(self.config.hidden_size, 3)
+        self.qa_classifier = nn.Linear(self.config.hidden_size, 13)
 
         def init_weights(m):
             if type(m) == nn.Linear:
@@ -149,27 +148,6 @@ class TweetBert(nn.Module):
         ])
 
         self.backup = {}
-
-        self.aoa = AttentionOverAttention(self.config.hidden_size)
-
-        self.cross_attention = CrossAttention(num_attention_head=12,
-                                              hidden_dim=self.config.hidden_size,
-                                              dropout_rate=0.1)
-
-    def attack(self, epsilon=1., emb_name='word_embeddings'):
-        for name, param in self.bert.named_parameters():
-            if param.requires_grad and emb_name in name:
-                self.backup[name] = param.data.clone()
-                norm = torch.norm(param.grad)
-                if not torch.isnan(norm):
-                    r_at = epsilon * param.grad / (norm + 1e-8)
-                    param.data.add_(r_at)
-
-    def restore(self, emb_name='word_embeddings'):
-        for name, param in self.bert.named_parameters():
-            if param.requires_grad and emb_name in name:
-                param.data = self.backup[name]
-            self.backup = {}
 
     def get_hidden_states(self, hidden_states):
 
@@ -207,13 +185,10 @@ class TweetBert(nn.Module):
             input_ids=None,
             attention_mask=None,
             token_type_ids=None,
-            onthot_ans_type=None,
+            onthot_sentiments_type=None,
             position_ids=None,
             head_mask=None,
             inputs_embeds=None,
-            start_positions=None,
-            end_positions=None,
-            sentiment_weight=None,
     ):
 
         outputs = self.bert(
@@ -229,100 +204,12 @@ class TweetBert(nn.Module):
         # bs, seq len, hidden size
         fuse_hidden = self.get_hidden_states(hidden_states)
 
-        # # hidden for context, padding added
-        fuse_hidden_context = fuse_hidden[:, 4:-1, :]
-
-        # #################################################################### aoa, attention over attention
-        # # hidden for question
-        # fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
-        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask)
-        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
-        # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
-
-        # #################################################################### cross attention
-        # # hidden for question
-        fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
-        fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
-                                                       attention_mask[:, 4:-1])
-        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
-        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
-
-        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
-        # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
-
         classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
 
-        outputs = (start_logits, end_logits, classification_logits) + outputs[2:]
-        # outputs = (start_logits, end_logits,) + outputs[2:]
+        loss_classification = nn.BCEWithLogitsLoss()
+        classification_loss = loss_classification(classification_logits, onthot_sentiments_type)
 
-        if start_positions is not None and end_positions is not None:
-            # If we are on multi-GPU, split add a dimension
-            if len(start_positions.size()) > 1:
-                start_positions = start_positions.squeeze(-1)
-            if len(end_positions.size()) > 1:
-                end_positions = end_positions.squeeze(-1)
-            # sometimes the start/end positions are outside our model inputs, we ignore these terms
-            ignored_index = start_logits.size(1)
-            start_positions.clamp_(0, ignored_index)
-            end_positions.clamp_(0, ignored_index)
+        outputs = classification_logits + outputs[2:]
+        outputs = (classification_loss,) + outputs
 
-            if self.training:
-                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
-                loss_classification = nn.BCEWithLogitsLoss()
-                classification_loss = loss_classification(classification_logits, onthot_ans_type)
-
-                if sentiment_weight is None:
-                    start_loss = loss_fct(start_logits, start_positions)
-                    end_loss = loss_fct(end_logits, end_positions)
-                else:
-                    start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
-                    end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
-                total_loss = (start_loss + end_loss + classification_loss) / 3
-            else:
-                loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
-                loss_classification = nn.BCEWithLogitsLoss()
-
-                start_loss = loss_fct(start_logits, start_positions)
-                end_loss = loss_fct(end_logits, end_positions)
-                classification_loss = loss_classification(classification_logits, onthot_ans_type)
-
-                if sentiment_weight is not None:
-                    start_loss *= sentiment_weight
-                    end_loss *= sentiment_weight
-
-                total_loss = (start_loss.mean() + end_loss.mean() + classification_loss) / 3
-            outputs = (total_loss,) + outputs
-
-        return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
-        
-        
-
-############################################ Define test Net function
-def test_Net():
-    print("------------------------testing Net----------------------")
-
-    all_input_ids = torch.tensor([[1, 2, 3, 4, 5, 0, 0], [1, 2, 3, 4, 5, 0, 0]])
-    all_attention_masks = torch.tensor([[1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 0, 0]])
-    all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
-    all_start_positions = torch.tensor([0, 1])
-    all_end_positions =  torch.tensor([3, 4])
-    all_onthot_ans_type = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
-    print(all_start_positions.shape)
-
-    model = TweetBert(max_seq_len=7)
-
-    y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
-              start_positions=all_start_positions, end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
-
-    print("loss: ", y[0])
-    print("start_logits: ", y[1])
-    print("end_logits: ", y[2])
-    print("------------------------testing Net finished----------------------")
-
-    return
-
-
-if __name__ == "__main__":
-    print("------------------------testing Net----------------------")
-    test_Net()
-    
+        return outputs

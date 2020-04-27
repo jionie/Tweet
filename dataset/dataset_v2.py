@@ -13,6 +13,8 @@ from sklearn.model_selection import StratifiedKFold, KFold
 import nlpaug.augmenter.word as naw
 import nlpaug.flow as naf
 
+from .Datasampler import *
+
 ############################################ Define augments for test
 
 parser = argparse.ArgumentParser(description="arg parser")
@@ -145,9 +147,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
     input_ids = [0] + [sentiment_id[sentiment]] + [2] + [2] + input_ids_orig + [2]
     token_type_ids = [0, 0, 0, 0] + [0] * (len(input_ids_orig) + 1)
     mask = [1] * len(token_type_ids)
-    tweet_offsets = [(0, 0)] * 4 + tweet_offsets + [(0, 0)]
-    targets_start += 4
-    targets_end += 4
+    tweet_offsets = tweet_offsets + [(0, 0)]
 
     padding_length = max_len - len(input_ids)
     if padding_length > 0:
@@ -289,6 +289,13 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
             lowercase=True,
             add_prefix_space=True
         )
+    elif model_type == "roberta-base-squad":
+        tokenizer = tokenizers.ByteLevelBPETokenizer(
+            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
+            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
+            lowercase=True,
+            add_prefix_space=True
+        )
     elif model_type == "roberta-large":
         tokenizer = tokenizers.ByteLevelBPETokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
@@ -319,7 +326,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
                           model_type="bert-base-uncased",
                           batch_size=4,
                           val_batch_size=4,
-                          num_workers=2):
+                          num_workers=2,
+                          Datasampler="ImbalancedDatasetSampler"):
 
     CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     train_csv_path = os.path.join(data_path, 'split/train_fold_%s_seed_%s.csv' % (fold, seed))
@@ -365,6 +373,13 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
             lowercase=True,
             add_prefix_space=True
         )
+    elif model_type == "roberta-base-squad":
+        tokenizer = tokenizers.ByteLevelBPETokenizer(
+            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
+            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
+            lowercase=True,
+            add_prefix_space=True
+        )
     elif model_type == "roberta-large":
         tokenizer = tokenizers.ByteLevelBPETokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
@@ -384,8 +399,21 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         max_len=max_seq_length,
         augment=False
     )
-    train_loader = torch.utils.data.DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                                               drop_last=True)
+
+    if Datasampler == "None":
+        train_loader = torch.utils.data.DataLoader(ds_train,
+                                                   batch_size=batch_size,
+                                                   shuffle=True,
+                                                   num_workers=num_workers,
+                                                   drop_last=True)
+    elif Datasampler == "ImbalancedDatasetSampler":
+        train_loader = torch.utils.data.DataLoader(ds_train,
+                                                   batch_size=batch_size,
+                                                   sampler=ImbalancedDatasetSampler(ds_train),
+                                                   num_workers=num_workers,
+                                                   drop_last=True)
+    else:
+        raise NotImplementedError
 
     ds_val = TweetDataset(
         tweet=df_val.text.values,
@@ -424,11 +452,12 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                      batch_size=4,
                      num_workers=4):
 
-    test_loader = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, model_type=model_type,
+    test_loader, _ = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, model_type=model_type,
                                   batch_size=batch_size, num_workers=num_workers)
 
-    for _, (all_input_ids, all_attention_masks, all_token_type_ids,  all_start_positions, all_end_positions,
-            all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in enumerate(test_loader):
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
+            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+            in enumerate(test_loader):
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -458,7 +487,8 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                      num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-            all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in enumerate(train_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+            in enumerate(train_loader):
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -473,7 +503,8 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-            all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in enumerate(val_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+            in enumerate(val_loader):
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
