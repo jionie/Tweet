@@ -1,9 +1,8 @@
 from transformers import *
-import numpy as np
 import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from .Attention import *
 
 
 ##################################################### CrossEntropyLossOHEM
@@ -131,11 +130,6 @@ class TweetBert(nn.Module):
         weights_init.data[:-1] = -3
         self.layer_weights = torch.nn.Parameter(weights_init)
 
-        self.question_projection_start = nn.Linear(self.config.hidden_size, self.config.hidden_size)
-        self.context_projection_start = nn.Linear(self.config.hidden_size, self.config.hidden_size)
-        self.question_projection_end = nn.Linear(self.config.hidden_size, self.config.hidden_size)
-        self.context_projection_end = nn.Linear(self.config.hidden_size, self.config.hidden_size)
-
         self.qa_start = nn.Linear(self.config.hidden_size, 1)
         self.qa_end = nn.Linear(self.config.hidden_size, 1)
         self.qa_classifier = nn.Linear(self.config.hidden_size, 3)
@@ -146,11 +140,6 @@ class TweetBert(nn.Module):
                 # m.bias.data.fill_(0)
                 torch.nn.init.normal_(m.weight, std=0.02)
 
-        self.question_projection_start.apply(init_weights)
-        self.context_projection_start.apply(init_weights)
-        self.question_projection_end.apply(init_weights)
-        self.context_projection_end.apply(init_weights)
-
         self.qa_start.apply(init_weights)
         self.qa_end.apply(init_weights)
         self.qa_classifier.apply(init_weights)
@@ -160,6 +149,12 @@ class TweetBert(nn.Module):
         ])
 
         self.backup = {}
+
+        self.aoa = AttentionOverAttention(self.config.hidden_size)
+
+        self.cross_attention = CrossAttention(num_attention_head=12,
+                                              hidden_dim=self.config.hidden_size,
+                                              dropout_rate=0.1)
 
     def attack(self, epsilon=1., emb_name='word_embeddings'):
         for name, param in self.bert.named_parameters():
@@ -234,43 +229,26 @@ class TweetBert(nn.Module):
         # bs, seq len, hidden size
         fuse_hidden = self.get_hidden_states(hidden_states)
 
-        # # hidden for question
-        # fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
         # # hidden for context, padding added
         fuse_hidden_context = fuse_hidden[:, 4:-1, :]
 
         # #################################################################### aoa, attention over attention
-        # # bs, hidden size, question seq len
-        # question_start = self.question_projection_start(fuse_hidden_question).permute(0, 2, 1)
-        # question_end = self.question_projection_end(fuse_hidden_question).permute(0, 2, 1)
-        #
-        # # bs, context seq len, hidden size
-        # context_start = self.context_projection_start(fuse_hidden_context)
-        # context_end = self.context_projection_end(fuse_hidden_context)
-        #
-        # # Attention-over-Attention, bs, context seq len, question seq len
-        # aoa_M_start = context_start.bmm(question_start)
-        # aoa_M_end = context_end.bmm(question_end)
-        # aoa_M_start[attention_mask != 1, :] = -999999
-        # aoa_M_end[attention_mask != 1, :] = -999999
-        #
-        # # document level attention, aoa alpha, (bs, context seq len, question seq len), over document
-        # aoa_alpha_start = torch.softmax(aoa_M_start, dim=1)
-        # aoa_alpha_end = torch.softmax(aoa_M_end, dim=1)
-        #
-        # # query level attention, aoa beta, (bs, 1, question seq len), over query then take mean on document
-        # aoa_beta_start = torch.softmax(aoa_M_start, dim=2).mean(1).unsqueeze(1)
-        # aoa_beta_end = torch.softmax(aoa_M_end, dim=2).mean(1).unsqueeze(1)
-        #
-        # # aos s, bs, context seq len
-        # aoa_s_start = aoa_alpha_start.bmm(aoa_beta_start.permute(0, 2, 1)).squeeze(-1)
-        # aoa_s_end = aoa_alpha_end.bmm(aoa_beta_end.permute(0, 2, 1)).squeeze(-1)
-        #
+        # # hidden for question
+        # fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
+        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask)
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
 
-        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
-        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
+        # #################################################################### cross attention
+        # # hidden for question
+        fuse_hidden_question = fuse_hidden[:, 1, :].unsqueeze(1)
+        fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
+                                                       attention_mask[:, 4:-1])
+        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
+        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
+
+        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
+        # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
 
         classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
 

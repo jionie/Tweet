@@ -1,0 +1,6 @@
+sample = pd.read_csv("../input/tweet-sentiment-extraction/sample_submission.csv")
+sample.loc[:, 'selected_text'] = final_output
+
+sample['selected_text'] = sample['selected_text'].apply(lambda x: x.replace('!!!!', '!') if len(x.split())==1 else x)
+sample['selected_text'] = sample['selected_text'].apply(lambda x: x.replace('..', '.') if len(x.split())==1 else x)
+sample['selected_text'] = sample['selected_text'].apply(lambda x: x.replace('...', '.') if len(x.split())==1 else x)

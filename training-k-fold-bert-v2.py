@@ -155,10 +155,8 @@ class QA():
                                self.model.bert.encoder.layer[9],
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
+                               self.model.aoa,
+                               self.model.cross_attention,
                                self.model.qa_start,
                                self.model.qa_end,
                                self.model.qa_classifier,
@@ -192,10 +190,8 @@ class QA():
                                self.model.bert.encoder.layer[21],
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
+                               self.model.aoa,
+                               self.model.cross_attention,
                                self.model.qa_start,
                                self.model.qa_end,
                                self.model.qa_classifier,
@@ -538,7 +534,6 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
 
@@ -639,7 +634,6 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
 
@@ -653,7 +647,6 @@ class QA():
                         self.eval_metrics.append(jaccard_score)
 
                 l = np.array([loss.item() * self.config.val_batch_size])
-                n = np.array([self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
                 valid_loss = valid_loss + l
                 valid_num = valid_num + n
@@ -709,6 +702,7 @@ class QA():
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_onthot_ans_type = all_onthot_ans_type.cuda()
+                sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, onthot_ans_type=all_onthot_ans_type)
@@ -733,9 +727,10 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
+                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
+                        final_text = tweet
                     all_results.append(final_text)
 
         # save csv
