@@ -234,8 +234,10 @@ class AttentionOverAttention(nn.Module):
         # Attention-over-Attention, bs, context seq len, question seq len
         aoa_M_start = context_start.bmm(question_start)
         aoa_M_end = context_end.bmm(question_end)
-        aoa_M_start[attention_mask != 1, :] = -999999
-        aoa_M_end[attention_mask != 1, :] = -999999
+
+        attention_mask = attention_mask.unsqueeze(-1)
+        aoa_M_start = aoa_M_start.masked_fill(attention_mask == 0, -1e4)
+        aoa_M_end = aoa_M_end.masked_fill(attention_mask == 0, -1e4)
 
         # document level attention, aoa alpha, (bs, context seq len, question seq len), over document
         aoa_alpha_start = torch.softmax(aoa_M_start, dim=1)
