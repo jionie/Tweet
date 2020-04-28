@@ -133,6 +133,15 @@ class QA():
         self.model = TweetBert(model_type=self.config.model_type,
                                hidden_layers=self.config.hidden_layers).to(self.config.device)
 
+        def init_weights(model):
+            for name, param in model.named_parameters():
+                if 'weight' in name:
+                    torch.nn.init.normal_(param.data, std=0.02)
+                else:
+                    torch.nn.init.constant_(param.data, 0)
+
+        self.model.apply(init_weights)
+
     def differential_lr(self):
 
         if self.config.differential_lr:
