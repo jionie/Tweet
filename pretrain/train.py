@@ -22,10 +22,9 @@ amp.register_half_function(torch, "einsum")
 from apex.optimizers import FusedAdam
 
 # import dataset class
-from dataset.dataset_v2 import *
+from dataset.dataset import *
 
 # import utils
-from utils.squad_metrics import *
 from utils.ranger import *
 from utils.lrs_scheduler import *
 from utils.loss_function import *
@@ -92,27 +91,13 @@ class QA():
     def load_data(self):
         self.log.write('\nLoading data...')
 
-        get_train_val_split(data_path=self.config.data_path,
-                            save_path=self.config.save_path,
-                            n_splits=self.config.n_splits,
-                            seed=self.config.seed,
-                            split=self.config.split)
-
-        self.test_data_loader, self.tokenizer = get_test_loader(data_path=self.config.data_path,
-                                                max_seq_length=self.config.max_seq_length,
-                                                model_type=self.config.model_type,
-                                                batch_size=self.config.val_batch_size,
-                                                num_workers=self.config.num_workers)
-
-        self.train_data_loader, self.val_data_loader, _ = get_train_val_loaders(data_path=self.config.data_path,
+        self.train_data_loader, self.val_data_loader = get_train_val_loaders(
                                                                   seed=self.config.seed,
-                                                                  fold=self.config.fold,
                                                                   max_seq_length=self.config.max_seq_length,
                                                                   model_type=self.config.model_type,
                                                                   batch_size=self.config.batch_size,
                                                                   val_batch_size=self.config.val_batch_size,
-                                                                  num_workers=self.config.num_workers,
-                                                                  Datasampler=self.config.Datasampler)
+                                                                  num_workers=self.config.num_workers)
 
     def prepare_train(self):
         # preparation for training
@@ -155,12 +140,6 @@ class QA():
                                self.model.bert.encoder.layer[9],
                                self.model.bert.encoder.layer[10],
                                self.model.bert.encoder.layer[11],
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.qa_start,
-                               self.model.qa_end,
                                self.model.qa_classifier,
                                ]
 
@@ -192,12 +171,6 @@ class QA():
                                self.model.bert.encoder.layer[21],
                                self.model.bert.encoder.layer[22],
                                self.model.bert.encoder.layer[23],
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.question_projection_start,
-                               self.model.context_projection_end,
-                               self.model.qa_start,
-                               self.model.qa_end,
                                self.model.qa_classifier,
                                ]
             else:
@@ -560,9 +533,7 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
-                all_start_positions = all_start_positions.cuda()
-                all_end_positions = all_end_positions.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
+                all_onthot_sentiment = all_onthot_sentiment.cuda()
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                      token_type_ids=all_token_type_ids, onthot_sentiments_type=all_onthot_sentiment)

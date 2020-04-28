@@ -23,7 +23,7 @@ def calculate_jaccard_score(
         filtered_output = original_tweet
     else:
         input_ids_orig = tokenizer.encode(original_tweet).ids
-        input_ids = input_ids_orig + [2]
+        input_ids = input_ids_orig
         filtered_output = tokenizer.decode(input_ids[idx_start:idx_end+1])
 
     jac = jaccard(target_string.strip(), filtered_output.strip())

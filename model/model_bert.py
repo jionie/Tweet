@@ -220,26 +220,26 @@ class TweetBert(nn.Module):
         fuse_hidden = self.get_hidden_states(hidden_states)
 
         # # hidden for context, padding added, ignore end_idx
-        fuse_hidden_context = fuse_hidden[:, 4:-2, :]
+        fuse_hidden_context = fuse_hidden[:, 4:-1, :]
 
         # #################################################################### aoa, attention over attention
         # hidden for question, cls + sentiment
         # fuse_hidden_question = fuse_hidden[:, 0:2, :]
-        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:-2])
+        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:-1])
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
 
         # #################################################################### cross attention
         # hidden for question, cls + sentiment
-        fuse_hidden_question = fuse_hidden[:, 0:2, :]
-        fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
-                                                       attention_mask[:, 4:-2])
-        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
-        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
+        # fuse_hidden_question = fuse_hidden[:, 0:2, :]
+        # fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
+        #                                                attention_mask[:, 4:-1])
+        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
+        # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
 
         # #################################################################### direct approach
-        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
-        # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
+        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
+        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
 
         classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
 

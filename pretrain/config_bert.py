@@ -28,7 +28,7 @@ class Config_Bert:
         self.n_splits = 5
         self.fold = fold
         # path, specify the path for saving model
-        self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/pretrain/model", self.model_name)
+        self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/pretrain", self.model_name)
         if not os.path.exists(self.model_folder):
             os.mkdir(self.model_folder)
         self.checkpoint_folder_all_fold = os.path.join(self.model_folder, self.model_type + '-' + str(self.seed))
@@ -78,7 +78,7 @@ class Config_Bert:
         # epochs
         self.num_epoch = 8
         # saving rate
-        self.saving_rate = 1 / 3
+        self.saving_rate = 1
         # early stopping
         self.early_stopping = 3 / self.saving_rate
         # progress rate

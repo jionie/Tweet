@@ -1,14 +1,15 @@
-import argparse
 import os
 import pandas as pd
-import numpy as np
 
 import torch
 from torch.utils.data import DataLoader
 from transformers import *
 from transformers.data.processors.squad import *
 import tokenizers
-from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.model_selection import StratifiedKFold
+
+import nlpaug.augmenter.word as naw
+import nlpaug.flow as naf
 
 
 ############################################ Define process data functions
@@ -45,10 +46,10 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 def process_data(tweet, sentiment, tokenizer, max_len, augment):
 
     if augment:
-        tweet = augmentation(tweet, insert=False, substitute=False, swap=True, delete=True)
+        tweet = augmentation(tweet, insert=False, substitute=True, swap=False, delete=True)
 
     tok_tweet = tokenizer.encode(tweet)
-    input_ids_orig = tok_tweet.ids
+    input_ids_orig = tok_tweet
 
     input_ids = [0] + input_ids_orig + [2]
     token_type_ids = [0] + [0] * (len(input_ids_orig) + 1)
@@ -112,6 +113,7 @@ class TweetDataset:
 
 
 def get_train_val_loaders(
+                          seed=42,
                           max_seq_length=192,
                           model_type="roberta-base",
                           batch_size=4,
@@ -119,9 +121,10 @@ def get_train_val_loaders(
                           num_workers=2):
 
     CURR_PATH = os.path.dirname(os.path.realpath(__file__))
-    df = pd.read_csv("tweet_dataset.csv")
+    df = pd.read_csv("/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/tweet_dataset.csv")
+    df = df.dropna()
 
-    kf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True).split(X=df.text, y=df.sentiment)
+    kf = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True).split(X=df.text, y=df.sentiment)
 
     df_train = None
     df_val = None
@@ -131,55 +134,44 @@ def get_train_val_loaders(
         break
 
     if (model_type == "bert-base-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-large-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-base-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif (model_type == "bert-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif model_type == "t5-base":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-base":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
-        )
-    elif model_type == "roberta-base-squad":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-large":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     else:
 
@@ -190,7 +182,7 @@ def get_train_val_loaders(
         sentiment=df_train.sentiment.values,
         tokenizer=tokenizer,
         max_len=max_seq_length,
-        augment=True
+        augment=False
     )
 
 

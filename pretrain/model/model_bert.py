@@ -129,8 +129,6 @@ class TweetBert(nn.Module):
         weights_init.data[:-1] = -3
         self.layer_weights = torch.nn.Parameter(weights_init)
 
-        self.qa_start = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end = nn.Linear(self.config.hidden_size, 1)
         self.qa_classifier = nn.Linear(self.config.hidden_size, 13)
 
         def init_weights(m):
@@ -139,8 +137,6 @@ class TweetBert(nn.Module):
                 # m.bias.data.fill_(0)
                 torch.nn.init.normal_(m.weight, std=0.02)
 
-        self.qa_start.apply(init_weights)
-        self.qa_end.apply(init_weights)
         self.qa_classifier.apply(init_weights)
 
         self.dropouts = nn.ModuleList([
@@ -203,13 +199,14 @@ class TweetBert(nn.Module):
         hidden_states = outputs[2]
         # bs, seq len, hidden size
         fuse_hidden = self.get_hidden_states(hidden_states)
+        # fuse_hidden = fuse_hidden.mean(1)
 
         classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
 
         loss_classification = nn.BCEWithLogitsLoss()
         classification_loss = loss_classification(classification_logits, onthot_sentiments_type)
 
-        outputs = classification_logits + outputs[2:]
+        outputs = (classification_logits, ) + outputs[2:]
         outputs = (classification_loss,) + outputs
 
         return outputs

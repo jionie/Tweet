@@ -146,6 +146,31 @@ class QA():
         self.model.qa_end.apply(init_weights)
         self.model.qa_classifier.apply(init_weights)
 
+        if self.config.load_pretrain:
+            checkpoint_to_load = torch.load(self.config.checkpoint_pretrain, map_location=self.config.device)
+            model_state_dict = checkpoint_to_load['model']
+
+            if self.config.data_parallel:
+                state_dict = self.model.model.state_dict()
+            else:
+                state_dict = self.model.state_dict()
+
+            keys = list(state_dict.keys())
+
+            for key in keys:
+                if any(s in key for s in (self.config.skip_layers + ["qa_classifier.weight", "qa_classifier.bias"])):
+                    continue
+                try:
+                    state_dict[key] = model_state_dict[key]
+                except:
+                    print("Missing key:", key)
+
+            if self.config.data_parallel:
+                self.model.model.load_state_dict(state_dict)
+            else:
+                self.model.load_state_dict(state_dict)
+
+
     def differential_lr(self):
 
         if self.config.differential_lr:

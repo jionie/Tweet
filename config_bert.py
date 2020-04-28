@@ -8,6 +8,7 @@ class Config_Bert:
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
+        self.load_pretrain = False
         self.data_parallel = False  # enable data parallel training
         self.apex = True  # enable mix precision training
         self.adversarial = False  # enable adversarial training
@@ -29,6 +30,9 @@ class Config_Bert:
         self.n_splits = 5
         self.fold = fold
         # path, specify the path for saving model
+        self.checkpoint_pretrain = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/pretrain",
+                                                self.model_name + "/" + self.model_type + '-' + str(self.seed)
+                                                + "/fold_0/pretrain.pth")
         self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/model", self.model_name)
         if not os.path.exists(self.model_folder):
             os.mkdir(self.model_folder)
