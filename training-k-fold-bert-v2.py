@@ -137,8 +137,6 @@ class QA():
             for name, param in model.named_parameters():
                 if 'weight' in name:
                     torch.nn.init.normal_(param.data, std=0.02)
-                else:
-                    torch.nn.init.constant_(param.data, 0)
 
         self.model.cross_attention.apply(init_weights)
         self.model.cross_attention.apply(init_weights)
@@ -148,7 +146,7 @@ class QA():
 
         if self.config.load_pretrain:
             checkpoint_to_load = torch.load(self.config.checkpoint_pretrain, map_location=self.config.device)
-            model_state_dict = checkpoint_to_load['model']
+            model_state_dict = checkpoint_to_load
 
             if self.config.data_parallel:
                 state_dict = self.model.model.state_dict()
@@ -478,7 +476,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -629,7 +627,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -730,7 +728,7 @@ class QA():
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
                                all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
-                               all_offsets) in enumerate(self.test_data_loader):
+                               ) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()

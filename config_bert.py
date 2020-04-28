@@ -8,7 +8,7 @@ class Config_Bert:
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
-        self.load_pretrain = False
+        self.load_pretrain = True
         self.data_parallel = False  # enable data parallel training
         self.apex = True  # enable mix precision training
         self.adversarial = False  # enable adversarial training
@@ -32,7 +32,7 @@ class Config_Bert:
         # path, specify the path for saving model
         self.checkpoint_pretrain = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/pretrain",
                                                 self.model_name + "/" + self.model_type + '-' + str(self.seed)
-                                                + "/fold_0/pretrain.pth")
+                                                + "/fold_0/pytorch_model.bin")
         self.model_folder = os.path.join("/media/jionie/my_disk/Kaggle/Tweet/model", self.model_name)
         if not os.path.exists(self.model_folder):
             os.mkdir(self.model_folder)
@@ -65,7 +65,7 @@ class Config_Bert:
         self.warmup_proportion = 0.005
         self.warmup_steps = 200
         # lr
-        self.lr = 1e-3
+        self.lr = 2e-4
         self.weight_decay = 0.001
         # differential lr settings
         self.differential_lr = False

@@ -89,10 +89,12 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
     idx1 = None
 
     for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
-        if " " + tweet[ind: ind + len_st] == selected_text:
+        if " " + tweet[ind : ind + len_st] == selected_text:
             idx0 = ind
             idx1 = ind + len_st - 1
             break
+
+    # print(selected_text, tweet[idx0 : idx1 + 1])
 
     if augment:
         # augment for non-select text
@@ -117,23 +119,29 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
 
     char_targets = [0] * len(tweet)
     if idx0 != None and idx1 != None:
-        for ct in range(idx0, idx1 + 1):
-            char_targets[ct] = 1
+        char_targets[idx0 : idx1 + 1] = 1
 
     tok_tweet = tokenizer.encode(tweet)
-    input_ids_orig = tok_tweet.ids
-    tweet_offsets = tok_tweet.offsets
+
+    offsets = []
+    idx = 0
+    for t in tok_tweet:
+        w = tokenizer.decode([t])
+        offsets.append((idx, idx + len(w)))
+        idx += len(w)
+
+    input_ids_orig = tok_tweet
 
     target_idx = []
-    for j, (offset1, offset2) in enumerate(tweet_offsets):
-        if sum(char_targets[offset1: offset2]) > 0:
+    for j, (offset1, offset2) in enumerate(offsets):
+        if sum(char_targets[offset1 : offset2]) > 0:
             target_idx.append(j)
 
     if len(target_idx) == 0:
         print(tweet, selected_text)
 
-    targets_start = target_idx[0]
-    targets_end = target_idx[-1]
+    targets_start = target_idx[0] + 1
+    targets_end = target_idx[-1] + 1
 
     # ... i kinda lost respect  . i kinda lost respect
     # print(tokenizer.decode(input_ids_orig[targets_start:targets_end+1]), selected_text)
@@ -243,61 +251,49 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
                     batch_size=4,
                     num_workers=4):
 
-    CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     csv_path = os.path.join(data_path, "test.csv")
     df_test = pd.read_csv(csv_path)
     df_test.loc[:, "selected_text"] = df_test.text.values
 
     if (model_type == "bert-base-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-large-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-base-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif (model_type == "bert-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif model_type == "t5-base":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-base":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
-        )
-    elif model_type == "roberta-base-squad":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-large":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     else:
 
@@ -325,7 +321,6 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
                           num_workers=2,
                           Datasampler="ImbalancedDatasetSampler"):
 
-    CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     train_csv_path = os.path.join(data_path, 'split/train_fold_%s_seed_%s.csv' % (fold, seed))
     val_csv_path = os.path.join(data_path, 'split/val_fold_%s_seed_%s.csv' % (fold, seed))
 
@@ -333,58 +328,46 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     df_val = pd.read_csv(val_csv_path)
 
     if (model_type == "bert-base-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-large-uncased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "bert-base-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif (model_type == "bert-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
+        )
+    elif model_type == "t5-base":
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=False,
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-base":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
-        )
-    elif model_type == "roberta-base-squad":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     elif model_type == "roberta-large":
-        tokenizer = tokenizers.ByteLevelBPETokenizer(
-            vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
-            merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
-            lowercase=True,
-            add_prefix_space=True
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_type,
+            do_lower_case=True,
         )
     else:
-
         raise NotImplementedError
 
     ds_train = TweetDataset(

@@ -19,10 +19,10 @@ def calculate_jaccard_score(
 
     if idx_end < idx_start:
         length = len(original_tweet)
-        filtered_output = original_tweet[length // 4 : length // 4 * 3]
-        # filtered_output = original_tweet
+        # filtered_output = original_tweet[length // 4 : length // 4 * 3]
+        filtered_output = original_tweet
     else:
-        input_ids_orig = tokenizer.encode(original_tweet).ids
+        input_ids_orig = tokenizer.encode(original_tweet)
         input_ids = input_ids_orig + [2]
         filtered_output = tokenizer.decode(input_ids[idx_start:idx_end+1])
 
