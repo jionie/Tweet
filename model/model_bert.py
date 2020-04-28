@@ -134,16 +134,6 @@ class TweetBert(nn.Module):
         self.qa_end = nn.Linear(self.config.hidden_size, 1)
         self.qa_classifier = nn.Linear(self.config.hidden_size, 3)
 
-        def init_weights(m):
-            if type(m) == nn.Linear:
-                # torch.nn.init.xavier_uniform(m.weight)
-                # m.bias.data.fill_(0)
-                torch.nn.init.normal_(m.weight, std=0.02)
-
-        self.qa_start.apply(init_weights)
-        self.qa_end.apply(init_weights)
-        self.qa_classifier.apply(init_weights)
-
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
         ])

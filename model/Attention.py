@@ -162,15 +162,6 @@ class CrossAttention(nn.Module):
         self.projection_value = nn.Linear(self.hidden_dim, self.all_attention_hidden_dim)
         self.projection_final = nn.Linear(self.all_attention_hidden_dim, self.hidden_dim)
 
-        def init_weights(m):
-            if type(m) == nn.Linear:
-                torch.nn.init.normal_(m.weight, std=0.02)
-
-        self.projection_query.apply(init_weights)
-        self.projection_key.apply(init_weights)
-        self.projection_value.apply(init_weights)
-        self.projection_final.apply(init_weights)
-
     def forward(self, query, key, value, mask):
 
         batch_size = query.shape[0]
@@ -210,15 +201,6 @@ class AttentionOverAttention(nn.Module):
         self.context_projection_start = nn.Linear(hidden_size, hidden_size)
         self.question_projection_end = nn.Linear(hidden_size, hidden_size)
         self.context_projection_end = nn.Linear(hidden_size, hidden_size)
-
-        def init_weights(m):
-            if type(m) == nn.Linear:
-                torch.nn.init.normal_(m.weight, std=0.02)
-
-        self.question_projection_start.apply(init_weights)
-        self.context_projection_start.apply(init_weights)
-        self.question_projection_end.apply(init_weights)
-        self.context_projection_end.apply(init_weights)
 
     def forward(self, fuse_hidden_question, fuse_hidden_context, attention_mask):
         # fuse_hidden_question: (batch_size, seq_len_q, hidden_size)
