@@ -140,7 +140,11 @@ class QA():
                 else:
                     torch.nn.init.constant_(param.data, 0)
 
-        self.model.apply(init_weights)
+        self.model.cross_attention.apply(init_weights)
+        self.model.cross_attention.apply(init_weights)
+        self.model.qa_start.apply(init_weights)
+        self.model.qa_end.apply(init_weights)
+        self.model.qa_classifier.apply(init_weights)
 
     def differential_lr(self):
 
