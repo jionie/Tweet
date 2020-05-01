@@ -17,40 +17,84 @@ class CrossEntropyLossOHEM(torch.nn.Module):
             valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
             return torch.mean(valid_loss)
 
-class MSELoss(nn.Module):
-    def __init__(self, gamma=2):
-        super().__init__()
-        self.gamma = gamma
-        self.MSELoss = nn.MSELoss()
 
-    def forward(self, logit, target):
-        target = target.float()
+class LabelSmoothingLossOHEM(torch.nn.Module):
+    def __init__(self, label_smoothing, tgt_vocab_size, ignore_index, top_k=0.75):
+        super(LabelSmoothingLossOHEM, self).__init__()
+        self.top_k = top_k
+        self.loss = LabelSmoothingLoss(label_smoothing, tgt_vocab_size, ignore_index=ignore_index, reduction='none')
 
-        loss = self.MSELoss(torch.sigmoid(logit), target)
+    def forward(self, input, target):
+        loss = self.loss(input, target)
+        if self.top_k == 1:
+            return torch.mean(loss)
+        else:
+            valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
+            return torch.mean(valid_loss)
 
-        logpt = F.log_softmax(loss, dim=0)
 
-        invprobs = torch.exp(logpt)
+class LabelSmoothingLossOHEM(torch.nn.Module):
+    def __init__(self, label_smoothing, tgt_vocab_size, ignore_index, top_k=0.75, reduction='mean'):
+        super(LabelSmoothingLossOHEM, self).__init__()
+        self.top_k = top_k
+        self.loss = LabelSmoothingLoss(label_smoothing, tgt_vocab_size, ignore_index=ignore_index, reduction='none')
+        self.reduction = reduction
 
-        loss = (invprobs ** self.gamma) * loss
-        if len(loss.size())==2:
-            loss = loss.sum(dim=1)
+    def forward(self, input, target, sentiment=None):
+        loss = self.loss(input, target).mean(-1)
+        if sentiment is not None:
+            loss *= sentiment
+        if self.top_k == 1:
+            if self.reduction == "mean":
+                return torch.mean(loss)
+            elif self.reduction == "sum":
+                return torch.sum(loss)
+            elif self.reduction == "none":
+                return loss
+            else:
+                raise NotImplementedError
+        else:
+            valid_loss, idxs = torch.topk(loss, int(self.top_k * loss.size()[0]), dim=0)
+            if self.reduction == "mean":
+                return torch.mean(valid_loss)
+            elif self.reduction == "sum":
+                return torch.sum(valid_loss)
+            elif self.reduction == "none":
+                return valid_loss
+            else:
+                raise NotImplementedError
 
-        return loss.mean()
 
-class MSEBCELoss(nn.Module):
-    def __init__(self, gamma=2):
-        super().__init__()
-        self.gamma = gamma
-        self.MSELoss = MSELoss()
-        self.NNMSELoss = nn.MSELoss()
-        self.BCELoss = nn.BCEWithLogitsLoss()
+class LabelSmoothingLoss(nn.Module):
+    """
+    With label smoothing,
+    KL-divergence between q_{smoothed ground truth prob.}(w)
+    and p_{prob. computed by model}(w) is minimized.
+    """
+    def __init__(self, label_smoothing, tgt_vocab_size, ignore_index=-100, reduction="none"):
+        assert 0.0 < label_smoothing <= 1.0
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+        super(LabelSmoothingLoss, self).__init__()
 
-    def forward(self, logit, target):
-        target = target.float()
-        loss = self.NNMSELoss(logit, target) * 10 + self.BCELoss(logit, target)
+        self.num_classes = tgt_vocab_size
+        self.label_smoothing = label_smoothing
+        self.confidence = 1.0 - label_smoothing
 
-        return loss.mean()
+    def forward(self, output, target):
+        """
+        output (FloatTensor): batch_size x n_classes
+        target (LongTensor): batch_size
+        """
+
+        output = F.log_softmax(output, -1)
+
+        one_hot = torch.zeros_like(output)
+        one_hot.fill_(self.label_smoothing / (self.num_classes - 1))
+        one_hot.scatter_(1, target.unsqueeze(1).long(), self.confidence)
+
+        return F.kl_div(output, one_hot, reduction=self.reduction)
+
 
 class SoftDiceLoss_binary(nn.Module):
     def __init__(self):

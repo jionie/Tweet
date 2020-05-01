@@ -780,6 +780,52 @@ class QA():
 
         return
 
+    def find_errors(self):
+
+        scores = []
+        bad_predictions = []
+        bad_labels = []
+        bad_scores = []
+
+        for fold in range(5):
+            checkpoint_folder = os.path.join(self.config.checkpoint_folder_all_fold, 'fold_' + str(fold) + '/')
+            val_pred = pd.read_csv(os.path.join(checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
+                                                                                                   fold)))
+            val_label = pd.read_csv(os.path.join(checkpoint_folder, "val_fold_{}_seed_{}.csv".format(fold,
+                                                                                                     self.config.seed)))
+            pred_text = val_pred.selected_text
+            label_text = val_label.selected_text
+
+            for i, label_string in enumerate(label_text):
+                pred_string = pred_text[i]
+
+                try:
+                    if pred_string[0] == " ":
+                        print(pred_string[1:])
+                        print(label_string)
+                        print(jaccard(label_string.strip(), pred_string.strip()), jaccard(label_string.strip(), pred_string[1:].strip()))
+                        print("_______________________________________")
+                        pred_string = pred_string[1:]
+                    jac = jaccard(label_string.strip(), pred_string.strip())
+                except:
+                    continue
+
+                scores.append(jac)
+
+                if jac < 0.5:
+                    bad_scores.append(jac)
+                    bad_predictions.append(pred_string)
+                    bad_labels.append(label_string)
+
+        bad_samples = pd.DataFrame({"score": bad_scores, "prediction": bad_predictions, "label": bad_labels})
+        bad_samples = bad_samples.sort_values(by=["score"])
+
+        bad_samples.to_csv(os.path.join(self.config.checkpoint_folder_all_fold, "bad_samples.csv"))
+
+        print(np.mean(scores))
+
+        return
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -792,3 +838,4 @@ if __name__ == "__main__":
     qa.train_op()
     # qa.evaluate_op()
     # qa.infer_op()
+    # qa.find_errors()

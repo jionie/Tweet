@@ -2,6 +2,7 @@ from transformers import *
 import math
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from .Attention import *
 
 
@@ -13,10 +14,12 @@ class CrossEntropyLossOHEM(torch.nn.Module):
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
         self.reduction = reduction
 
-    def forward(self, input, target, sentiment=None):
+    def forward(self, input, target, sentiment=None, position_penalty=None):
         loss = self.loss(input, target)
         if sentiment is not None:
             loss *= sentiment
+        if position_penalty is not None:
+            loss *= position_penalty
         if self.top_k == 1:
             if self.reduction == "mean":
                 return torch.mean(loss)
@@ -36,6 +39,15 @@ class CrossEntropyLossOHEM(torch.nn.Module):
                 return valid_loss
             else:
                 raise NotImplementedError
+
+
+def pos_weight(pred_tensor, pos_tensor, neg_weight=1, pos_weight=1):
+    # neg_weight for when pred position < target position
+    # pos_weight for when pred position > target position
+    gap = torch.argmax(pred_tensor, dim=1) - pos_tensor
+    gap = gap.type(torch.float32)
+    return torch.where(gap < 0, -neg_weight * gap, pos_weight * gap)
+
 
 def swish(x):
     return x * torch.sigmoid(x)
@@ -257,8 +269,12 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
+            start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
+            end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
+
             if self.training:
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
+
                 loss_classification = nn.BCEWithLogitsLoss()
                 classification_loss = loss_classification(classification_logits, onthot_ans_type)
 
@@ -296,7 +312,7 @@ def test_Net():
     all_attention_masks = torch.tensor([[1, 1, 1, 1, 1, 0, 0], [1, 1, 1, 1, 1, 0, 0]])
     all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
     all_start_positions = torch.tensor([0, 1])
-    all_end_positions =  torch.tensor([3, 4])
+    all_end_positions =  torch.tensor([2, 3])
     all_onthot_ans_type = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
     print(all_start_positions.shape)
 
