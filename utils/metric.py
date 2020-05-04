@@ -52,12 +52,14 @@ def calculate_jaccard_score(
             if len(prediction) == 0:
                 filtered_output = prediction
             else:
+                max_match = 0
                 for idx in range(len(original_tweet)):
+                    curr_output = ""
                     if original_tweet[idx] == prediction[0]:
                         tweet_idx = idx
                         for prediction_idx in range(len(prediction)):
                             if (original_tweet[tweet_idx] == prediction[prediction_idx]):
-                                filtered_output += original_tweet[tweet_idx]
+                                curr_output += original_tweet[tweet_idx]
                                 tweet_idx += 1
 
                                 # reach tweet end
@@ -75,10 +77,14 @@ def calculate_jaccard_score(
                                 if (prediction[prediction_idx] == " "):
                                     continue
                                 else:
-                                    filtered_output = ""
                                     break
                         if finished:
+                            filtered_output = curr_output
                             break
+                        else:
+                            if max_match < len(curr_output):
+                                max_match = len(curr_output)
+                                filtered_output = curr_output
 
             if len(prediction) != 0 and len(filtered_output) == 0:
                 print("orig_tweet: ", original_tweet)
