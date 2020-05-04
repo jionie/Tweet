@@ -138,11 +138,17 @@ class QA():
                 if 'weight' in name:
                     torch.nn.init.normal_(param.data, std=0.02)
 
+        def init_weights_linear(m):
+            if type(m) == torch.nn.Linear:
+                # torch.nn.init.xavier_uniform(m.weight)
+                # m.bias.data.fill_(0)
+                torch.nn.init.normal_(m.weight, std=0.02)
+
         self.model.cross_attention.apply(init_weights)
         self.model.cross_attention.apply(init_weights)
-        self.model.qa_start.apply(init_weights)
-        self.model.qa_end.apply(init_weights)
-        self.model.qa_classifier.apply(init_weights)
+        self.model.qa_start.apply(init_weights_linear)
+        self.model.qa_end.apply(init_weights_linear)
+        self.model.qa_classifier.apply(init_weights_linear)
 
         if self.config.load_pretrain:
             checkpoint_to_load = torch.load(self.config.checkpoint_pretrain, map_location=self.config.device)
@@ -476,7 +482,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -563,19 +569,21 @@ class QA():
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
 
-                for px, tweet in enumerate(all_orig_tweet):
+                for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
+                        tweet=all_tweet[px],
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         tokenizer=self.tokenizer,
+                        offsets=all_offsets[px],
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.train_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.train_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        self.train_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
+                        self.train_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                     else:
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
@@ -627,7 +635,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -663,21 +671,23 @@ class QA():
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
 
-                for px, tweet in enumerate(all_orig_tweet):
+                for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
+                        tweet=all_tweet[px],
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         tokenizer=self.tokenizer,
+                        offsets=all_offsets[px],
                     )
 
                     all_result.append(final_text)
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.eval_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.eval_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        self.eval_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                     else:
                         self.eval_metrics_no_postprocessing.append(jaccard_score)
                         self.eval_metrics.append(jaccard_score)
@@ -727,8 +737,8 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
-                               ) in enumerate(self.test_data_loader):
+                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet,
+                               all_sentiment, all_offsets) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -756,17 +766,19 @@ class QA():
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
 
-                for px, tweet in enumerate(all_orig_tweet):
+                for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
+                        tweet=all_tweet[px],
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         tokenizer=self.tokenizer,
+                        offsets=all_offsets[px],
                     )
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        final_text = tweet
+                        final_text = orig_tweet
                     all_results.append(final_text)
 
         # save csv

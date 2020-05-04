@@ -232,12 +232,12 @@ class TweetBert(nn.Module):
         fuse_hidden = self.get_hidden_states(hidden_states)
 
         # # hidden for context, padding added, ignore end_idx
-        fuse_hidden_context = fuse_hidden[:, 4:-1, :]
+        fuse_hidden_context = fuse_hidden[:, 4:, :]
 
         # #################################################################### aoa, attention over attention
         # hidden for question, cls + sentiment
         # fuse_hidden_question = fuse_hidden[:, 0:2, :]
-        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:-1])
+        # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:])
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
 
@@ -245,7 +245,7 @@ class TweetBert(nn.Module):
         # hidden for question, cls + sentiment
         # fuse_hidden_question = fuse_hidden[:, 0:2, :]
         # fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
-        #                                                attention_mask[:, 4:-1])
+        #                                                attention_mask[:, 4:])
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
 
@@ -269,8 +269,8 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
-            start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
-            end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
+            # start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
+            # end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
 
             if self.training:
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")

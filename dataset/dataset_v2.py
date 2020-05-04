@@ -1,4 +1,5 @@
 import argparse
+import re
 import os
 import pandas as pd
 import numpy as np
@@ -74,6 +75,25 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 
 
 def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=False):
+
+    # keep origin tweet and selected_text
+    orig_tweet = " " + " ".join(str(tweet).split())
+    orig_selected_text = " " + " ".join(str(selected_text).split())
+
+    if isinstance(tweet, str):
+        # split continuous sign
+        tweet = re.split('([^a-zA-Z0-9])', tweet)
+        tweet = [element for element in tweet if element != " " and element != ""]
+        tweet = " ".join(tweet)
+
+        selected_text = re.split('([^a-zA-Z0-9])', selected_text)
+        selected_text = [element for element in selected_text if element != " " and element != ""]
+        selected_text = " ".join(selected_text)
+
+    # print("tweet: ", tweet)
+    # print("selexted_text: ", selected_text)
+
+    # for tokenizer
     tweet = " " + " ".join(str(tweet).split())
     selected_text = " " + " ".join(str(selected_text).split())
 
@@ -147,12 +167,14 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
     input_ids = [0] + [sentiment_id[sentiment]] + [2] + [2] + input_ids_orig + [2]
     token_type_ids = [0, 0, 0, 0] + [0] * (len(input_ids_orig) + 1)
     mask = [1] * len(token_type_ids)
+    tweet_offsets = tweet_offsets + [(0, 0)]
 
     padding_length = max_len - len(input_ids)
     if padding_length > 0:
         input_ids = input_ids + ([1] * padding_length)
         mask = mask + ([0] * padding_length)
         token_type_ids = token_type_ids + ([0] * padding_length)
+        tweet_offsets = tweet_offsets + ([(0, 0)] * padding_length)
 
     return {
         'ids': input_ids,
@@ -160,9 +182,11 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
         'token_type_ids': token_type_ids,
         'targets_start': targets_start,
         'targets_end': targets_end,
-        'orig_tweet': tweet,
-        'orig_selected': selected_text,
+        'orig_tweet': orig_tweet,
+        'orig_selected': orig_selected_text,
+        'tweet': tweet,
         'sentiment': sentiment,
+        'offsets': tweet_offsets,
         'ans_type': ans_type
     }
 
@@ -204,7 +228,9 @@ class TweetDataset:
                onthot_ans_type[data["ans_type"]], \
                data["orig_tweet"], \
                data["orig_selected"], \
-               data["sentiment"]
+               data["tweet"], \
+               data["sentiment"], \
+               torch.tensor(data["offsets"], dtype=torch.long)
 
 
 
@@ -452,7 +478,7 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                                   batch_size=batch_size, num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
             in enumerate(test_loader):
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
@@ -462,6 +488,7 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
         print("all_end_positions (numpy): ", all_end_positions.numpy().shape)
         print("all_orig_tweet (string): ", all_orig_tweet)
         print("all_orig_selected (string): ", all_orig_selected)
+        print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
         print("all_offsets (numpy): ", all_offsets.numpy().shape)
         print("------------------------testing test loader finished----------------------")
@@ -483,7 +510,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                      num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
             in enumerate(train_loader):
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
@@ -493,13 +520,14 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("all_end_positions (numpy): ", all_end_positions.numpy().shape)
         print("all_orig_tweet (string): ", all_orig_tweet)
         print("all_orig_selected (string): ", all_orig_selected)
+        print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
         print("all_offsets (numpy): ", all_offsets.numpy().shape)
         print("------------------------testing train loader finished----------------------")
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
             in enumerate(val_loader):
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
@@ -509,6 +537,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("all_end_positions (numpy): ", all_end_positions.numpy().shape)
         print("all_orig_tweet (string): ", all_orig_tweet)
         print("all_orig_selected (string): ", all_orig_selected)
+        print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
         print("all_offsets (numpy): ", all_offsets.numpy().shape)
         print("------------------------testing val loader finished----------------------")
