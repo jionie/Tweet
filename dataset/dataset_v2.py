@@ -229,6 +229,7 @@ class TweetDataset:
                data["orig_tweet"], \
                data["orig_selected"], \
                data["tweet"], \
+               data["ans_type"], \
                data["sentiment"], \
                torch.tensor(data["offsets"], dtype=torch.long)
 

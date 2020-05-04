@@ -14,10 +14,12 @@ class CrossEntropyLossOHEM(torch.nn.Module):
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
         self.reduction = reduction
 
-    def forward(self, input, target, sentiment=None, position_penalty=None):
+    def forward(self, input, target, sentiment=None, ans=None, position_penalty=None):
         loss = self.loss(input, target)
         if sentiment is not None:
             loss *= sentiment
+        if ans is not None:
+            loss *= ans
         if position_penalty is not None:
             loss *= position_penalty
         if self.top_k == 1:
@@ -216,6 +218,7 @@ class TweetBert(nn.Module):
             start_positions=None,
             end_positions=None,
             sentiment_weight=None,
+            ans_weight=None,
     ):
 
         outputs = self.bert(
@@ -278,12 +281,9 @@ class TweetBert(nn.Module):
                 loss_classification = nn.BCEWithLogitsLoss()
                 classification_loss = loss_classification(classification_logits, onthot_ans_type)
 
-                if sentiment_weight is None:
-                    start_loss = loss_fct(start_logits, start_positions)
-                    end_loss = loss_fct(end_logits, end_positions)
-                else:
-                    start_loss = loss_fct(start_logits, start_positions, sentiment_weight)
-                    end_loss = loss_fct(end_logits, end_positions, sentiment_weight)
+                start_loss = loss_fct(start_logits, start_positions, sentiment=sentiment_weight, ans=ans_weight)
+                end_loss = loss_fct(end_logits, end_positions, sentiment=sentiment_weight, ans=ans_weight)
+
                 total_loss = (start_loss + end_loss + classification_loss) / 3
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
