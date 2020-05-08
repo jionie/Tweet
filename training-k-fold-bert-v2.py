@@ -785,6 +785,7 @@ class QA():
         scores = []
         bad_predictions = []
         bad_labels = []
+        bad_text = []
         bad_scores = []
 
         for fold in range(5):
@@ -795,6 +796,7 @@ class QA():
                                                                                                      self.config.seed)))
             pred_text = val_pred.selected_text
             label_text = val_label.selected_text
+            whole_text = val_label.text
 
             for i, label_string in enumerate(label_text):
                 pred_string = pred_text[i]
@@ -814,10 +816,11 @@ class QA():
 
                 if jac < 0.5:
                     bad_scores.append(jac)
+                    bad_text.append(whole_text[i])
                     bad_predictions.append(pred_string)
                     bad_labels.append(label_string)
 
-        bad_samples = pd.DataFrame({"score": bad_scores, "prediction": bad_predictions, "label": bad_labels})
+        bad_samples = pd.DataFrame({"score": bad_scores, "prediction": bad_predictions, "label": bad_labels, "text": bad_text})
         bad_samples = bad_samples.sort_values(by=["score"])
 
         bad_samples.to_csv(os.path.join(self.config.checkpoint_folder_all_fold, "bad_samples.csv"))
@@ -835,7 +838,7 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
+    # qa.train_op()
     # qa.evaluate_op()
     # qa.infer_op()
-    # qa.find_errors()
+    qa.find_errors()
