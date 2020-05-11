@@ -476,7 +476,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -570,6 +570,7 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
+                        model_type=self.config.model_type,
                         tokenizer=self.tokenizer,
                     )
 
@@ -627,7 +628,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, ) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -670,6 +671,7 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
+                        model_type=self.config.model_type,
                         tokenizer=self.tokenizer,
                     )
 
@@ -728,7 +730,7 @@ class QA():
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
                                all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
-                               ) in enumerate(self.test_data_loader):
+                               all_offsets) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -763,6 +765,7 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
+                        model_type=self.config.model_type,
                         tokenizer=self.tokenizer,
                     )
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
@@ -838,7 +841,7 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
     seed_everything(config.seed)
     qa = QA(config)
-    # qa.train_op()
+    qa.train_op()
     # qa.evaluate_op()
     # qa.infer_op()
-    qa.find_errors()
+    # qa.find_errors()

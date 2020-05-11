@@ -8,7 +8,7 @@ class Config_Bert:
         # setting
         self.reuse_model = True
         self.load_from_load_from_data_parallel = False
-        self.load_pretrain = True
+        self.load_pretrain = False
         self.data_parallel = False  # enable data parallel training
         self.apex = True  # enable mix precision training
         self.adversarial = False  # enable adversarial training
