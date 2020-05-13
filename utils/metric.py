@@ -28,8 +28,8 @@ def calculate_jaccard_score(
         if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
 
             # we remove first tokens in hidden states
-            idx_start -= 4
-            idx_end -= 4
+            idx_start += 4
+            idx_end += 4
 
             filtered_output = ""
             for ix in range(idx_start, idx_end + 1):
@@ -41,8 +41,8 @@ def calculate_jaccard_score(
                 model_type == "albert-xlarge-v2"):
 
             # we remove first tokens in hidden states
-            idx_start -= 3
-            idx_end -= 3
+            idx_start += 3
+            idx_end += 3
 
             filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
@@ -50,8 +50,8 @@ def calculate_jaccard_score(
         elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
             # we remove first tokens in hidden states
-            idx_start -= 2
-            idx_end -= 2
+            idx_start += 2
+            idx_end += 2
 
             filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
@@ -59,8 +59,8 @@ def calculate_jaccard_score(
         elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
 
             # we remove first tokens in hidden states
-            idx_start -= 3
-            idx_end -= 3
+            idx_start += 3
+            idx_end += 3
 
             filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
@@ -68,8 +68,8 @@ def calculate_jaccard_score(
         elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
 
             # we remove first tokens in hidden states
-            idx_start -= 3
-            idx_end -= 3
+            idx_start += 3
+            idx_end += 3
 
             filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
