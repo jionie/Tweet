@@ -482,7 +482,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_ans, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -574,16 +574,16 @@ class QA():
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
 
-                for px, orig_tweet in enumerate(all_orig_tweet):
+                for px, tweet in enumerate(all_orig_tweet):
+
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=orig_tweet,
-                        tweet=all_tweet[px],
-                        target_string=selected_tweet,
+                        original_tweet=tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        tokenizer=self.tokenizer,
-                        offsets=all_offsets[px],
+                        model_type=self.config.model_type,
+                        tweet_offsets=all_offsets[px],
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
@@ -640,7 +640,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_ans, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -679,13 +679,12 @@ class QA():
                 for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=orig_tweet,
-                        tweet=all_tweet[px],
-                        target_string=selected_tweet,
+                        original_tweet=tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        tokenizer=self.tokenizer,
-                        offsets=all_offsets[px],
+                        model_type=self.config.model_type,
+                        tweet_offsets=all_offsets[px],
                     )
 
                     all_result.append(final_text)
@@ -742,8 +741,8 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet,
-                               all_ans, all_sentiment, all_offsets) in enumerate(self.test_data_loader):
+                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
+                               all_offsets) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -774,13 +773,12 @@ class QA():
                 for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
-                        original_tweet=orig_tweet,
-                        tweet=all_tweet[px],
-                        target_string=selected_tweet,
+                        original_tweet=tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        tokenizer=self.tokenizer,
-                        offsets=all_offsets[px],
+                        model_type=self.config.model_type,
+                        tweet_offsets=all_offsets[px],
                     )
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                         final_text = orig_tweet
@@ -802,6 +800,7 @@ class QA():
         scores = []
         bad_predictions = []
         bad_labels = []
+        bad_text = []
         bad_scores = []
 
         for fold in range(5):
@@ -812,6 +811,7 @@ class QA():
                                                                                                      self.config.seed)))
             pred_text = val_pred.selected_text
             label_text = val_label.selected_text
+            whole_text = val_label.text
 
             for i, label_string in enumerate(label_text):
                 pred_string = pred_text[i]
@@ -831,10 +831,11 @@ class QA():
 
                 if jac < 0.5:
                     bad_scores.append(jac)
+                    bad_text.append(whole_text[i])
                     bad_predictions.append(pred_string)
                     bad_labels.append(label_string)
 
-        bad_samples = pd.DataFrame({"score": bad_scores, "prediction": bad_predictions, "label": bad_labels})
+        bad_samples = pd.DataFrame({"score": bad_scores, "prediction": bad_predictions, "label": bad_labels, "text": bad_text})
         bad_samples = bad_samples.sort_values(by=["score"])
 
         bad_samples.to_csv(os.path.join(self.config.checkpoint_folder_all_fold, "bad_samples.csv"))

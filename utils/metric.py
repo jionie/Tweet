@@ -12,88 +12,70 @@ def jaccard_v2(list1, list2):
 
 def calculate_jaccard_score(
         original_tweet,
-        tweet,
-        target_string,
+        selected_text,
         idx_start,
         idx_end,
-        tokenizer,
-        offsets):
+        model_type,
+        tweet_offsets):
 
     if idx_end < idx_start:
-        filtered_output = ""
+        length = len(original_tweet)
+        filtered_output = original_tweet[length // 4 : length // 4 * 3]
+        # filtered_output = original_tweet
+
     else:
-        # filtered_output = ""
-        # for ix in range(idx_start, idx_end + 1):
-        #     filtered_output += original_tweet[offsets[ix][0]: offsets[ix][1]]
-        #     if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
-        #         filtered_output += " "
-        input_ids_orig = tokenizer.encode(tweet).ids
-        input_ids = input_ids_orig + [2]
-        selected_tokens = input_ids[idx_start:idx_end+1]
-        remove_end_idx = len(selected_tokens) - 1
 
-        while (remove_end_idx >= 0) and (selected_tokens[remove_end_idx] == 2 or selected_tokens[remove_end_idx] == 1):
-            remove_end_idx -= 1
+        if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
 
-        if remove_end_idx < 0:
-            length = len(original_tweet)
-            filtered_output = original_tweet[length // 4: length // 4 * 3]
-        else:
-
-            prediction = tokenizer.decode(selected_tokens[:remove_end_idx+1]).strip()
-            original_tweet = original_tweet.lower().strip()
+            # we remove first tokens in hidden states
+            idx_start += 4
+            idx_end += 4
 
             filtered_output = ""
-            finished = False
+            for ix in range(idx_start, idx_end + 1):
+                filtered_output += original_tweet[tweet_offsets[ix][0]: tweet_offsets[ix][1]]
+                if (ix + 1) < len(tweet_offsets) and tweet_offsets[ix][1] < tweet_offsets[ix + 1][0]:
+                    filtered_output += " "
 
-            # print("tweet: ", tweet)
-            # print("prediction: ", prediction)
+        elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (
+                model_type == "albert-xlarge-v2"):
 
-            if len(prediction) == 0:
-                filtered_output = prediction
-            else:
-                max_match = 0
-                for idx in range(len(original_tweet)):
-                    curr_output = ""
-                    if original_tweet[idx] == prediction[0]:
-                        tweet_idx = idx
-                        for prediction_idx in range(len(prediction)):
-                            if (original_tweet[tweet_idx] == prediction[prediction_idx]):
-                                curr_output += original_tweet[tweet_idx]
-                                tweet_idx += 1
+            # we remove first tokens in hidden states
+            idx_start += 3
+            idx_end += 3
 
-                                # reach tweet end
-                                if (tweet_idx >= len(original_tweet)):
-                                    if (prediction_idx == len(prediction) - 1):
-                                        finished = True
-                                    break
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, filtered_output)
 
-                                # reach prediction end
-                                if (prediction_idx == len(prediction) - 1):
-                                    finished = True
-                                    break
-                            else:
-                                # skip extra " "
-                                if (prediction[prediction_idx] == " "):
-                                    continue
-                                else:
-                                    break
-                        if finished:
-                            filtered_output = curr_output
-                            break
-                        else:
-                            if max_match < len(curr_output):
-                                max_match = len(curr_output)
-                                filtered_output = curr_output
+        elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
-            if len(prediction) != 0 and len(filtered_output) == 0:
-                print("orig_tweet: ", original_tweet)
-                print("prediction: ", prediction)
-                print("output: ", filtered_output)
+            # we remove first tokens in hidden states
+            idx_start += 2
+            idx_end += 2
 
-    if filtered_output == "":
-        length = len(original_tweet)
-        filtered_output = original_tweet[length // 4: length // 4 * 3]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, filtered_output)
 
-    jac = jaccard(target_string.strip(), filtered_output.strip())
+        elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
+
+            # we remove first tokens in hidden states
+            idx_start += 3
+            idx_end += 3
+
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, filtered_output)
+
+        elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+
+            # we remove first tokens in hidden states
+            idx_start += 3
+            idx_end += 3
+
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, filtered_output)
+
+        else:
+            raise NotImplementedError
+
+    jac = jaccard(selected_text.strip(), filtered_output.strip())
     return jac, filtered_output

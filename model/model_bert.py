@@ -136,6 +136,26 @@ class TweetBert(nn.Module):
                 model_type,
                 config=self.config,
             )
+        elif model_type == "albert-base-v2":
+            self.config = AutoConfig.from_pretrained(
+                "albert-base-v2",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.bert = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
+        elif model_type == "albert-large-v2":
+            self.config = AutoConfig.from_pretrained(
+                "albert-large-v2",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.bert = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
         else:
             raise NotImplementedError
 
@@ -235,7 +255,27 @@ class TweetBert(nn.Module):
         fuse_hidden = self.get_hidden_states(hidden_states)
 
         # # hidden for context, padding added, ignore end_idx
-        fuse_hidden_context = fuse_hidden[:, 4:, :]
+        if self.model_type == "roberta-base" or self.model_type == "roberta-large" or \
+            self.model_type == "roberta-base-squad":
+
+            fuse_hidden_context = fuse_hidden[:, 4:-1, :]
+
+        elif (self.model_type == "albert-base-v2") or (self.model_type == "albert-large-v2") or \
+                (self.model_type == "albert-xlarge-v2"):
+
+            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
+
+        elif (self.model_type == "xlnet-base-cased") or (self.model_type == "xlnet-large-cased"):
+
+            fuse_hidden_context = fuse_hidden[:, 2:-2, :]
+
+        elif (self.model_type == "bert-base-uncased") or (self.model_type == "bert-large-uncased") or \
+                (self.model_type == "bert-base-cased") or (self.model_type == "bert-large-cased"):
+
+            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
+
+        else:
+            raise NotImplementedError
 
         # #################################################################### aoa, attention over attention
         # hidden for question, cls + sentiment
