@@ -564,14 +564,15 @@ class QA():
                 end_logits = to_numpy((end_logits))
 
                 for px, tweet in enumerate(all_orig_tweet):
+
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
-                        target_string=selected_tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         model_type=self.config.model_type,
-                        tokenizer=self.tokenizer,
+                        tweet_offsets=all_offsets[px],
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
@@ -668,11 +669,11 @@ class QA():
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
-                        target_string=selected_tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         model_type=self.config.model_type,
-                        tokenizer=self.tokenizer,
+                        tweet_offsets=all_offsets[px],
                     )
 
                     all_result.append(final_text)
@@ -762,11 +763,11 @@ class QA():
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
                         original_tweet=tweet,
-                        target_string=selected_tweet,
+                        selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
                         model_type=self.config.model_type,
-                        tokenizer=self.tokenizer,
+                        tweet_offsets=all_offsets[px],
                     )
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                         final_text = tweet
