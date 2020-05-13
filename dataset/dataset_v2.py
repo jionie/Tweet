@@ -273,9 +273,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         'token_type_ids': token_type_ids,
         'targets_start': targets_start,
         'targets_end': targets_end,
-        'orig_tweet': orig_tweet,
-        'orig_selected': orig_selected_text,
-        'tweet': tweet,
+        'orig_tweet': tweet,
+        'orig_selected': selected_text,
         'sentiment': sentiment,
         'ans_type': ans_type,
         'offsets': tweet_offsets,
@@ -321,6 +320,7 @@ class TweetDataset:
                onthot_ans_type[data["ans_type"]], \
                data["orig_tweet"], \
                data["orig_selected"], \
+               data["ans_type"], \
                data["sentiment"], \
                torch.tensor(data["offsets"], dtype=torch.long),
 

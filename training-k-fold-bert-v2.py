@@ -482,7 +482,7 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -574,11 +574,11 @@ class QA():
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
 
-                for px, tweet in enumerate(all_orig_tweet):
+                for px, orig_tweet in enumerate(all_orig_tweet):
 
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
@@ -640,7 +640,7 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -679,7 +679,7 @@ class QA():
                 for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
@@ -741,7 +741,7 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
+                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
                                all_offsets) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
@@ -773,7 +773,7 @@ class QA():
                 for px, orig_tweet in enumerate(all_orig_tweet):
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
-                        original_tweet=tweet,
+                        original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
