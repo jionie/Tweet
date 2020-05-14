@@ -31,11 +31,8 @@ def calculate_jaccard_score(
             idx_start += 4
             idx_end += 4
 
-            filtered_output = ""
-            for ix in range(idx_start, idx_end + 1):
-                filtered_output += original_tweet[tweet_offsets[ix][0]: tweet_offsets[ix][1]]
-                if (ix + 1) < len(tweet_offsets) and tweet_offsets[ix][1] < tweet_offsets[ix + 1][0]:
-                    filtered_output += " "
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (
                 model_type == "albert-xlarge-v2"):
@@ -45,7 +42,7 @@ def calculate_jaccard_score(
             idx_end += 3
 
             filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            # print(selected_text, filtered_output)
+            # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 

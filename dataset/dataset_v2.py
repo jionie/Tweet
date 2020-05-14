@@ -76,8 +76,9 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 
 def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
 
-    tweet = " ".join(str(tweet).split())
-    selected_text = " ".join(str(selected_text).split())
+    # lower cased here
+    tweet = " " + " ".join(str(tweet).lower().split())
+    selected_text = " " + " ".join(str(selected_text).lower().split())
 
     if len(tweet) == len(selected_text):
         ans_type = "long"
@@ -86,110 +87,77 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
     else:
         ans_type = "short"
 
-    if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
+    # remove first " "
+    len_st = len(selected_text) - 1
+    idx0 = None
+    idx1 = None
 
-        tweet = " " + " ".join(str(tweet).split())
-        selected_text = " " + " ".join(str(selected_text).split())
+    # get char idx
+    for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
+        if " " + tweet[ind: ind + len_st] == selected_text:
+            idx0 = ind
+            idx1 = ind + len_st - 1
+            break
 
-        len_st = len(selected_text) - 1
-        idx0 = None
-        idx1 = None
+    if augment:
+        # augment for non-select text
+        start_str = tweet[:idx0]
+        end_str = tweet[idx1 + 1:]
 
+        if (len(start_str) > 0):
+            if np.random.uniform(0, 1, 1) < 0.1:
+                start_str = augmentation(start_str, insert=False, substitute=False, swap=False, delete=True)
+        if (len(end_str) > 0):
+            if np.random.uniform(0, 1, 1) < 0.1:
+                end_str = augmentation(end_str, insert=False, substitute=False, swap=False, delete=True)
+
+        tweet = start_str + selected_text + end_str
+
+        # after augment we need to search again
         for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
             if " " + tweet[ind: ind + len_st] == selected_text:
                 idx0 = ind
                 idx1 = ind + len_st - 1
                 break
 
-        if augment:
-            # augment for non-select text
-            start_str = tweet[:idx0]
-            end_str = tweet[idx1 + 1:]
+    # get char mask
+    char_targets = [0] * len(tweet)
+    if idx0 != None and idx1 != None:
+        for ct in range(idx0, idx1 + 1):
+            char_targets[ct] = 1
 
-            if (len(start_str) > 0):
-                if np.random.uniform(0, 1, 1) < 0.1:
-                    start_str = augmentation(start_str, insert=False, substitute=False, swap=False, delete=True)
-            if (len(end_str) > 0):
-                if np.random.uniform(0, 1, 1) < 0.1:
-                    end_str = augmentation(end_str, insert=False, substitute=False, swap=False, delete=True)
+    # get word offsets
+    tweet_offsets = []
+    cursor = 0
+    input_ids_orig = []
 
-            tweet = start_str + selected_text + end_str
+    for i, word in enumerate(tweet.split()):
 
-            # after augment we need to search again
-            for ind in (i for i, e in enumerate(tweet) if e == selected_text[1]):
-                if " " + tweet[ind: ind + len_st] == selected_text:
-                    idx0 = ind
-                    idx1 = ind + len_st - 1
-                    break
+        encoded_word = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(" " + word))
+        number_of_tokens = len(encoded_word)
+        input_ids_orig += encoded_word
 
-        char_targets = [0] * len(tweet)
-        if idx0 != None and idx1 != None:
-            for ct in range(idx0, idx1 + 1):
-                char_targets[ct] = 1
+        start_offsets = cursor
+        cursor += len(" " + word)
+        end_offsets = cursor
 
-        encoded = tokenizer.encode(tweet)
-        input_ids_orig = encoded.ids
-        tweet_offsets = encoded.offsets
+        for i in range(number_of_tokens):
+            tweet_offsets.append((start_offsets, end_offsets))
 
-        target_idx = []
-        for j, (offset1, offset2) in enumerate(tweet_offsets):
-            if sum(char_targets[offset1: offset2]) > 0:
-                target_idx.append(j)
+    # get word idx
+    target_idx = []
+    for j, (offset1, offset2) in enumerate(tweet_offsets):
 
-        if len(target_idx) == 0:
-            print(tweet, selected_text)
+        if sum(char_targets[offset1: offset2]) > 0:
+            target_idx.append(j)
 
-        targets_start = target_idx[0]
-        targets_end = target_idx[-1]
+    if len(target_idx) == 0:
+        print(tweet, selected_text)
 
-    else:
+    targets_start = target_idx[0]
+    targets_end = target_idx[-1]
 
-        len_st = len(selected_text)
-        idx0 = None
-        idx1 = None
-
-        # get char idx
-        for ind in (i for i, e in enumerate(tweet) if e == selected_text[0]):
-            if tweet[ind: ind + len_st] == selected_text:
-                idx0 = ind
-                idx1 = ind + len_st - 1
-                break
-
-        # get char mask
-        char_targets = [0] * len(tweet)
-        if idx0 != None and idx1 != None:
-            for ct in range(idx0, idx1 + 1):
-                char_targets[ct] = 1
-
-        # get word offsets
-        tweet_offsets = []
-        cursor = 0
-
-        for word in tweet.split():
-
-            encoded_word = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(word))
-            number_of_tokens = len(encoded_word)
-
-            start_offsets = cursor
-            cursor += len(word)
-            end_offsets = cursor
-
-            for i in range(number_of_tokens):
-                tweet_offsets.append((start_offsets, end_offsets))
-
-            cursor += 1
-
-        # get word idx
-        target_idx = []
-        for j, (offset1, offset2) in enumerate(tweet_offsets):
-
-            if sum(char_targets[offset1: offset2]) > 0:
-                target_idx.append(j)
-
-        targets_start = target_idx[0]
-        targets_end = target_idx[-1]
-
-        input_ids_orig = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(tweet))
+    # print(tweet[tweet_offsets[targets_start][0] : tweet_offsets[targets_end][1]], "------------", selected_text)
 
     num_words = len(tweet.split())
     if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
@@ -266,6 +234,11 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         mask = mask + ([0] * padding_length)
         token_type_ids = token_type_ids + ([0] * padding_length)
         tweet_offsets = tweet_offsets + ([(0, num_words)] * padding_length)
+    else:
+        input_ids = input_ids[:max_len]
+        mask = mask[:max_len]
+        token_type_ids = token_type_ids[:max_len]
+        tweet_offsets = tweet_offsets[:max_len]
 
     return {
         'ids': input_ids,
@@ -296,6 +269,7 @@ class TweetDataset:
         return len(self.tweet)
 
     def __getitem__(self, item):
+
         data = process_data(
             self.tweet[item],
             self.selected_text[item],
@@ -369,59 +343,50 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     if (model_type == "bert-base-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+            lowercase=True,
         )
     elif (model_type == "bert-large-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+            lowercase=True,
         )
     elif (model_type == "bert-base-cased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "bert-large-cased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
         tokenizer = XLNetTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
         tokenizer = AlbertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-base":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-base-squad":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-large":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     else:
 
@@ -460,61 +425,52 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     if (model_type == "bert-base-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+            lowercase=True,
         )
     elif (model_type == "bert-large-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=False,
-            add_prefix_space=True
+            lowercase=True,
         )
     elif (model_type == "bert-base-cased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "bert-large-cased"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
         tokenizer = XLNetTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH,
                                                        "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
         tokenizer = AlbertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH,
                                                        "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-base":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-base-squad":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     elif model_type == "roberta-large":
-        tokenizer = RobertaTokenizer.from_pretrained(
+        tokenizer = RobertaTokenizer(
             vocab_file=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.json".format(model_type)),
             merges_file=os.path.join(CURR_PATH, "transformers_vocab/{}-merges.txt".format(model_type)),
             lowercase=True,
-            add_prefix_space=True
         )
     else:
 
