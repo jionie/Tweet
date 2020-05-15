@@ -258,21 +258,21 @@ class TweetBert(nn.Module):
         if self.model_type == "roberta-base" or self.model_type == "roberta-large" or \
             self.model_type == "roberta-base-squad":
 
-            fuse_hidden_context = fuse_hidden[:, 4:, :]
+            fuse_hidden_context = fuse_hidden[:, 4:-1, :]
 
         elif (self.model_type == "albert-base-v2") or (self.model_type == "albert-large-v2") or \
                 (self.model_type == "albert-xlarge-v2"):
 
-            fuse_hidden_context = fuse_hidden[:, 3:, :]
+            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
 
         elif (self.model_type == "xlnet-base-cased") or (self.model_type == "xlnet-large-cased"):
 
-            fuse_hidden_context = fuse_hidden[:, 2:, :]
+            fuse_hidden_context = fuse_hidden[:, 2:-2, :]
 
         elif (self.model_type == "bert-base-uncased") or (self.model_type == "bert-large-uncased") or \
                 (self.model_type == "bert-base-cased") or (self.model_type == "bert-large-cased"):
 
-            fuse_hidden_context = fuse_hidden[:, 3:, :]
+            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
 
         else:
             raise NotImplementedError
