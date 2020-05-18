@@ -512,7 +512,7 @@ class QA():
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                          token_type_ids=all_token_type_ids, start_positions=all_start_positions,
                                          end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
-                                     sentiment_weight=sentiment_weight, ans_weight=None)
+                                     sentiment_weight=sentiment_weight, ans_weight=ans_weight)
 
                 loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
 
