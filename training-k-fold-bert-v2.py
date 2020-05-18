@@ -402,7 +402,8 @@ class QA():
             'step': self.step,
             'epoch': self.epoch,
             'model': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict()}
+            # 'optimizer': self.optimizer.state_dict()
+            }
 
         save_path = self.config.save_point.format(self.step, self.epoch)
         torch.save(checkpoint_to_save, save_path)
