@@ -707,7 +707,7 @@ class QA():
                         idx_start=start_idx_token,
                         idx_end=end_idx_token,
                         model_type=self.config.model_type,
-                        tweet_offsets=all_offsets_word_level[px],
+                        tweet_offsets=all_offsets_token_level[px],
                     )
 
                     all_result.append(final_text)
