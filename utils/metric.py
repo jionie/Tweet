@@ -1,3 +1,5 @@
+import numpy as np
+
 def jaccard(str1, str2):
     a = set(str1.lower().split())
     b = set(str2.lower().split())
@@ -9,6 +11,80 @@ def jaccard_v2(list1, list2):
     b = set(list2)
     c = a.intersection(b)
     return float(len(c)) / (len(a) + len(b) - len(c))
+
+def get_word_level_logits(start_logits,
+                          end_logits,
+                          model_type,
+                          tweet_offsets_word_level):
+
+    if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
+        logit_offset = 4
+
+    elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (
+            model_type == "albert-xlarge-v2"):
+        logit_offset = 3
+
+    elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
+        logit_offset = 2
+
+    elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
+        logit_offset = 3
+
+    elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+        logit_offset = 3
+
+    prev = tweet_offsets_word_level[logit_offset]
+    word_level_bbx = []
+    curr_bbx = []
+
+    for i in range(len(tweet_offsets_word_level) - logit_offset - 1):
+
+        curr = tweet_offsets_word_level[i + logit_offset]
+
+        if curr[0] < prev[0] and curr[1] > prev[1]:
+            break
+
+        if curr[0] == prev[0] and curr[1] == prev[1]:
+            curr_bbx.append(i)
+        else:
+            word_level_bbx.append(curr_bbx)
+            curr_bbx = [i]
+
+        prev = curr
+
+    for i in range(len(word_level_bbx)):
+        word_level_bbx[i].append(word_level_bbx[i][-1] + 1)
+
+    start_logits_word_level = [np.max(start_logits[bbx[0]: bbx[-1]]) for bbx in word_level_bbx]
+    end_logits_word_level = [np.max(end_logits[bbx[0]: bbx[-1]]) for bbx in word_level_bbx]
+
+    return start_logits_word_level, end_logits_word_level, word_level_bbx
+
+
+def get_token_level_idx(start_logits,
+                        end_logits,
+                        start_logits_word_level,
+                        end_logits_word_level,
+                        word_level_bbx):
+
+    # get most possible word
+    start_idx_word = np.argmax(start_logits_word_level)
+    end_idx_word = np.argmax(end_logits_word_level)
+
+    # get all token idx in selected word
+    start_word_bbx = word_level_bbx[start_idx_word]
+    end_word_bbx = word_level_bbx[end_idx_word]
+
+    # find most possible token idx in selected word
+    start_idx_in_word = np.argmax(start_logits[start_word_bbx[0]: start_word_bbx[-1]])
+    end_idx_in_word = np.argmax(end_logits[end_word_bbx[0]: end_word_bbx[-1]])
+
+    # find most possible token idx in whole sentence
+    start_idx_token = start_word_bbx[start_idx_in_word]
+    end_idx_token = end_word_bbx[end_idx_in_word]
+
+    return start_idx_token, end_idx_token
+
 
 def calculate_jaccard_score(
         original_tweet,

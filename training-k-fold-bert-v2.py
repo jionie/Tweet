@@ -483,8 +483,8 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment, all_offsets) in \
-                    enumerate(self.train_data_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.train_data_loader):
 
                 rate = 0
                 for param_group in self.optimizer.param_groups:
@@ -566,8 +566,6 @@ class QA():
                 # translate to predictions
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
@@ -577,14 +575,26 @@ class QA():
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
 
+                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
+                        start_logits[px],
+                        end_logits[px],
+                        self.config.model_type,
+                        all_offsets_word_level[px])
+
+                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                                                                         end_logits[px],
+                                                                         start_logits_word_level,
+                                                                         end_logits_word_level,
+                                                                         word_level_bbx)
+
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
+                        idx_start=start_idx_token,
+                        idx_end=end_idx_token,
                         model_type=self.config.model_type,
-                        tweet_offsets=all_offsets[px],
+                        tweet_offsets=all_offsets_token_level[px],
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
@@ -641,8 +651,8 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment, all_offsets) in \
-                    enumerate(self.val_data_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.val_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -668,8 +678,6 @@ class QA():
                 # translate to predictions
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
@@ -678,14 +686,28 @@ class QA():
                 end_logits = to_numpy((end_logits))
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
+
+                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
+                        start_logits[px],
+                        end_logits[px],
+                        self.config.model_type,
+                        all_offsets_word_level[px])
+
+                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                                                                         end_logits[px],
+                                                                         start_logits_word_level,
+                                                                         end_logits_word_level,
+                                                                         word_level_bbx)
+
                     selected_tweet = all_orig_selected[px]
+
                     jaccard_score, final_text = calculate_jaccard_score(
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
+                        idx_start=start_idx_token,
+                        idx_end=end_idx_token,
                         model_type=self.config.model_type,
-                        tweet_offsets=all_offsets[px],
+                        tweet_offsets=all_offsets_word_level[px],
                     )
 
                     all_result.append(final_text)
@@ -743,7 +765,7 @@ class QA():
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
                                all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
-                               all_offsets) in enumerate(self.test_data_loader):
+                               all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -762,8 +784,6 @@ class QA():
 
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
@@ -772,25 +792,49 @@ class QA():
                 end_logits = to_numpy((end_logits))
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
+
+                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
+                                                                                                start_logits[px],
+                                                                                                end_logits[px],
+                                                                                                self.config.model_type,
+                                                                                                all_offsets_word_level[px])
+
+                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                                                                        end_logits[px],
+                                                                        start_logits_word_level,
+                                                                        end_logits_word_level,
+                                                                        word_level_bbx)
+
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
-                        idx_start=start_logits[px],
-                        idx_end=end_logits[px],
+                        idx_start=start_idx_token,
+                        idx_end=end_idx_token,
                         model_type=self.config.model_type,
-                        tweet_offsets=all_offsets[px],
+                        tweet_offsets=all_offsets_token_level[px],
                     )
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                         final_text = orig_tweet
                     all_results.append(final_text)
 
         # save csv
-        submission = pd.read_csv(os.path.join(self.config.data_path, "sample_submission.csv"))
+        submission = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
+        pd_test = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
 
         for i in range(len(submission)):
-            final_text = " ".join(set(all_results[i].lower().split()))
-            submission.loc[i, 'selected_text'] = final_text
+            if pd_test['sentiment'][i] == 'neutral' or len(
+                    str(pd_test['text'][i]).split()) < 3:  # neutral postprocessing
+                submission.loc[i, 'selected_text'] = str(pd_test['text'][i])
+            else:
+                submission.loc[i, 'selected_text'] = str(all_results[i])
+
+        submission['selected_text'] = submission['selected_text'].apply(
+            lambda x: x.replace('!!!!', '!') if len(x.split()) == 1 else x)
+        submission['selected_text'] = submission['selected_text'].apply(
+            lambda x: x.replace('..', '.') if len(x.split()) == 1 else x)
+        submission['selected_text'] = submission['selected_text'].apply(
+            lambda x: x.replace('...', '.') if len(x.split()) == 1 else x)
 
         submission.to_csv(os.path.join(self.config.checkpoint_folder, "submission_{}.csv".format(self.config.fold)))
 
@@ -854,7 +898,7 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
-    # qa.evaluate_op()
+    # qa.train_op()
+    qa.evaluate_op()
     # qa.infer_op()
     # qa.find_errors()

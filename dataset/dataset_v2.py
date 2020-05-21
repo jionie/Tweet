@@ -188,7 +188,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [0] + [sentiment_id[sentiment]] + [2] + [2] + input_ids_orig + [2]
         token_type_ids = [0, 0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, num_words)] * 4 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, num_words)] * 4 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_word_level = [(0, num_words)] * 4 + tweet_offsets_word_level + [(0, num_words)]
 
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
 
@@ -201,7 +202,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [2] + [sentiment_id[sentiment]] + [3] + input_ids_orig + [3]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
 
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
@@ -214,7 +216,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [sentiment_id[sentiment]] + [4] + input_ids_orig + [3]
         token_type_ids = [0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, num_words)] * 2 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, num_words)] * 2 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_word_level = [(0, num_words)] * 2 + tweet_offsets_word_level + [(0, num_words)]
 
     elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
 
@@ -227,7 +230,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
 
     elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
 
@@ -240,7 +244,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
+        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
 
     else:
         raise NotImplementedError
@@ -250,12 +255,14 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = input_ids + ([1] * padding_length)
         mask = mask + ([0] * padding_length)
         token_type_ids = token_type_ids + ([0] * padding_length)
-        tweet_offsets = tweet_offsets + ([(0, num_words)] * padding_length)
+        tweet_offsets_token_level = tweet_offsets_token_level + ([(0, num_words)] * padding_length)
+        tweet_offsets_word_level = tweet_offsets_word_level + ([(0, num_words)] * padding_length)
     else:
         input_ids = input_ids[:max_len]
         mask = mask[:max_len]
         token_type_ids = token_type_ids[:max_len]
-        tweet_offsets = tweet_offsets[:max_len]
+        tweet_offsets_token_level = tweet_offsets_token_level[:max_len]
+        tweet_offsets_word_level = tweet_offsets_word_level[:max_len]
 
     return {
         'ids': input_ids,
@@ -267,7 +274,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         'orig_selected': selected_text,
         'sentiment': sentiment,
         'ans_type': ans_type,
-        'offsets': tweet_offsets,
+        'offsets_token_level': tweet_offsets_token_level,
+        'offsets_word_level': tweet_offsets_word_level
     }
 
 
@@ -313,7 +321,8 @@ class TweetDataset:
                data["orig_selected"], \
                data["ans_type"], \
                data["sentiment"], \
-               torch.tensor(data["offsets"], dtype=torch.long),
+               torch.tensor(data["offsets_token_level"], dtype=torch.long), \
+               torch.tensor(data["offsets_word_level"], dtype=torch.long)
 
 
 
@@ -560,8 +569,9 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                                   batch_size=batch_size, num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
-            in enumerate(test_loader):
+            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
+
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -572,7 +582,7 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
         print("all_orig_selected (string): ", all_orig_selected)
         print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
-        print("all_offsets (numpy): ", all_offsets.numpy().shape)
+        print("all_offsets (numpy): ", all_offsets_token_level.numpy().shape)
         print("------------------------testing test loader finished----------------------")
         break
 
@@ -592,8 +602,9 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                      num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
-            in enumerate(train_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
+
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -604,13 +615,14 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("all_orig_selected (string): ", all_orig_selected)
         print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
-        print("all_offsets (numpy): ", all_offsets.numpy().shape)
+        print("all_offsets (numpy): ", all_offsets_token_level.numpy().shape)
         print("------------------------testing train loader finished----------------------")
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment, all_offsets) \
-            in enumerate(val_loader):
+                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
+
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -621,7 +633,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("all_orig_selected (string): ", all_orig_selected)
         print("all_tweet (string after processing): ", all_tweet)
         print("all_sentiment (string): ", all_sentiment)
-        print("all_offsets (numpy): ", all_offsets.numpy().shape)
+        print("all_offsets (numpy): ", all_offsets_token_level.numpy().shape)
         print("------------------------testing val loader finished----------------------")
         break
 
