@@ -17,6 +17,8 @@ def get_word_level_logits(start_logits,
                           model_type,
                           tweet_offsets_word_level):
 
+    tweet_offsets_word_level = np.array(tweet_offsets_word_level)
+
     if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
         logit_offset = 4
 
@@ -52,6 +54,21 @@ def get_word_level_logits(start_logits,
 
         prev = curr
 
+    if len(word_level_bbx) == 0:
+        word_level_bbx.append(curr_bbx)
+
+    # debug word_level_bbx
+    # tmp_bbx = []
+    # for i in range(len(word_level_bbx)):
+    #     tmp = []
+    #
+    #     for bbx in word_level_bbx[i]:
+    #         tmp.append(tuple(tweet_offsets_word_level[bbx+logit_offset]))
+    #
+    #     tmp_bbx.append(tmp)
+    #
+    # print(tmp_bbx)
+
     for i in range(len(word_level_bbx)):
         word_level_bbx[i].append(word_level_bbx[i][-1] + 1)
 
@@ -83,6 +100,9 @@ def get_token_level_idx(start_logits,
     start_idx_token = start_word_bbx[start_idx_in_word]
     end_idx_token = end_word_bbx[end_idx_in_word]
 
+    # start_idx_token = np.argmax(start_logits)
+    # end_idx_token = np.argmax(end_logits)
+
     return start_idx_token, end_idx_token
 
 
@@ -96,7 +116,7 @@ def calculate_jaccard_score(
 
     if idx_end < idx_start:
         length = len(original_tweet)
-        filtered_output = original_tweet[length // 4 : length // 4 * 3]
+        filtered_output = original_tweet[length // 4: length // 4 * 3]
         # filtered_output = original_tweet
 
     else:

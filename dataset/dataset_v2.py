@@ -175,8 +175,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
     targets_end = target_idx[-1]
 
     # print(tweet[tweet_offsets[targets_start][0] : tweet_offsets[targets_end][1]], "------------", selected_text)
-
-    num_words = len(tweet.split())
+    last_offset = tweet_offsets_word_level[-1][1]
     if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
 
         sentiment_id = {
@@ -188,8 +187,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [0] + [sentiment_id[sentiment]] + [2] + [2] + input_ids_orig + [2]
         token_type_ids = [0, 0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, num_words)] * 4 + tweet_offsets_token_level + [(0, num_words)]
-        tweet_offsets_word_level = [(0, num_words)] * 4 + tweet_offsets_word_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, last_offset)] * 4 + tweet_offsets_token_level + [(0, last_offset)]
+        tweet_offsets_word_level = [(0, last_offset)] * 4 + tweet_offsets_word_level + [(0, last_offset)]
 
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
 
@@ -202,8 +201,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [2] + [sentiment_id[sentiment]] + [3] + input_ids_orig + [3]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
-        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
+        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
 
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
@@ -216,8 +215,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [sentiment_id[sentiment]] + [4] + input_ids_orig + [3]
         token_type_ids = [0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, num_words)] * 2 + tweet_offsets_token_level + [(0, num_words)]
-        tweet_offsets_word_level = [(0, num_words)] * 2 + tweet_offsets_word_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, last_offset)] * 2 + tweet_offsets_token_level + [(0, last_offset)]
+        tweet_offsets_word_level = [(0, last_offset)] * 2 + tweet_offsets_word_level + [(0, last_offset)]
 
     elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
 
@@ -230,8 +229,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
-        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
+        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
 
     elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
 
@@ -244,8 +243,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, num_words)] * 3 + tweet_offsets_token_level + [(0, num_words)]
-        tweet_offsets_word_level = [(0, num_words)] * 3 + tweet_offsets_word_level + [(0, num_words)]
+        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
+        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
 
     else:
         raise NotImplementedError
@@ -255,8 +254,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = input_ids + ([1] * padding_length)
         mask = mask + ([0] * padding_length)
         token_type_ids = token_type_ids + ([0] * padding_length)
-        tweet_offsets_token_level = tweet_offsets_token_level + ([(0, num_words)] * padding_length)
-        tweet_offsets_word_level = tweet_offsets_word_level + ([(0, num_words)] * padding_length)
+        tweet_offsets_token_level = tweet_offsets_token_level + ([(0, last_offset)] * padding_length)
+        tweet_offsets_word_level = tweet_offsets_word_level + ([(0, last_offset)] * padding_length)
     else:
         input_ids = input_ids[:max_len]
         mask = mask[:max_len]
