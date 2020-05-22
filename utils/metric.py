@@ -100,9 +100,6 @@ def get_token_level_idx(start_logits,
     start_idx_token = start_word_bbx[start_idx_in_word]
     end_idx_token = end_word_bbx[end_idx_in_word]
 
-    # start_idx_token = np.argmax(start_logits)
-    # end_idx_token = np.argmax(end_logits)
-
     return start_idx_token, end_idx_token
 
 

@@ -139,7 +139,6 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
 
         sub_words = tokenizer.tokenize(" " + word)
         encoded_word = tokenizer.convert_tokens_to_ids(sub_words)
-        orig_word = tokenizer.convert_tokens_to_string(sub_words)
         number_of_tokens = len(encoded_word)
         input_ids_orig += encoded_word
 
@@ -153,10 +152,14 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
 
             tweet_offsets_word_level.append((start_offsets, end_offsets))
 
-            # for bert tokenizer, replace "##" and add " " for first sub_word
-            sub_word_len = len(sub_words[i].replace("##", ""))
-            if i == 0 and orig_word != " " + word:
-                sub_word_len += 1
+            if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") \
+                or (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+                # for bert tokenizer, replace "##" and add " " for first sub_word
+                sub_word_len = len(sub_words[i].replace("##", ""))
+                if i == 0:
+                    sub_word_len += 1
+            else:
+                sub_word_len = len(sub_words[i])
 
             tweet_offsets_token_level.append((token_level_cursor, token_level_cursor + sub_word_len))
             token_level_cursor += sub_word_len

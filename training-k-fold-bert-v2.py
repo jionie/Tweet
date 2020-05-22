@@ -785,6 +785,9 @@ class QA():
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
 
+                start_logits = start_logits.argmax(dim=-1)
+                end_logits = end_logits.argmax(dim=-1)
+
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
 
@@ -799,11 +802,13 @@ class QA():
                                                                                                 self.config.model_type,
                                                                                                 all_offsets_word_level[px])
 
-                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
-                                                                        end_logits[px],
-                                                                        start_logits_word_level,
-                                                                        end_logits_word_level,
-                                                                        word_level_bbx)
+                    # start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                    #                                                     end_logits[px],
+                    #                                                     start_logits_word_level,
+                    #                                                     end_logits_word_level,
+                    #                                                     word_level_bbx)
+
+                    start_idx_token, end_idx_token = start_logits[px], end_logits[px]
 
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
