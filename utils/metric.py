@@ -100,8 +100,8 @@ def get_token_level_idx(start_logits,
     start_idx_token = start_word_bbx[start_idx_in_word]
     end_idx_token = end_word_bbx[end_idx_in_word]
 
-    return start_idx_token, end_idx_token
-
+    # return start_idx_token, end_idx_token
+    return np.argmax(start_logits), np.argmax(end_logits)
 
 def calculate_jaccard_score(
         original_tweet,
@@ -124,7 +124,7 @@ def calculate_jaccard_score(
             idx_start += 4
             idx_end += 4
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]+1]
             # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (
@@ -134,7 +134,7 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]+1]
             # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
@@ -143,7 +143,7 @@ def calculate_jaccard_score(
             idx_start += 2
             idx_end += 2
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]+1]
             # print(selected_text, filtered_output)
 
         elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
@@ -152,7 +152,7 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]+1]
             # print(selected_text, filtered_output)
 
         elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
@@ -161,7 +161,7 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]+1]
             # print(selected_text, filtered_output)
 
         else:

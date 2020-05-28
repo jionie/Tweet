@@ -119,7 +119,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
 
     char_targets = [0] * len(tweet)
     if idx0 != None and idx1 != None:
-        char_targets[idx0 : idx1 + 1] = 1
+        char_targets[idx0: idx1 + 1] = 1
 
     tok_tweet = tokenizer.encode(tweet)
 
@@ -134,14 +134,14 @@ def process_data(tweet, selected_text, sentiment, tokenizer, max_len, augment=Fa
 
     target_idx = []
     for j, (offset1, offset2) in enumerate(offsets):
-        if sum(char_targets[offset1 : offset2]) > 0:
+        if sum(char_targets[offset1: offset2]) > 0:
             target_idx.append(j)
 
     if len(target_idx) == 0:
         print(tweet, selected_text)
 
-    targets_start = target_idx[0] + 1
-    targets_end = target_idx[-1] + 1
+    targets_start = target_idx[0]
+    targets_end = target_idx[-1]
 
     # ... i kinda lost respect  . i kinda lost respect
     # print(tokenizer.decode(input_ids_orig[targets_start:targets_end+1]), selected_text)
