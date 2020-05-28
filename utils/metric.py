@@ -100,8 +100,8 @@ def get_token_level_idx(start_logits,
     start_idx_token = start_word_bbx[start_idx_in_word]
     end_idx_token = end_word_bbx[end_idx_in_word]
 
-    # return start_idx_token, end_idx_token
-    return np.argmax(start_logits), np.argmax(end_logits)
+    return start_idx_token, end_idx_token
+    # return np.argmax(start_logits), np.argmax(end_logits)
 
 def calculate_jaccard_score(
         original_tweet,
@@ -112,9 +112,7 @@ def calculate_jaccard_score(
         tweet_offsets):
 
     if idx_end < idx_start:
-        length = len(original_tweet)
-        filtered_output = original_tweet[length // 4: length // 4 * 3]
-        # filtered_output = original_tweet
+        filtered_output = original_tweet
 
     else:
 

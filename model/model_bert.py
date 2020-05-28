@@ -14,12 +14,14 @@ class CrossEntropyLossOHEM(torch.nn.Module):
         self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
         self.reduction = reduction
 
-    def forward(self, input, target, sentiment=None, ans=None, position_penalty=None):
+    def forward(self, input, target, sentiment=None, ans=None, noise=None, position_penalty=None):
         loss = self.loss(input, target)
         if sentiment is not None:
             loss *= sentiment
         if ans is not None:
             loss *= ans
+        if noise is not None:
+            loss *= noise
         if position_penalty is not None:
             loss *= position_penalty
         if self.top_k == 1:
@@ -176,7 +178,8 @@ class TweetBert(nn.Module):
 
         self.qa_start = nn.Linear(self.config.hidden_size, 1)
         self.qa_end = nn.Linear(self.config.hidden_size, 1)
-        self.qa_classifier = nn.Linear(self.config.hidden_size, 3)
+        self.qa_ans_classifier = nn.Linear(self.config.hidden_size, 3)
+        self.qa_noise_classifier = nn.Linear(self.config.hidden_size, 2)
 
         self.dropouts = nn.ModuleList([
             nn.Dropout(0.5) for _ in range(5)
@@ -241,7 +244,8 @@ class TweetBert(nn.Module):
             input_ids=None,
             attention_mask=None,
             token_type_ids=None,
-            onthot_ans_type=None,
+            onehot_ans_type=None,
+            onehot_noise_type=None,
             position_ids=None,
             head_mask=None,
             inputs_embeds=None,
@@ -249,6 +253,7 @@ class TweetBert(nn.Module):
             end_positions=None,
             sentiment_weight=None,
             ans_weight=None,
+            noise_weight=None,
     ):
 
         outputs = self.bert(
@@ -306,9 +311,10 @@ class TweetBert(nn.Module):
         start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
         end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
 
-        classification_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_classifier)
+        ans_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_ans_classifier)
+        noise_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_noise_classifier)
 
-        outputs = (start_logits, end_logits, classification_logits) + outputs[2:]
+        outputs = (start_logits, end_logits, ans_logits, noise_logits) + outputs[2:]
         # outputs = (start_logits, end_logits,) + outputs[2:]
 
         if start_positions is not None and end_positions is not None:
@@ -329,25 +335,37 @@ class TweetBert(nn.Module):
                 loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
 
                 loss_classification = nn.BCEWithLogitsLoss()
-                classification_loss = loss_classification(classification_logits, onthot_ans_type)
+                ans_loss = loss_classification(ans_logits, onehot_ans_type)
+                noise_loss = loss_classification(noise_logits, onehot_noise_type)
 
-                start_loss = loss_fct(start_logits, start_positions, sentiment=sentiment_weight, ans=ans_weight)
-                end_loss = loss_fct(end_logits, end_positions, sentiment=sentiment_weight, ans=ans_weight)
+                start_loss = loss_fct(start_logits, start_positions, sentiment=sentiment_weight, ans=ans_weight,
+                                      noise=noise_weight)
+                end_loss = loss_fct(end_logits, end_positions, sentiment=sentiment_weight, ans=ans_weight,
+                                    noise=noise_weight)
 
-                total_loss = (start_loss + end_loss + classification_loss) / 3
+                total_loss = (start_loss + end_loss + ans_loss + noise_loss) / 4
             else:
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_classification = nn.BCEWithLogitsLoss()
 
                 start_loss = loss_fct(start_logits, start_positions)
                 end_loss = loss_fct(end_logits, end_positions)
-                classification_loss = loss_classification(classification_logits, onthot_ans_type)
+                ans_loss = loss_classification(ans_logits, onehot_ans_type)
+                noise_loss = loss_classification(noise_logits, onehot_noise_type)
 
                 if sentiment_weight is not None:
                     start_loss *= sentiment_weight
                     end_loss *= sentiment_weight
 
-                total_loss = (start_loss.mean() + end_loss.mean() + classification_loss) / 3
+                if ans_weight is not None:
+                    start_loss *= ans_weight
+                    end_loss *= ans_weight
+
+                if noise_weight is not None:
+                    start_loss *= noise_weight
+                    end_loss *= noise_weight
+
+                total_loss = (start_loss.mean() + end_loss.mean() + ans_loss + noise_loss) / 4
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)
@@ -363,13 +381,15 @@ def test_Net():
     all_token_type_ids = torch.tensor([[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]])
     all_start_positions = torch.tensor([0, 1])
     all_end_positions =  torch.tensor([2, 3])
-    all_onthot_ans_type = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
+    all_onehot_ans_type = torch.tensor([[0, 0, 1], [1, 0, 0]]).float()
+    all_onehot_noise_type = torch.tensor([[0, 1], [1, 0]]).float()
     print(all_start_positions.shape)
 
     model = TweetBert(max_seq_len=7)
 
     y = model(input_ids=all_input_ids, attention_mask=all_attention_masks, token_type_ids=all_token_type_ids,
-              start_positions=all_start_positions, end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
+              start_positions=all_start_positions, end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+              onehot_noise_type=all_onehot_noise_type,)
 
     print("loss: ", y[0])
     print("start_logits: ", y[1])

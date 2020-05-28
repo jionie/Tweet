@@ -148,7 +148,8 @@ class QA():
         self.model.cross_attention.apply(init_weights)
         self.model.qa_start.apply(init_weights_linear)
         self.model.qa_end.apply(init_weights_linear)
-        self.model.qa_classifier.apply(init_weights_linear)
+        self.model.qa_ans_classifier.apply(init_weights_linear)
+        self.model.qa_noise_classifier.apply(init_weights_linear)
 
         if self.config.load_pretrain:
             checkpoint_to_load = torch.load(self.config.checkpoint_pretrain, map_location=self.config.device)
@@ -201,7 +202,8 @@ class QA():
                                self.model.cross_attention,
                                self.model.qa_start,
                                self.model.qa_end,
-                               self.model.qa_classifier,
+                               self.model.qa_ans_classifier,
+                               self.model.qa_noise_classifier,
                                ]
 
             elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
@@ -236,7 +238,8 @@ class QA():
                                self.model.cross_attention,
                                self.model.qa_start,
                                self.model.qa_end,
-                               self.model.qa_classifier,
+                               self.model.qa_ans_classifier,
+                               self.model.qa_noise_classifier,
                                ]
             else:
                 raise NotImplementedError
@@ -465,6 +468,8 @@ class QA():
             self.train_metrics = []
             self.train_metrics_no_postprocessing = []
             self.train_metrics_postprocessing = []
+            self.train_ans_acc = []
+            self.train_noise_acc = []
 
             # update lr and start from start_epoch
             if (self.epoch >= 1) and (not self.lr_scheduler_each_iter) \
@@ -483,8 +488,9 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.train_data_loader):
+                    all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet, all_orig_selected, all_ans,
+                    all_noise, all_sentiment, all_offsets_token_level, all_offsets_word_level) in \
+                    enumerate(self.train_data_loader):
 
                 rate = 0
                 for param_group in self.optimizer.param_groups:
@@ -499,7 +505,8 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
+                all_onehot_ans_type = all_onehot_ans_type.cuda()
+                all_onehot_noise_type = all_onehot_noise_type.cuda()
 
                 sentiment = all_sentiment
                 sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
@@ -509,13 +516,19 @@ class QA():
                 ans_weight = np.array([self.config.ans_weight_map[ans_] for ans_ in ans])
                 ans_weight = torch.tensor(ans_weight).float().cuda()
 
+                noise = all_noise
+                noise_weight = np.array([self.config.noise_weight_map[noise_] for noise_ in noise])
+                noise_weight = torch.tensor(noise_weight).float().cuda()
+
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
-                                     sentiment_weight=sentiment_weight, ans_weight=ans_weight)
+                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+                                     onehot_noise_type=all_onehot_noise_type, sentiment_weight=sentiment_weight,
+                                     ans_weight=ans_weight, noise_weight=noise_weight)
 
-                loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
+                loss, start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], \
+                                                                           outputs[3], outputs[4]
 
                 # use apex
                 if self.config.apex:
@@ -531,7 +544,7 @@ class QA():
                             self.model.attack()
                             outputs_adv = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
                                                      token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                                     end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type,
+                                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
                                                  sentiment_weight=sentiment_weight)
                             loss_adv = outputs_adv[0]
 
@@ -566,12 +579,20 @@ class QA():
                 # translate to predictions
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
+                ans_logits = torch.argmax(ans_logits, dim=-1)
+                noise_logits = torch.argmax(noise_logits, dim=-1)
+                all_onehot_ans_type = torch.argmax(all_onehot_ans_type, dim=-1)
+                all_onehot_noise_type = torch.argmax(all_onehot_noise_type, dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
 
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
+                ans_logits = to_numpy(ans_logits)
+                noise_logits = to_numpy(noise_logits)
+                all_onehot_ans_type = to_numpy(all_onehot_ans_type)
+                all_onehot_noise_type = to_numpy(all_onehot_noise_type)
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
 
@@ -604,6 +625,16 @@ class QA():
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
 
+                    if ans_logits[px] == all_onehot_ans_type[px]:
+                        self.train_ans_acc.append(1)
+                    else:
+                        self.train_ans_acc.append(0)
+
+                    if noise_logits[px] == all_onehot_noise_type[px]:
+                        self.train_noise_acc.append(1)
+                    else:
+                        self.train_noise_acc.append(0)
+
                 l = np.array([loss.item() * self.config.batch_size])
                 n = np.array([self.config.batch_size])
                 sum_train_loss = sum_train_loss + l
@@ -617,9 +648,12 @@ class QA():
                     mean_train_metric = np.mean(self.train_metrics)
                     mean_train_metric_postprocessing = np.mean(self.train_metrics_postprocessing)
                     mean_train_metric_no_postprocessing = np.mean(self.train_metrics_no_postprocessing)
+                    mean_train_ans_acc = np.mean(self.train_ans_acc)
+                    mean_train_noise_acc = np.mean(self.train_noise_acc)
 
-                    self.log.write('lr: %f train loss: %f train_jaccard: %f train_jaccard_postprocessing: %f train_jaccard_no_postprocessing: %f\n' % \
-                                   (rate, train_loss[0], mean_train_metric, mean_train_metric_postprocessing, mean_train_metric_no_postprocessing))
+                    self.log.write('lr: %f train loss: %f train_jaccard: %f train_jaccard_postprocessing: %f train_jaccard_no_postprocessing: %f train_ans_acc: %f train_noise_acc: %f\n' % \
+                                   (rate, train_loss[0], mean_train_metric, mean_train_metric_postprocessing,
+                                    mean_train_metric_no_postprocessing, mean_train_ans_acc, mean_train_noise_acc))
 
                     print("Training ground truth: ", selected_tweet)
                     print("Training prediction: ", final_text)
@@ -641,6 +675,8 @@ class QA():
         self.eval_metrics = []
         self.eval_metrics_no_postprocessing = []
         self.eval_metrics_postprocessing = []
+        self.eval_ans_acc = []
+        self.eval_noise_acc = []
 
         all_result = []
 
@@ -651,8 +687,9 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.val_data_loader):
+                    all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet, all_orig_selected, all_ans,
+                    all_noise, all_sentiment, all_offsets_token_level, all_offsets_word_level) in \
+                    enumerate(self.val_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -663,14 +700,18 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
+                all_onehot_ans_type = all_onehot_ans_type.cuda()
+                all_onehot_noise_type = all_onehot_noise_type.cuda()
+
                 sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                         end_positions=all_end_positions, onthot_ans_type=all_onthot_ans_type)
+                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+                                     onehot_noise_type=all_onehot_noise_type)
 
-                loss, start_logits, end_logits = outputs[0], outputs[1], outputs[2]
+                loss, start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], \
+                                                                           outputs[3], outputs[4]
 
                 self.writer.add_scalar('val_loss_' + str(self.config.fold), loss.item(), (self.eval_count - 1) * len(
                     self.val_data_loader) * self.config.val_batch_size + val_batch_i * self.config.val_batch_size)
@@ -678,12 +719,20 @@ class QA():
                 # translate to predictions
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
+                ans_logits = torch.argmax(ans_logits, dim=-1)
+                noise_logits = torch.argmax(noise_logits, dim=-1)
+                all_onehot_ans_type = torch.argmax(all_onehot_ans_type, dim=-1)
+                all_onehot_noise_type = torch.argmax(all_onehot_noise_type, dim=-1)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()
 
                 start_logits = to_numpy(start_logits)
                 end_logits = to_numpy((end_logits))
+                ans_logits = to_numpy(ans_logits)
+                noise_logits = to_numpy(noise_logits)
+                all_onehot_ans_type = to_numpy(all_onehot_ans_type)
+                all_onehot_noise_type = to_numpy(all_onehot_noise_type)
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
 
@@ -719,6 +768,16 @@ class QA():
                         self.eval_metrics_no_postprocessing.append(jaccard_score)
                         self.eval_metrics.append(jaccard_score)
 
+                    if ans_logits[px] == all_onehot_ans_type[px]:
+                        self.eval_ans_acc.append(1)
+                    else:
+                        self.eval_ans_acc.append(0)
+
+                    if noise_logits[px] == all_onehot_noise_type[px]:
+                        self.eval_noise_acc.append(1)
+                    else:
+                        self.eval_noise_acc.append(0)
+
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
                 valid_loss = valid_loss + l
@@ -728,9 +787,12 @@ class QA():
             mean_eval_metric = np.mean(self.eval_metrics)
             mean_eval_metric_postprocessing = np.mean(self.eval_metrics_postprocessing)
             mean_eval_metric_no_postprocessing = np.mean(self.eval_metrics_no_postprocessing)
+            mean_eval_ans_acc = np.mean(self.eval_ans_acc)
+            mean_eval_noise_acc = np.mean(self.eval_noise_acc)
 
-            self.log.write('validation loss: %f eval_jaccard: %f eval_jaccard_postprocessing: %f eval_jaccard_no_postprocessing: %f\n' % \
-                           (valid_loss[0], mean_eval_metric, mean_eval_metric_postprocessing, mean_eval_metric_no_postprocessing))
+            self.log.write('validation loss: %f eval_jaccard: %f eval_jaccard_postprocessing: %f eval_jaccard_no_postprocessing: %f eval_ans_acc: %f eval_noise_acc: %f\n' % \
+                           (valid_loss[0], mean_eval_metric, mean_eval_metric_postprocessing,
+                            mean_eval_metric_no_postprocessing, mean_eval_ans_acc, mean_eval_noise_acc))
             print("Validating ground truth: ", selected_tweet)
             print("Validating prediction: ", final_text)
 
@@ -752,7 +814,8 @@ class QA():
 
         val_df = pd.DataFrame({'selected_text': all_result})
         val_df.to_csv(os.path.join(self.config.checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
-                                                                                                    self.config.fold)), index=False)
+                                                                                                    self.config.fold)),
+                      index=False)
 
     def infer_op(self):
 
@@ -764,8 +827,9 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_ans, all_sentiment,
-                               all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
+                               all_end_positions, all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet,
+                               all_orig_selected, all_ans, all_noise, all_sentiment, all_offsets_token_level,
+                               all_offsets_word_level) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -774,19 +838,29 @@ class QA():
                 all_input_ids = all_input_ids.cuda()
                 all_attention_masks = all_attention_masks.cuda()
                 all_token_type_ids = all_token_type_ids.cuda()
-                all_onthot_ans_type = all_onthot_ans_type.cuda()
+                all_start_positions = all_start_positions.cuda()
+                all_end_positions = all_end_positions.cuda()
+                all_onehot_ans_type = all_onehot_ans_type.cuda()
+                all_onehot_noise_type = all_onehot_noise_type.cuda()
+
                 sentiment = all_sentiment
 
                 outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                         token_type_ids=all_token_type_ids, onthot_ans_type=all_onthot_ans_type)
+                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
+                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+                                     onehot_noise_type=all_onehot_noise_type)
 
-                start_logits, end_logits = outputs[0], outputs[1]
+                start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], outputs[3]
 
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
+                ans_logits = torch.argmax(ans_logits, dim=-1)
+                noise_logits = torch.argmax(noise_logits, dim=-1)
 
                 start_logits = start_logits.argmax(dim=-1)
                 end_logits = end_logits.argmax(dim=-1)
+                ans_logits = to_numpy(ans_logits)
+                noise_logits = to_numpy(noise_logits)
 
                 def to_numpy(tensor):
                     return tensor.detach().cpu().numpy()

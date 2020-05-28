@@ -177,7 +177,15 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
     targets_start = target_idx[0]
     targets_end = target_idx[-1]
 
-    # print(tweet[tweet_offsets[targets_start][0] : tweet_offsets[targets_end][1]], "------------", selected_text)
+    # print(tweet[tweet_offsets_token_level[targets_start][0]: tweet_offsets_token_level[targets_end][1]],
+    #       "------------", selected_text)
+
+    if tweet_offsets_word_level[targets_start][0] != tweet_offsets_token_level[targets_start][0] or \
+        tweet_offsets_word_level[targets_end][1] != tweet_offsets_token_level[targets_end][1]:
+        noise_type = "noisy"
+    else:
+        noise_type = "clean"
+
     last_offset = tweet_offsets_word_level[-1][1]
     if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
 
@@ -276,6 +284,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         'orig_selected': selected_text,
         'sentiment': sentiment,
         'ans_type': ans_type,
+        'noise_type': noise_type,
         'offsets_token_level': tweet_offsets_token_level,
         'offsets_word_level': tweet_offsets_word_level
     }
@@ -307,10 +316,15 @@ class TweetDataset:
             self.augment
         )
 
-        onthot_ans_type = {
+        onehot_ans_type = {
             'long': torch.tensor([1, 0, 0], dtype=torch.float),
             'none': torch.tensor([0, 1, 0], dtype=torch.float),
             'short': torch.tensor([0, 0, 1], dtype=torch.float),
+        }
+
+        onehot_noise_type = {
+            'clean': torch.tensor([0, 0], dtype=torch.float),
+            'noisy': torch.tensor([0, 1], dtype=torch.float),
         }
 
         return torch.tensor(data["ids"], dtype=torch.long), \
@@ -318,10 +332,12 @@ class TweetDataset:
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
                torch.tensor(data["targets_start"], dtype=torch.long),\
                torch.tensor(data["targets_end"], dtype=torch.long),\
-               onthot_ans_type[data["ans_type"]], \
+               onehot_ans_type[data["ans_type"]], \
+               onehot_noise_type[data["noise_type"]], \
                data["orig_tweet"], \
                data["orig_selected"], \
                data["ans_type"], \
+               data["noise_type"], \
                data["sentiment"], \
                torch.tensor(data["offsets_token_level"], dtype=torch.long), \
                torch.tensor(data["offsets_word_level"], dtype=torch.long)
@@ -571,7 +587,7 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                                   batch_size=batch_size, num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-            all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+            all_end_positions, all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
             all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
 
         print("------------------------testing test loader----------------------")
@@ -604,7 +620,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                      num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+                    all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
             all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
 
         print("------------------------testing train loader----------------------")
@@ -622,7 +638,7 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
+                    all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
             all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
 
         print("------------------------testing val loader----------------------")
