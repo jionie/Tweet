@@ -156,6 +156,16 @@ class TweetBert(nn.Module):
                 model_type,
                 config=self.config,
             )
+        elif model_type == "albert-xlarge-v2":
+            self.config = AutoConfig.from_pretrained(
+                "albert-xlarge-v2",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.bert = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
         else:
             raise NotImplementedError
 
