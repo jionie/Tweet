@@ -21,7 +21,7 @@ class Config_Bert:
         self.hidden_layers = [-1, -2, -3, -4]
         self.sentiment_weight_map = {"neutral": 0.8, "positive": 1, "negative": 1}
         self.ans_weight_map = {"short": 1.2, "long": 1, "none": 1}
-        self.noise_weight_map = {"clean": 1, "noisy": 1.2}
+        self.noise_weight_map = {"clean": 1, "noisy": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
         # path, specify the path for saving splitted csv
