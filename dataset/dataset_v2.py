@@ -323,7 +323,7 @@ class TweetDataset:
         }
 
         onehot_noise_type = {
-            'clean': torch.tensor([0, 0], dtype=torch.float),
+            'clean': torch.tensor([1, 0], dtype=torch.float),
             'noisy': torch.tensor([0, 1], dtype=torch.float),
         }
 

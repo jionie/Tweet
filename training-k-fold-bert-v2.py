@@ -768,13 +768,13 @@ class QA():
                         self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                     else:
                         if noise_logits[px] == 1:
+                            # print(final_text, "-------", selected_tweet)
                             final_text = final_text.replace('....!', '..')
                             if final_text[:3] == "...":
                                 final_text = final_text[2:]
                             if final_text[-4:-1] == "..." and final_text[-1] != ".":
                                 final_text = final_text[:-1]
                             jaccard_score = jaccard(selected_tweet.strip(), final_text.strip())
-                            # print(final_text, "-------", selected_tweet)
                         self.eval_metrics_no_postprocessing.append(jaccard_score)
                         self.eval_metrics.append(jaccard_score)
 
