@@ -176,8 +176,12 @@ class TweetBert(nn.Module):
         weights_init.data[:-1] = -3
         self.layer_weights = torch.nn.Parameter(weights_init)
 
-        self.qa_start = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end = nn.Linear(self.config.hidden_size, 1)
+        self.qa_start_neutral = nn.Linear(self.config.hidden_size, 1)
+        self.qa_end_neutral = nn.Linear(self.config.hidden_size, 1)
+        self.qa_start_positive = nn.Linear(self.config.hidden_size, 1)
+        self.qa_end_positive = nn.Linear(self.config.hidden_size, 1)
+        self.qa_start_negative = nn.Linear(self.config.hidden_size, 1)
+        self.qa_end_negative = nn.Linear(self.config.hidden_size, 1)
         self.qa_ans_classifier = nn.Linear(self.config.hidden_size, 3)
         self.qa_noise_classifier = nn.Linear(self.config.hidden_size, 2)
 
@@ -244,6 +248,7 @@ class TweetBert(nn.Module):
             input_ids=None,
             attention_mask=None,
             token_type_ids=None,
+            onehot_sentiment_type=None,
             onehot_ans_type=None,
             onehot_noise_type=None,
             position_ids=None,
@@ -308,8 +313,22 @@ class TweetBert(nn.Module):
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
 
         # #################################################################### direct approach
-        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
-        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
+        start_logits_neutral = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_neutral).squeeze(-1)
+        end_logits_neutral = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_neutral).squeeze(-1)
+
+        start_logits_positive = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_positive).squeeze(-1)
+        end_logits_positive = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_positive).squeeze(-1)
+
+        start_logits_negative = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_negative).squeeze(-1)
+        end_logits_negative = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_negative).squeeze(-1)
+
+        start_logits = start_logits_neutral * onehot_sentiment_type[:, 0].unsqueeze(1).expand(start_logits_neutral.shape) + \
+                       start_logits_positive * onehot_sentiment_type[:, 1].unsqueeze(1).expand(start_logits_positive.shape) + \
+                       start_logits_negative * onehot_sentiment_type[:, 2].unsqueeze(1).expand(start_logits_negative.shape)
+
+        end_logits = end_logits_neutral * onehot_sentiment_type[:, 0].unsqueeze(1).expand(end_logits_neutral.shape) + \
+                     end_logits_positive * onehot_sentiment_type[:, 1].unsqueeze(1).expand(end_logits_positive.shape) + \
+                     end_logits_negative * onehot_sentiment_type[:, 2].unsqueeze(1).expand(end_logits_negative.shape)
 
         ans_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_ans_classifier)
         noise_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_noise_classifier)

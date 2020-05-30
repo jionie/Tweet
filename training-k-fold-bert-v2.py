@@ -146,8 +146,12 @@ class QA():
 
         self.model.cross_attention.apply(init_weights)
         self.model.cross_attention.apply(init_weights)
-        self.model.qa_start.apply(init_weights_linear)
-        self.model.qa_end.apply(init_weights_linear)
+        self.model.qa_start_neutral.apply(init_weights_linear)
+        self.model.qa_end_neutral.apply(init_weights_linear)
+        self.model.qa_start_positive.apply(init_weights_linear)
+        self.model.qa_end_positive.apply(init_weights_linear)
+        self.model.qa_start_negative.apply(init_weights_linear)
+        self.model.qa_end_negative.apply(init_weights_linear)
         self.model.qa_ans_classifier.apply(init_weights_linear)
         self.model.qa_noise_classifier.apply(init_weights_linear)
 
@@ -200,8 +204,12 @@ class QA():
                                self.model.bert.encoder.layer[11],
                                self.model.aoa,
                                self.model.cross_attention,
-                               self.model.qa_start,
-                               self.model.qa_end,
+                               self.model.qa_start_neutral,
+                               self.model.qa_end_neutral,
+                               self.model.qa_start_positive,
+                               self.model.qa_end_positive,
+                               self.model.qa_start_negative,
+                               self.model.qa_end_negative,
                                self.model.qa_ans_classifier,
                                self.model.qa_noise_classifier,
                                ]
@@ -236,8 +244,12 @@ class QA():
                                self.model.bert.encoder.layer[23],
                                self.model.aoa,
                                self.model.cross_attention,
-                               self.model.qa_start,
-                               self.model.qa_end,
+                               self.model.qa_start_neutral,
+                               self.model.qa_end_neutral,
+                               self.model.qa_start_positive,
+                               self.model.qa_end_positive,
+                               self.model.qa_start_negative,
+                               self.model.qa_end_negative,
                                self.model.qa_ans_classifier,
                                self.model.qa_noise_classifier,
                                ]
@@ -487,10 +499,12 @@ class QA():
             self.model.zero_grad()
 
             for tr_batch_i, (
-                    all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet, all_orig_selected, all_ans,
-                    all_noise, all_sentiment, all_offsets_token_level, all_offsets_word_level) in \
-                    enumerate(self.train_data_loader):
+                    all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.train_data_loader):
 
                 rate = 0
                 for param_group in self.optimizer.param_groups:
@@ -505,6 +519,7 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
+                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
                 all_onehot_ans_type = all_onehot_ans_type.cuda()
                 all_onehot_noise_type = all_onehot_noise_type.cuda()
 
@@ -521,11 +536,17 @@ class QA():
                 noise_weight = torch.tensor(noise_weight).float().cuda()
 
 
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
-                                     onehot_noise_type=all_onehot_noise_type, sentiment_weight=sentiment_weight,
-                                     ans_weight=ans_weight, noise_weight=noise_weight)
+                outputs = self.model(input_ids=all_input_ids,
+                                     attention_mask=all_attention_masks,
+                                     token_type_ids=all_token_type_ids,
+                                     start_positions=all_start_positions,
+                                     end_positions=all_end_positions,
+                                     onehot_sentiment_type=all_onehot_sentiment_type,
+                                     onehot_ans_type=all_onehot_ans_type,
+                                     onehot_noise_type=all_onehot_noise_type,
+                                     sentiment_weight=sentiment_weight,
+                                     ans_weight=ans_weight,
+                                     noise_weight=noise_weight)
 
                 loss, start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], \
                                                                            outputs[3], outputs[4]
@@ -687,10 +708,12 @@ class QA():
             torch.cuda.empty_cache()
 
             for val_batch_i, (
-                    all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet, all_orig_selected, all_ans,
-                    all_noise, all_sentiment, all_offsets_token_level, all_offsets_word_level) in \
-                    enumerate(self.val_data_loader):
+                    all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.val_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -701,14 +724,19 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
+                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
                 all_onehot_ans_type = all_onehot_ans_type.cuda()
                 all_onehot_noise_type = all_onehot_noise_type.cuda()
 
                 sentiment = all_sentiment
 
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+                outputs = self.model(input_ids=all_input_ids,
+                                     attention_mask=all_attention_masks,
+                                     token_type_ids=all_token_type_ids,
+                                     start_positions=all_start_positions,
+                                     end_positions=all_end_positions,
+                                     onehot_sentiment_type=all_onehot_sentiment_type,
+                                     onehot_ans_type=all_onehot_ans_type,
                                      onehot_noise_type=all_onehot_noise_type)
 
                 loss, start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], \
@@ -836,10 +864,13 @@ class QA():
             # init cache
             torch.cuda.empty_cache()
 
-            for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onehot_ans_type, all_onehot_noise_type, all_orig_tweet,
-                               all_orig_selected, all_ans, all_noise, all_sentiment, all_offsets_token_level,
-                               all_offsets_word_level) in enumerate(self.test_data_loader):
+            for test_batch_i, (
+                    all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
                 self.model.eval()
@@ -850,14 +881,19 @@ class QA():
                 all_token_type_ids = all_token_type_ids.cuda()
                 all_start_positions = all_start_positions.cuda()
                 all_end_positions = all_end_positions.cuda()
+                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
                 all_onehot_ans_type = all_onehot_ans_type.cuda()
                 all_onehot_noise_type = all_onehot_noise_type.cuda()
 
                 sentiment = all_sentiment
 
-                outputs = self.model(input_ids=all_input_ids, attention_mask=all_attention_masks,
-                                     token_type_ids=all_token_type_ids, start_positions=all_start_positions,
-                                     end_positions=all_end_positions, onehot_ans_type=all_onehot_ans_type,
+                outputs = self.model(input_ids=all_input_ids,
+                                     attention_mask=all_attention_masks,
+                                     token_type_ids=all_token_type_ids,
+                                     start_positions=all_start_positions,
+                                     end_positions=all_end_positions,
+                                     onehot_sentiment_type=all_onehot_sentiment_type,
+                                     onehot_ans_type=all_onehot_ans_type,
                                      onehot_noise_type=all_onehot_noise_type)
 
                 start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], outputs[3]

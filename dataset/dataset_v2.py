@@ -316,6 +316,12 @@ class TweetDataset:
             self.augment
         )
 
+        onehot_sentiment_type = {
+            'neutral': torch.tensor([1, 0, 0], dtype=torch.float),
+            'positive': torch.tensor([0, 1, 0], dtype=torch.float),
+            'negative': torch.tensor([0, 0, 1], dtype=torch.float),
+        }
+
         onehot_ans_type = {
             'long': torch.tensor([1, 0, 0], dtype=torch.float),
             'none': torch.tensor([0, 1, 0], dtype=torch.float),
@@ -332,13 +338,14 @@ class TweetDataset:
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
                torch.tensor(data["targets_start"], dtype=torch.long),\
                torch.tensor(data["targets_end"], dtype=torch.long),\
+               onehot_sentiment_type[data["sentiment"]], \
                onehot_ans_type[data["ans_type"]], \
                onehot_noise_type[data["noise_type"]], \
                data["orig_tweet"], \
                data["orig_selected"], \
+               data["sentiment"], \
                data["ans_type"], \
                data["noise_type"], \
-               data["sentiment"], \
                torch.tensor(data["offsets_token_level"], dtype=torch.long), \
                torch.tensor(data["offsets_word_level"], dtype=torch.long)
 
@@ -586,9 +593,12 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
     test_loader, _ = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, model_type=model_type,
                                   batch_size=batch_size, num_workers=num_workers)
 
-    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-            all_end_positions, all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
 
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
@@ -619,9 +629,12 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                      batch_size=batch_size, val_batch_size=val_batch_size,
                                                      num_workers=num_workers)
 
-    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
 
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
@@ -637,9 +650,12 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         print("------------------------testing train loader finished----------------------")
         break
 
-    for _, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onehot_ans_type, all_orig_tweet, all_orig_selected, all_tweet, all_sentiment,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
+    for _, (all_input_ids, all_attention_masks, all_token_type_ids,
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
 
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
