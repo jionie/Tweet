@@ -53,23 +53,19 @@ class Config_Bert:
             self.reuse_model = False
         # dataset setting
         self.Datasampler = Datasampler
-        self.max_seq_length = 192
-        self.max_query_length = 64
-        self.max_answer_length = 30
-        self.doc_stride = 128
-        self.threads = 4
+        self.max_seq_length = 96
         # optimizer
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
-        self.max_grad_norm = 2
+        self.max_grad_norm = 5
         # lr scheduler, can choose to use proportion or steps
         self.lr_scheduler_name = 'WarmupLinear'
-        self.warmup_proportion = 0.005
-        self.warmup_steps = 200
+        self.warmup_proportion = 0
+        self.warmup_steps = 0
         # lr
-        self.max_lr = 1e-5
-        self.min_lr = 1e-5
-        self.lr = 2e-4
+        self.max_lr = 4e-5
+        self.min_lr = 4e-5
+        self.lr = 4e-5
         self.weight_decay = 0.001
         # differential lr setting, step or decay
         self.method = "step"
@@ -82,7 +78,7 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 7
+        self.num_epoch = 3
         # saving rate
         self.saving_rate = 1 / 3
         # early stopping
