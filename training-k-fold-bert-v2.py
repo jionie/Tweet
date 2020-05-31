@@ -145,13 +145,10 @@ class QA():
                 torch.nn.init.normal_(m.weight, std=0.02)
 
         self.model.cross_attention.apply(init_weights)
-        self.model.cross_attention.apply(init_weights)
-        self.model.qa_start_neutral.apply(init_weights_linear)
-        self.model.qa_end_neutral.apply(init_weights_linear)
-        self.model.qa_start_positive.apply(init_weights_linear)
-        self.model.qa_end_positive.apply(init_weights_linear)
-        self.model.qa_start_negative.apply(init_weights_linear)
-        self.model.qa_end_negative.apply(init_weights_linear)
+        self.model.aoa.apply(init_weights)
+        self.model.qa_start.apply(init_weights_linear)
+        self.model.qa_end.apply(init_weights_linear)
+        self.model.qa_sentiment_classifier.apply(init_weights_linear)
         self.model.qa_ans_classifier.apply(init_weights_linear)
         self.model.qa_noise_classifier.apply(init_weights_linear)
 
@@ -182,147 +179,39 @@ class QA():
 
     def differential_lr(self):
 
-        if self.config.differential_lr:
-            self.optimizer_grouped_parameters = []
-            list_lr = []
+        param_optimizer = list(self.model.named_parameters())
 
-            if ((self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-base-cased")
-                    or self.config.model_type == "roberta-base"):
-
-                list_layers = [self.model.bert.embeddings,
-                               self.model.bert.encoder.layer[0],
-                               self.model.bert.encoder.layer[1],
-                               self.model.bert.encoder.layer[2],
-                               self.model.bert.encoder.layer[3],
-                               self.model.bert.encoder.layer[4],
-                               self.model.bert.encoder.layer[5],
-                               self.model.bert.encoder.layer[6],
-                               self.model.bert.encoder.layer[7],
-                               self.model.bert.encoder.layer[8],
-                               self.model.bert.encoder.layer[9],
-                               self.model.bert.encoder.layer[10],
-                               self.model.bert.encoder.layer[11],
-                               self.model.aoa,
-                               self.model.cross_attention,
-                               self.model.qa_start_neutral,
-                               self.model.qa_end_neutral,
-                               self.model.qa_start_positive,
-                               self.model.qa_end_positive,
-                               self.model.qa_start_negative,
-                               self.model.qa_end_negative,
-                               self.model.qa_ans_classifier,
-                               self.model.qa_noise_classifier,
-                               ]
-
-            elif ((self.config.model_type == "bert-large-uncased") or (self.config.model_type == "bert-large-cased")
-                  or self.config.model_type == "roberta-large"):
-
-                list_layers = [self.model.bert.embeddings,
-                               self.model.bert.encoder.layer[0],
-                               self.model.bert.encoder.layer[1],
-                               self.model.bert.encoder.layer[2],
-                               self.model.bert.encoder.layer[3],
-                               self.model.bert.encoder.layer[4],
-                               self.model.bert.encoder.layer[5],
-                               self.model.bert.encoder.layer[6],
-                               self.model.bert.encoder.layer[7],
-                               self.model.bert.encoder.layer[8],
-                               self.model.bert.encoder.layer[9],
-                               self.model.bert.encoder.layer[10],
-                               self.model.bert.encoder.layer[11],
-                               self.model.bert.encoder.layer[12],
-                               self.model.bert.encoder.layer[13],
-                               self.model.bert.encoder.layer[14],
-                               self.model.bert.encoder.layer[15],
-                               self.model.bert.encoder.layer[16],
-                               self.model.bert.encoder.layer[17],
-                               self.model.bert.encoder.layer[18],
-                               self.model.bert.encoder.layer[19],
-                               self.model.bert.encoder.layer[20],
-                               self.model.bert.encoder.layer[21],
-                               self.model.bert.encoder.layer[22],
-                               self.model.bert.encoder.layer[23],
-                               self.model.aoa,
-                               self.model.cross_attention,
-                               self.model.qa_start_neutral,
-                               self.model.qa_end_neutral,
-                               self.model.qa_start_positive,
-                               self.model.qa_end_positive,
-                               self.model.qa_start_negative,
-                               self.model.qa_end_negative,
-                               self.model.qa_ans_classifier,
-                               self.model.qa_noise_classifier,
-                               ]
-            else:
-                raise NotImplementedError
-
-            if self.config.method == "step":
-                mult = self.config.lr / self.config.min_lr
-                step = mult ** (1 / (len(list_layers) - 1))
-                list_lr = [self.config.min_lr * (step ** i) for i in range(len(list_layers))]
-            elif self.config.method == "decay":
-
-                for i in range(len(list_layers)):
-                    list_lr.append(self.config.lr)
-                    self.config.lr = self.config.lr * self.config.decay_factor
-                list_lr.reverse()
-
-            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-            print(list_lr)
-
-            for i in range(len(list_lr)):
-
-                if isinstance(list_layers[i], list):
-
-                    for list_layer in list_layers[i]:
-                        layer_parameters = list(list_layer.named_parameters())
-
-                        self.optimizer_grouped_parameters.append({
-                            'params': [p for n, p in layer_parameters if not any(nd in n for nd in no_decay)],
-                            'lr': list_lr[i],
-                            'weight_decay': self.config.weight_decay})
-
-                        self.optimizer_grouped_parameters.append({
-                            'params': [p for n, p in layer_parameters if any(nd in n for nd in no_decay)],
-                            'lr': list_lr[i],
-                            'weight_decay': 0.0})
-
-                else:
-
-                    layer_parameters = list(list_layers[i].named_parameters())
-
-                    self.optimizer_grouped_parameters.append({
-                        'params': [p for n, p in layer_parameters if not any(nd in n for nd in no_decay)],
-                        'lr': list_lr[i],
-                        'weight_decay': self.config.weight_decay})
-
-                    self.optimizer_grouped_parameters.append({
-                        'params': [p for n, p in layer_parameters if any(nd in n for nd in no_decay)],
-                        'lr': list_lr[i],
-                        'weight_decay': 0.0})
-
-        else:
-            param_optimizer = list(self.model.named_parameters())
-
+        def is_backbone(n):
             prefix = "bert"
-            def is_backbone(n):
-                return prefix in n
+            return prefix in n
 
-            no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
-            self.optimizer_grouped_parameters = [
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and is_backbone(n)],
-                 'lr': self.config.min_lr,
-                 'weight_decay': self.config.weight_decay},
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and not is_backbone(n)],
-                 'lr': self.config.lr,
-                 'weight_decay': self.config.weight_decay},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and is_backbone(n)],
-                 'lr': self.config.min_lr,
-                 'weight_decay': 0.0},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and not is_backbone(n)],
-                 'lr': self.config.lr,
-                 'weight_decay': 0.0}
-            ]
+        def is_cross_attention(n):
+            cross_attention = "cross_attention"
+            return cross_attention in n
+
+        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        self.optimizer_grouped_parameters = [
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and is_backbone(n)],
+             'lr': self.config.min_lr,
+             'weight_decay': self.config.weight_decay},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and is_cross_attention(n)],
+             'lr': self.config.max_lr,
+             'weight_decay': self.config.weight_decay},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay) and not is_backbone(n)
+                        and not is_cross_attention(n)],
+             'lr': self.config.lr,
+             'weight_decay': self.config.weight_decay},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and is_backbone(n)],
+             'lr': self.config.min_lr,
+             'weight_decay': 0.0},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and is_cross_attention(n)],
+             'lr': self.config.max_lr,
+             'weight_decay': 0.0},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay) and not is_backbone(n)
+                        and not is_cross_attention(n)],
+             'lr': self.config.lr,
+             'weight_decay': 0.0}
+        ]
 
     def prepare_optimizer(self):
 

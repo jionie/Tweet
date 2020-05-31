@@ -176,12 +176,9 @@ class TweetBert(nn.Module):
         weights_init.data[:-1] = -3
         self.layer_weights = torch.nn.Parameter(weights_init)
 
-        self.qa_start_neutral = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end_neutral = nn.Linear(self.config.hidden_size, 1)
-        self.qa_start_positive = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end_positive = nn.Linear(self.config.hidden_size, 1)
-        self.qa_start_negative = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end_negative = nn.Linear(self.config.hidden_size, 1)
+        self.qa_start = nn.Linear(self.config.hidden_size, 1)
+        self.qa_end = nn.Linear(self.config.hidden_size, 1)
+        self.qa_sentiment_classifier = nn.Linear(self.config.hidden_size, 3)
         self.qa_ans_classifier = nn.Linear(self.config.hidden_size, 3)
         self.qa_noise_classifier = nn.Linear(self.config.hidden_size, 2)
 
@@ -278,58 +275,48 @@ class TweetBert(nn.Module):
         if self.model_type == "roberta-base" or self.model_type == "roberta-large" or \
             self.model_type == "roberta-base-squad":
 
-            fuse_hidden_context = fuse_hidden[:, 4:-1, :]
+            offsets = 4
 
         elif (self.model_type == "albert-base-v2") or (self.model_type == "albert-large-v2") or \
                 (self.model_type == "albert-xlarge-v2"):
 
-            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
+            offsets = 3
 
         elif (self.model_type == "xlnet-base-cased") or (self.model_type == "xlnet-large-cased"):
 
-            fuse_hidden_context = fuse_hidden[:, 2:-2, :]
+            offsets = 2
 
         elif (self.model_type == "bert-base-uncased") or (self.model_type == "bert-large-uncased") or \
                 (self.model_type == "bert-base-cased") or (self.model_type == "bert-large-cased"):
 
-            fuse_hidden_context = fuse_hidden[:, 3:-1, :]
+            offsets = 3
 
         else:
             raise NotImplementedError
 
+        fuse_hidden_context = fuse_hidden[:, offsets:-1, :]
+        # fuse_hidden_context = torch.cat([fuse_hidden_context, fuse_hidden[:, 0, :].unsqueeze(1)], dim=1)
+
         # #################################################################### aoa, attention over attention
         # hidden for question, cls + sentiment
-        # fuse_hidden_question = fuse_hidden[:, 0:2, :]
+        # fuse_hidden_question = fuse_hidden[:, :offsets, :]
         # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:])
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
 
         # #################################################################### cross attention
         # hidden for question, cls + sentiment
-        # fuse_hidden_question = fuse_hidden[:, 0:2, :]
+        # fuse_hidden_question = fuse_hidden[:, :offsets, :]
         # fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
-        #                                                attention_mask[:, 4:])
+        #                                                attention_mask[:, offsets:-1])
         # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
 
         # #################################################################### direct approach
-        start_logits_neutral = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_neutral).squeeze(-1)
-        end_logits_neutral = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_neutral).squeeze(-1)
+        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)
+        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)
 
-        start_logits_positive = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_positive).squeeze(-1)
-        end_logits_positive = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_positive).squeeze(-1)
-
-        start_logits_negative = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_negative).squeeze(-1)
-        end_logits_negative = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end_negative).squeeze(-1)
-
-        start_logits = start_logits_neutral * onehot_sentiment_type[:, 0].unsqueeze(1).expand(start_logits_neutral.shape) + \
-                       start_logits_positive * onehot_sentiment_type[:, 1].unsqueeze(1).expand(start_logits_positive.shape) + \
-                       start_logits_negative * onehot_sentiment_type[:, 2].unsqueeze(1).expand(start_logits_negative.shape)
-
-        end_logits = end_logits_neutral * onehot_sentiment_type[:, 0].unsqueeze(1).expand(end_logits_neutral.shape) + \
-                     end_logits_positive * onehot_sentiment_type[:, 1].unsqueeze(1).expand(end_logits_positive.shape) + \
-                     end_logits_negative * onehot_sentiment_type[:, 2].unsqueeze(1).expand(end_logits_negative.shape)
-
+        # sentiment_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_sentiment_classifier)
         ans_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_ans_classifier)
         noise_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_noise_classifier)
 
@@ -351,9 +338,11 @@ class TweetBert(nn.Module):
             # end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
 
             if self.training:
-                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
 
+                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
                 loss_classification = nn.BCEWithLogitsLoss()
+
+                # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
                 ans_loss = loss_classification(ans_logits, onehot_ans_type)
                 noise_loss = loss_classification(noise_logits, onehot_noise_type)
 
@@ -364,13 +353,15 @@ class TweetBert(nn.Module):
 
                 total_loss = (start_loss + end_loss + ans_loss + noise_loss) / 4
             else:
+
                 loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
                 loss_classification = nn.BCEWithLogitsLoss()
 
-                start_loss = loss_fct(start_logits, start_positions)
-                end_loss = loss_fct(end_logits, end_positions)
+                # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
                 ans_loss = loss_classification(ans_logits, onehot_ans_type)
                 noise_loss = loss_classification(noise_logits, onehot_noise_type)
+                start_loss = loss_fct(start_logits, start_positions)
+                end_loss = loss_fct(end_logits, end_positions)
 
                 if sentiment_weight is not None:
                     start_loss *= sentiment_weight

@@ -67,12 +67,10 @@ class Config_Bert:
         self.warmup_proportion = 0.005
         self.warmup_steps = 200
         # lr
-        self.lr = 1.5e-4
-        self.weight_decay = 0.001
-        # differential lr settings
-        self.differential_lr = False
-        self.decay_factor = 0.9
+        self.max_lr = 1e-5
         self.min_lr = 1e-5
+        self.lr = 2e-4
+        self.weight_decay = 0.001
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
@@ -84,7 +82,7 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 8
+        self.num_epoch = 7
         # saving rate
         self.saving_rate = 1 / 3
         # early stopping

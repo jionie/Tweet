@@ -359,7 +359,7 @@ def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/twee
                         split="StratifiedKFold"):
 
     os.makedirs(save_path + '/split', exist_ok=True)
-    df_path = os.path.join(data_path, "train.csv")
+    df_path = os.path.join(data_path, "train_old.csv")
     df = pd.read_csv(df_path, encoding='utf8')
 
     if split == "StratifiedKFold":
