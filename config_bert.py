@@ -18,9 +18,9 @@ class Config_Bert:
         self.model_type = model_type
         self.do_lower_case = True
         self.model_name = 'TweetBert'
-        self.hidden_layers = [-1, -2, -3]
-        self.sentiment_weight_map = {"neutral": 1, "positive": 1, "negative": 1}
-        self.ans_weight_map = {"short": 1, "long": 1, "none": 1}
+        self.hidden_layers = [-1, -2, -3, -4]
+        self.sentiment_weight_map = {"neutral": 0.8, "positive": 1, "negative": 1}
+        self.ans_weight_map = {"short": 1.2, "long": 1, "none": 1}
         self.noise_weight_map = {"clean": 1, "noisy": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
@@ -57,16 +57,16 @@ class Config_Bert:
         # optimizer
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
-        self.max_grad_norm = 1
+        self.max_grad_norm = 5
         # lr scheduler, can choose to use proportion or steps
-        self.lr_scheduler_name = 'WarmupConstant'
+        self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0
-        self.warmup_steps = 0
+        self.warmup_steps = 200
         # lr
-        self.max_lr = 2e-5
-        self.min_lr = 2e-5
-        self.lr = 8e-5
-        self.weight_decay = 0
+        self.max_lr = 1e-5
+        self.min_lr = 1e-5
+        self.lr = 2e-4
+        self.weight_decay = 0.001
         # differential lr setting, step or decay
         self.method = "step"
         # dataloader settings
@@ -78,10 +78,10 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 5
+        self.num_epoch = 7
         # saving rate
         self.saving_rate = 1 / 2
         # early stopping
-        self.early_stopping = 3 / self.saving_rate
+        self.early_stopping = 3
         # progress rate
         self.progress_rate = 1 / 2

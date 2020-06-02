@@ -115,17 +115,18 @@ def get_selected_text(text, start_idx, end_idx, offsets):
 
 
 def calculate_jaccard_score(
+        split_tweet,
         original_tweet,
         selected_text,
         idx_start,
         idx_end,
-        start_gt,
-        end_gt,
         model_type,
         tweet_offsets):
 
+    original_selected_text = selected_text
+
     if idx_end < idx_start:
-        filtered_output = original_tweet
+        prediction = original_tweet
 
     else:
 
@@ -136,8 +137,7 @@ def calculate_jaccard_score(
             idx_end += 4
 
             # filtered_output = get_selected_text(original_tweet, idx_start, idx_end, tweet_offsets)
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            selected_text = original_tweet[tweet_offsets[start_gt][0]: tweet_offsets[end_gt][1]]
+            prediction = split_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (
@@ -147,8 +147,7 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            selected_text = original_tweet[tweet_offsets[start_gt][0]: tweet_offsets[end_gt][1]]
+            prediction = split_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, "----------", filtered_output)
 
         elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
@@ -157,8 +156,7 @@ def calculate_jaccard_score(
             idx_start += 2
             idx_end += 2
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            selected_text = original_tweet[tweet_offsets[start_gt][0]: tweet_offsets[end_gt][1]]
+            prediction = split_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
 
         elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
@@ -167,8 +165,7 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            selected_text = original_tweet[tweet_offsets[start_gt][0]: tweet_offsets[end_gt][1]]
+            prediction = split_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
 
         elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
@@ -177,12 +174,51 @@ def calculate_jaccard_score(
             idx_start += 3
             idx_end += 3
 
-            filtered_output = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
-            selected_text = original_tweet[tweet_offsets[start_gt][0]: tweet_offsets[end_gt][1]]
+            prediction = split_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
             # print(selected_text, filtered_output)
 
         else:
             raise NotImplementedError
+
+    filtered_output = ""
+    finished = False
+
+    if len(prediction) == 0:
+        filtered_output = prediction
+    else:
+        max_match = 0
+        for idx in range(len(original_tweet)):
+            curr_output = ""
+            if original_tweet[idx] == prediction[0]:
+                tweet_idx = idx
+                for prediction_idx in range(len(prediction)):
+                    if (original_tweet[tweet_idx] == prediction[prediction_idx]):
+                        curr_output += original_tweet[tweet_idx]
+                        tweet_idx += 1
+
+                        # reach tweet end
+                        if (tweet_idx >= len(original_tweet)):
+                            if (prediction_idx == len(prediction) - 1):
+                                finished = True
+                            break
+
+                        # reach prediction end
+                        if (prediction_idx == len(prediction) - 1):
+                            finished = True
+                            break
+                    else:
+                        # skip extra " "
+                        if (prediction[prediction_idx] == " "):
+                            continue
+                        else:
+                            break
+                if finished:
+                    filtered_output = curr_output
+                    break
+                else:
+                    if max_match < len(curr_output):
+                        max_match = len(curr_output)
+                        filtered_output = curr_output
 
     common_words = ['****.']
 
@@ -190,5 +226,5 @@ def calculate_jaccard_score(
         if word in str(original_tweet).lower().split() and word not in str(filtered_output).lower().split():
             filtered_output += " " + word
 
-    jac = jaccard(selected_text.strip(), filtered_output.strip())
+    jac = jaccard(original_selected_text.strip(), filtered_output.strip())
     return jac, filtered_output

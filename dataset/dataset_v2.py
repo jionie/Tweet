@@ -1,14 +1,9 @@
 import argparse
-import re
-import os
+import copy
 import pandas as pd
-import numpy as np
 
-import torch
 from torch.utils.data import DataLoader
 from transformers import *
-from transformers.data.processors.squad import *
-# import tokenizers
 from sklearn.model_selection import StratifiedKFold, KFold
 
 import nlpaug.augmenter.word as naw
@@ -77,11 +72,35 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
 
     # lower cased here
-    tweet = " ".join(str(tweet).split())
-    selected_text = " ".join(str(selected_text).split())
+    tweet = " ".join(str(tweet).split()).lower()
+    selected_text = " ".join(str(selected_text).split()).lower()
+    original_tweet = copy.deepcopy(tweet)
+    original_selected_text = copy.deepcopy(selected_text)
 
-    tweet = " " + tweet.lower()
-    selected_text = " " + selected_text.lower()
+    # some token optimization
+    special_tokens = ["!!!!", "!!!", "!!", "!",
+                      "....", "...", "..", ".",
+                      "????", "???", "??", "?",
+                      "****", "***", "**", "*",
+                      "----", "---", "--", "-",
+                      "~~~~", "~~~", "~~", "~",
+                      "////", "///", "//", "/",
+                      "````", "```", "``", "`",
+                      "====", "===", "==", "=",
+                      "####", "###", "##", "#",
+                      "&&&&", "&&&", "&&", "&",
+                      "))))", ")))", "))", ")",
+                      ";;;;", ";;;", ";;", ";",
+                      "''''", "'''", "''", "'",
+                      "<<<<", "<<<", "<<", "<"
+                      ]
+    for token in special_tokens:
+        replace_token = " ".join(token) + " "
+        tweet = tweet.replace(token, replace_token)
+        selected_text = selected_text.replace(token, replace_token)
+
+    tweet = " " + " ".join(tweet.split())
+    selected_text = " " + " ".join(selected_text.split())
 
     if len(tweet) == len(selected_text):
         ans_type = "long"
@@ -294,8 +313,9 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         'token_type_ids': token_type_ids,
         'targets_start': targets_start,
         'targets_end': targets_end,
-        'orig_tweet': tweet,
-        'orig_selected': selected_text,
+        'split_tweet': tweet,
+        'orig_tweet': original_tweet,
+        'orig_selected': original_selected_text,
         'sentiment': sentiment,
         'ans_type': ans_type,
         'noise_type': noise_type,
@@ -355,6 +375,7 @@ class TweetDataset:
                onehot_sentiment_type[data["sentiment"]], \
                onehot_ans_type[data["ans_type"]], \
                onehot_noise_type[data["noise_type"]], \
+               data["split_tweet"], \
                data["orig_tweet"], \
                data["orig_selected"], \
                data["sentiment"], \
