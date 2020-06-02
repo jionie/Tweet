@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import *
 from transformers.data.processors.squad import *
-import tokenizers
+# import tokenizers
 from sklearn.model_selection import StratifiedKFold, KFold
 
 import nlpaug.augmenter.word as naw
@@ -143,7 +143,6 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids_orig += encoded_word
 
         start_offsets = cursor
-        cursor += len(" " + word)
         end_offsets = cursor
 
         token_level_cursor = start_offsets
@@ -162,6 +161,7 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
                 sub_word_len = len(sub_words[i])
 
             tweet_offsets_token_level.append((token_level_cursor, token_level_cursor + sub_word_len))
+            cursor = token_level_cursor + sub_word_len
             token_level_cursor += sub_word_len
 
     # get word idx
@@ -186,7 +186,6 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
     else:
         noise_type = "clean"
 
-    last_offset = tweet_offsets_word_level[-1][1]
     if model_type == "roberta-base" or model_type == "roberta-large" or model_type == "roberta-base-squad":
 
         sentiment_id = {
@@ -198,8 +197,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [0] + [sentiment_id[sentiment]] + [2] + [2] + input_ids_orig + [2]
         token_type_ids = [0, 0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, last_offset)] * 4 + tweet_offsets_token_level + [(0, last_offset)]
-        tweet_offsets_word_level = [(0, last_offset)] * 4 + tweet_offsets_word_level + [(0, last_offset)]
+        tweet_offsets_token_level = [(0, 0)] * 4 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 4 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 4
+        targets_end += 4
 
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
 
@@ -212,8 +213,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [2] + [sentiment_id[sentiment]] + [3] + input_ids_orig + [3]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
-        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
+        tweet_offsets_token_level = [(0, 0)] * 3 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 3 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 3
+        targets_end += 3
 
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
 
@@ -226,8 +229,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [sentiment_id[sentiment]] + [4] + input_ids_orig + [3]
         token_type_ids = [0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, last_offset)] * 2 + tweet_offsets_token_level + [(0, last_offset)]
-        tweet_offsets_word_level = [(0, last_offset)] * 2 + tweet_offsets_word_level + [(0, last_offset)]
+        tweet_offsets_token_level = [(0, 0)] * 2 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 2 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 2
+        targets_end += 2
 
     elif (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased"):
 
@@ -240,8 +245,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
-        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
+        tweet_offsets_token_level = [(0, 0)] * 3 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 3 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 3
+        targets_end += 3
 
     elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
 
@@ -254,8 +261,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
         token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
         mask = [1] * len(token_type_ids)
-        tweet_offsets_token_level = [(0, last_offset)] * 3 + tweet_offsets_token_level + [(0, last_offset)]
-        tweet_offsets_word_level = [(0, last_offset)] * 3 + tweet_offsets_word_level + [(0, last_offset)]
+        tweet_offsets_token_level = [(0, 0)] * 3 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 3 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 3
+        targets_end += 3
 
     else:
         raise NotImplementedError
@@ -265,14 +274,19 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids = input_ids + ([1] * padding_length)
         mask = mask + ([0] * padding_length)
         token_type_ids = token_type_ids + ([0] * padding_length)
-        tweet_offsets_token_level = tweet_offsets_token_level + ([(0, last_offset)] * padding_length)
-        tweet_offsets_word_level = tweet_offsets_word_level + ([(0, last_offset)] * padding_length)
+        tweet_offsets_token_level = tweet_offsets_token_level + ([(0, 0)] * padding_length)
+        tweet_offsets_word_level = tweet_offsets_word_level + ([(0, 0)] * padding_length)
     else:
         input_ids = input_ids[:max_len]
         mask = mask[:max_len]
         token_type_ids = token_type_ids[:max_len]
         tweet_offsets_token_level = tweet_offsets_token_level[:max_len]
         tweet_offsets_word_level = tweet_offsets_word_level[:max_len]
+
+    # prediction = tweet[tweet_offsets_token_level[targets_start][0]: tweet_offsets_token_level[targets_end][1]].lower().strip()
+    # label = selected_text.lower().strip()
+    # if prediction != label:
+    #     print(prediction, label, tokenizer.tokenize(tweet))
 
     return {
         'ids': input_ids,
@@ -363,7 +377,7 @@ def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/twee
     df = pd.read_csv(df_path, encoding='utf8')
 
     if split == "StratifiedKFold":
-        kf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True).split(X=df.text, y=df.sentiment)
+        kf = StratifiedKFold(n_splits=n_splits, random_state=seed, shuffle=True).split(X=df, y=df.sentiment)
     elif split == "KFold":
         kf = KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(df.text)
     else:

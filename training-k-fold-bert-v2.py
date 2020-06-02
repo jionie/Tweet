@@ -12,7 +12,8 @@ import numpy as np
 # import pytorch related libraries
 import torch
 from tensorboardX import SummaryWriter
-from transformers import *
+from transformers import get_cosine_schedule_with_warmup, get_linear_schedule_with_warmup, \
+    get_constant_schedule_with_warmup, AdamW
 
 # import apex for mix precision training
 from apex import amp
@@ -21,21 +22,19 @@ amp.register_half_function(torch, "einsum")
 from apex.optimizers import FusedAdam
 
 # import dataset class
-from dataset.dataset_v2 import *
+from dataset.dataset_v2 import get_train_val_split, get_test_loader, get_train_val_loaders
 
 # import utils
-from utils.squad_metrics import *
-from utils.ranger import *
-from utils.lrs_scheduler import *
-from utils.loss_function import *
-from utils.metric import *
-from utils.file import *
+from utils.ranger import Ranger
+from utils.lrs_scheduler import WarmRestart
+from utils.metric import get_word_level_logits, get_token_level_idx, calculate_jaccard_score, jaccard
+from utils.file import Logger
 
 # import model
-from model.model_bert import *
+from model.model_bert import TweetBert
 
 # import config
-from config_bert import *
+from config_bert import Config_Bert
 
 ############################################################################## Define Argument
 parser = argparse.ArgumentParser(description="arg parser")
@@ -55,9 +54,11 @@ def seed_everything(seed=42):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.benchmark = False  ##uses the inbuilt cudnn auto-tuner to find the fastest convolution algorithms. -
-    torch.backends.cudnn.enabled = True
-    torch.backends.cudnn.deterministic = True
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = True
 
 
 ############################################################################## Class for QA
@@ -133,25 +134,6 @@ class QA():
         self.model = TweetBert(model_type=self.config.model_type,
                                hidden_layers=self.config.hidden_layers).to(self.config.device)
 
-        def init_weights(model):
-            for name, param in model.named_parameters():
-                if 'weight' in name:
-                    torch.nn.init.normal_(param.data, std=0.02)
-
-        def init_weights_linear(m):
-            if type(m) == torch.nn.Linear:
-                # torch.nn.init.xavier_uniform(m.weight)
-                # m.bias.data.fill_(0)
-                torch.nn.init.normal_(m.weight, std=0.02)
-
-        self.model.cross_attention.apply(init_weights)
-        self.model.aoa.apply(init_weights)
-        self.model.qa_start.apply(init_weights_linear)
-        self.model.qa_end.apply(init_weights_linear)
-        self.model.qa_sentiment_classifier.apply(init_weights_linear)
-        self.model.qa_ans_classifier.apply(init_weights_linear)
-        self.model.qa_noise_classifier.apply(init_weights_linear)
-
         if self.config.load_pretrain:
             checkpoint_to_load = torch.load(self.config.checkpoint_pretrain, map_location=self.config.device)
             model_state_dict = checkpoint_to_load
@@ -175,6 +157,29 @@ class QA():
                 self.model.model.load_state_dict(state_dict)
             else:
                 self.model.load_state_dict(state_dict)
+
+        # offsets for context
+        if self.config.model_type == "roberta-base" or self.config.model_type == "roberta-large" or \
+                self.config.model_type == "roberta-base-squad":
+
+            self.offsets = 4
+
+        elif (self.config.model_type == "albert-base-v2") or (self.config.model_type == "albert-large-v2") or \
+                (self.config.model_type == "albert-xlarge-v2"):
+
+            self.offsets = 3
+
+        elif (self.config.model_type == "xlnet-base-cased") or (self.config.model_type == "xlnet-large-cased"):
+
+            self.offsets = 2
+
+        elif (self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-large-uncased") or \
+                (self.config.model_type == "bert-base-cased") or (self.config.model_type == "bert-large-cased"):
+
+            self.offsets = 3
+
+        else:
+            raise NotImplementedError
 
 
     def differential_lr(self):
@@ -212,6 +217,11 @@ class QA():
              'lr': self.config.lr,
              'weight_decay': 0.0}
         ]
+        # self.optimizer_grouped_parameters = [
+        #     {'params': [p for n, p in param_optimizer],
+        #      'lr': self.config.min_lr,
+        #      'weight_decay': 0}
+        # ]
 
     def prepare_optimizer(self):
 
@@ -224,7 +234,9 @@ class QA():
         elif self.config.optimizer_name == "Ranger":
             self.optimizer = Ranger(self.optimizer_grouped_parameters)
         elif self.config.optimizer_name == "AdamW":
-            self.optimizer = AdamW(self.optimizer_grouped_parameters, eps=self.config.adam_epsilon)
+            self.optimizer = AdamW(self.optimizer_grouped_parameters,
+                                   eps=self.config.adam_epsilon,
+                                   betas=(0.9, 0.999))
         elif self.config.optimizer_name == "FusedAdam":
             self.optimizer = FusedAdam(self.optimizer_grouped_parameters,
                                        bias_correction=False)
@@ -253,6 +265,10 @@ class QA():
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='max', factor=0.6,
                                                                         patience=1, min_lr=1e-7)
             self.lr_scheduler_each_iter = False
+        elif self.config.lr_scheduler_name == "WarmupConstant":
+            self.scheduler = get_constant_schedule_with_warmup(self.optimizer,
+                                                             num_warmup_steps=self.config.warmup_steps)
+            self.lr_scheduler_each_iter = True
         else:
             raise NotImplementedError
 
@@ -445,6 +461,7 @@ class QA():
                     with amp.scale_loss(loss / self.config.accumulation_steps, self.optimizer) as scaled_loss:
                         scaled_loss.backward()
                 else:
+                    # print(loss, all_start_positions, all_end_positions, all_orig_tweet)
                     loss.backward()
 
                 # adversarial training
@@ -487,6 +504,9 @@ class QA():
                     self.step += 1
 
                 # translate to predictions
+                start_logits = start_logits[:, self.offsets:]
+                end_logits = end_logits[:, self.offsets:]
+
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
                 ans_logits = torch.argmax(ans_logits, dim=-1)
@@ -506,17 +526,19 @@ class QA():
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
 
-                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
-                        start_logits[px],
-                        end_logits[px],
-                        self.config.model_type,
-                        all_offsets_word_level[px])
+                    # start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
+                    #     start_logits[px],
+                    #     end_logits[px],
+                    #     self.config.model_type,
+                    #     all_offsets_word_level[px])
+                    #
+                    # start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                    #                                                      end_logits[px],
+                    #                                                      start_logits_word_level,
+                    #                                                      end_logits_word_level,
+                    #                                                      word_level_bbx)
 
-                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
-                                                                         end_logits[px],
-                                                                         start_logits_word_level,
-                                                                         end_logits_word_level,
-                                                                         word_level_bbx)
+                    start_idx_token, end_idx_token = start_logits[px].argmax(-1), end_logits[px].argmax(-1)
 
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
@@ -524,6 +546,8 @@ class QA():
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
                         idx_end=end_idx_token,
+                        start_gt=all_start_positions[px],
+                        end_gt=all_end_positions[px],
                         model_type=self.config.model_type,
                         tweet_offsets=all_offsets_token_level[px],
                     )
@@ -635,6 +659,9 @@ class QA():
                     self.val_data_loader) * self.config.val_batch_size + val_batch_i * self.config.val_batch_size)
 
                 # translate to predictions
+                start_logits = start_logits[:, self.offsets:]
+                end_logits = end_logits[:, self.offsets:]
+
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
                 ans_logits = torch.argmax(ans_logits, dim=-1)
@@ -654,17 +681,19 @@ class QA():
 
                 for px, orig_tweet in enumerate(all_orig_tweet):
 
-                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
-                        start_logits[px],
-                        end_logits[px],
-                        self.config.model_type,
-                        all_offsets_word_level[px])
+                    # start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
+                    #     start_logits[px],
+                    #     end_logits[px],
+                    #     self.config.model_type,
+                    #     all_offsets_word_level[px])
+                    #
+                    # start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
+                    #                                                      end_logits[px],
+                    #                                                      start_logits_word_level,
+                    #                                                      end_logits_word_level,
+                    #                                                      word_level_bbx)
 
-                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
-                                                                         end_logits[px],
-                                                                         start_logits_word_level,
-                                                                         end_logits_word_level,
-                                                                         word_level_bbx)
+                    start_idx_token, end_idx_token = start_logits[px].argmax(-1), end_logits[px].argmax(-1)
 
                     selected_tweet = all_orig_selected[px]
 
@@ -673,27 +702,29 @@ class QA():
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
                         idx_end=end_idx_token,
+                        start_gt=all_start_positions[px],
+                        end_gt=all_end_positions[px],
                         model_type=self.config.model_type,
                         tweet_offsets=all_offsets_token_level[px],
                     )
 
                     all_result.append(final_text)
 
-                    # if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                    if ans_logits[px] == 0:
+                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
+                    # if ans_logits[px] == 0:
                         self.eval_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
-                        self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
+                        # self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                     else:
-                        if noise_logits[px] == 1:
-                            # print(final_text, "-------", selected_tweet)
-                            final_text = final_text.replace('....!', '..')
-                            if final_text[:3] == "...":
-                                final_text = final_text[2:]
-                            if final_text[-4:-1] == "..." and final_text[-1] != ".":
-                                final_text = final_text[:-1]
-                            jaccard_score = jaccard(selected_tweet.strip(), final_text.strip())
+                        # if noise_logits[px] == 1:
+                        #     # print(final_text, "-------", selected_tweet)
+                        #     final_text = final_text.replace('....!', '..')
+                        #     if final_text[:3] == "...":
+                        #         final_text = final_text[2:]
+                        #     if final_text[-4:-1] == "..." and final_text[-1] != ".":
+                        #         final_text = final_text[:-1]
+                        #     jaccard_score = jaccard(selected_tweet.strip(), final_text.strip())
                         self.eval_metrics_no_postprocessing.append(jaccard_score)
-                        self.eval_metrics.append(jaccard_score)
+                    self.eval_metrics.append(jaccard_score)
 
                     if ans_logits[px] == all_onehot_ans_type[px]:
                         self.eval_ans_acc.append(1)
@@ -787,6 +818,9 @@ class QA():
 
                 start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], outputs[3]
 
+                start_logits = start_logits[:, self.offsets:]
+                end_logits = end_logits[:, self.offsets:]
+
                 start_logits = torch.softmax(start_logits, dim=-1)
                 end_logits = torch.softmax(end_logits, dim=-1)
                 ans_logits = torch.argmax(ans_logits, dim=-1)
@@ -823,6 +857,8 @@ class QA():
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
                         idx_end=end_idx_token,
+                        start_gt=all_start_positions[px],
+                        end_gt=all_end_positions[px],
                         model_type=self.config.model_type,
                         tweet_offsets=all_offsets_token_level[px],
                     )

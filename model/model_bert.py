@@ -8,10 +8,13 @@ from .Attention import *
 
 ##################################################### CrossEntropyLossOHEM
 class CrossEntropyLossOHEM(torch.nn.Module):
-    def __init__(self, ignore_index, top_k=0.75, reduction='mean'):
+    def __init__(self, ignore_index=None, top_k=0.75, reduction='mean'):
         super(CrossEntropyLossOHEM, self).__init__()
         self.top_k = top_k
-        self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
+        if ignore_index is not None:
+            self.loss = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, reduction='none')
+        else:
+            self.loss = torch.nn.CrossEntropyLoss(reduction='none')
         self.reduction = reduction
 
     def forward(self, input, target, sentiment=None, ans=None, noise=None, position_penalty=None):
@@ -176,14 +179,23 @@ class TweetBert(nn.Module):
         weights_init.data[:-1] = -3
         self.layer_weights = torch.nn.Parameter(weights_init)
 
-        self.qa_start = nn.Linear(self.config.hidden_size, 1)
-        self.qa_end = nn.Linear(self.config.hidden_size, 1)
+        self.qa_start_end = nn.Linear(self.config.hidden_size, 2)
         self.qa_sentiment_classifier = nn.Linear(self.config.hidden_size, 3)
         self.qa_ans_classifier = nn.Linear(self.config.hidden_size, 3)
         self.qa_noise_classifier = nn.Linear(self.config.hidden_size, 2)
 
+        def init_weights_linear(m):
+            if type(m) == torch.nn.Linear:
+                torch.nn.init.normal_(m.weight, std=0.02)
+                torch.nn.init.normal_(m.bias, 0)
+
+        self.qa_start_end.apply(init_weights_linear)
+        self.qa_sentiment_classifier.apply(init_weights_linear)
+        self.qa_ans_classifier.apply(init_weights_linear)
+        self.qa_noise_classifier.apply(init_weights_linear)
+
         self.dropouts = nn.ModuleList([
-            nn.Dropout(0.5) for _ in range(5)
+            nn.Dropout(0.3) for _ in range(1)
         ])
 
         self.backup = {}
@@ -193,6 +205,14 @@ class TweetBert(nn.Module):
         self.cross_attention = CrossAttention(num_attention_head=12,
                                               hidden_dim=self.config.hidden_size,
                                               dropout_rate=0.1)
+
+        def init_weights(model):
+            for name, param in model.named_parameters():
+                if 'weight' in name:
+                    torch.nn.init.normal_(param.data, std=0.02)
+
+        self.cross_attention.apply(init_weights)
+        self.aoa.apply(init_weights)
 
     def attack(self, epsilon=1., emb_name='word_embeddings'):
         for name, param in self.bert.named_parameters():
@@ -275,41 +295,30 @@ class TweetBert(nn.Module):
             noise_weight=None,
     ):
 
-        outputs = self.bert(
-            input_ids,
-            attention_mask=attention_mask,
-            token_type_ids=token_type_ids,
-            position_ids=position_ids,
-            head_mask=head_mask,
-            inputs_embeds=inputs_embeds,
-        )
+        if self.model_type == "roberta-base" or self.model_type == "roberta-base-squad" \
+                or self.model_type == "roberta-large":
+
+            outputs = self.bert(
+                input_ids,
+                attention_mask=attention_mask,
+                position_ids=position_ids,
+                head_mask=head_mask,
+                inputs_embeds=inputs_embeds,
+            )
+        else:
+
+            outputs = self.bert(
+                input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids,
+                position_ids=position_ids,
+                head_mask=head_mask,
+                inputs_embeds=inputs_embeds,
+            )
 
         hidden_states = outputs[2]
         # bs, seq len, hidden size
-        fuse_hidden = self.get_hidden_states(hidden_states)
-
-        # # hidden for context, padding added, ignore end_idx
-        if self.model_type == "roberta-base" or self.model_type == "roberta-large" or \
-            self.model_type == "roberta-base-squad":
-
-            offsets = 4
-
-        elif (self.model_type == "albert-base-v2") or (self.model_type == "albert-large-v2") or \
-                (self.model_type == "albert-xlarge-v2"):
-
-            offsets = 3
-
-        elif (self.model_type == "xlnet-base-cased") or (self.model_type == "xlnet-large-cased"):
-
-            offsets = 2
-
-        elif (self.model_type == "bert-base-uncased") or (self.model_type == "bert-large-uncased") or \
-                (self.model_type == "bert-base-cased") or (self.model_type == "bert-large-cased"):
-
-            offsets = 3
-
-        else:
-            raise NotImplementedError
+        fuse_hidden = self.get_hidden_states_by_mean(hidden_states)
 
         fuse_hidden_context = fuse_hidden
         # fuse_hidden_context = torch.cat([fuse_hidden_context, fuse_hidden[:, 0, :].unsqueeze(1)], dim=1)
@@ -318,21 +327,21 @@ class TweetBert(nn.Module):
         # hidden for question, cls + sentiment
         # fuse_hidden_question = fuse_hidden[:, :offsets, :]
         # aoa_s_start, aoa_s_end = self.aoa(fuse_hidden_question, fuse_hidden_context, attention_mask[:, 4:])
-        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1) * aoa_s_start
+        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_end).squeeze(-1) * aoa_s_start
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1) * aoa_s_end
 
         # #################################################################### cross attention
         # hidden for question, cls + sentiment
-        # fuse_hidden_question = fuse_hidden[:, :offsets, :]
+        # fuse_hidden_question = fuse_hidden
         # fuse_hidden_context_dot = self.cross_attention(fuse_hidden_context, fuse_hidden_question, fuse_hidden_question,
-        #                                                attention_mask[:, offsets:-1])
-        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start).squeeze(-1)
+        #                                                attention_mask)
+        # start_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_start_end).squeeze(-1)
         # end_logits = self.get_logits_by_random_dropout(fuse_hidden_context_dot, self.qa_end).squeeze(-1)
 
         # #################################################################### direct approach
-        start_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start).squeeze(-1)[:, offsets:]
-        end_logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_end).squeeze(-1)[:, offsets:]
-
+        logits = self.get_logits_by_random_dropout(fuse_hidden_context, self.qa_start_end)
+        start_logits, end_logits = logits.split(1, dim=-1)
+        start_logits, end_logits = start_logits.squeeze(-1), end_logits.squeeze(-1)
         # sentiment_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_sentiment_classifier)
         ans_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_ans_classifier)
         noise_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_noise_classifier)
@@ -352,12 +361,13 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
-            # start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
-            # end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
+            start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
+            end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
+            # ignored_index = None
 
             if self.training:
 
-                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.75, reduction="mean")
+                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.9, reduction="mean")
                 loss_classification = nn.BCEWithLogitsLoss()
 
                 # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
@@ -372,7 +382,11 @@ class TweetBert(nn.Module):
                 total_loss = (start_loss + end_loss + ans_loss + noise_loss) / 4
             else:
 
-                loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
+                if ignored_index is not None:
+                    loss_fct = nn.CrossEntropyLoss(ignore_index=ignored_index, reduction="none")
+                else:
+                    loss_fct = nn.CrossEntropyLoss(reduction="none")
+
                 loss_classification = nn.BCEWithLogitsLoss()
 
                 # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
