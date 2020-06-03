@@ -95,9 +95,20 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
                       "<<<<", "<<<", "<<", "<"
                       ]
     for token in special_tokens:
-        replace_token = " ".join(token) + " "
+        replace_token = " " + " ".join(token) + " "
         tweet = tweet.replace(token, replace_token)
         selected_text = selected_text.replace(token, replace_token)
+
+    # special_words = {"gonna": "g onna", "minutes": "minute s", "for": "fo r", "going": "go ing", "and": "an d",
+    #                  "totally": "totall y", "be": "b e", "up": "u p", "have": "hav e", "until": "un til",
+    #                  "getting": "gettin g", "worth": "wort h", "match": "ma tch", "review": "re view", "haha": "ha ha",
+    #                  "one": "on e", "guess": "gues s", "picture": "pictur e", "sorry": "sorr y",
+    #                  "soproudofyou": "soproudofyo u", "artist": "artis t", "request": "reque st", "ok": "o k",
+    #                  "thanks": "than ks", "the": "th e", "it": "i t", "amazing": "amaz ing", "though": "thoug h",
+    #                  "much": "mu ch", "fun": "fu n", "wanna": "wann a", "baby": "ba by", "would": "woul d",
+    #                  "star": "st ar", "guys": "guy s", "gh)": "g h)", "but": "bu t", "so": "s o", "memo": "mem o",
+    #                  "that": "th at", "make": "ma ke", "are": "ar e", "there": "ther e", "mother": "mo ther"
+    #                 }
 
     tweet = " " + " ".join(tweet.split())
     selected_text = " " + " ".join(selected_text.split())
@@ -178,6 +189,9 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
                     sub_word_len += 1
             else:
                 sub_word_len = len(sub_words[i])
+
+            if sub_words[i] == "Ã¯" or sub_words[i] == "Â½":
+                sub_word_len = 1
 
             tweet_offsets_token_level.append((token_level_cursor, token_level_cursor + sub_word_len))
             cursor = token_level_cursor + sub_word_len

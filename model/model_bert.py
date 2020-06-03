@@ -318,7 +318,7 @@ class TweetBert(nn.Module):
 
         hidden_states = outputs[2]
         # bs, seq len, hidden size
-        fuse_hidden = self.get_hidden_states_by_mean(hidden_states)
+        fuse_hidden = self.get_hidden_states(hidden_states)
 
         fuse_hidden_context = fuse_hidden
         # fuse_hidden_context = torch.cat([fuse_hidden_context, fuse_hidden[:, 0, :].unsqueeze(1)], dim=1)

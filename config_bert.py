@@ -63,9 +63,9 @@ class Config_Bert:
         self.warmup_proportion = 0
         self.warmup_steps = 200
         # lr
-        self.max_lr = 1e-5
-        self.min_lr = 1e-5
-        self.lr = 2e-4
+        self.max_lr = 2e-5
+        self.min_lr = 2e-5
+        self.lr = 8e-5
         self.weight_decay = 0.001
         # differential lr setting, step or decay
         self.method = "step"
