@@ -538,6 +538,8 @@ class QA():
                                                                          end_logits_word_level,
                                                                          word_level_bbx)
 
+                    # start_idx_token, end_idx_token = start_logits[px].argmax(-1), end_logits[px].argmax(-1)
+
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
                         split_tweet=all_split_tweet[px],
@@ -689,6 +691,8 @@ class QA():
                                                                          start_logits_word_level,
                                                                          end_logits_word_level,
                                                                          word_level_bbx)
+
+                    # start_idx_token, end_idx_token = start_logits[px].argmax(-1), end_logits[px].argmax(-1)
 
                     selected_tweet = all_orig_selected[px]
 

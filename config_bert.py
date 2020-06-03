@@ -84,4 +84,4 @@ class Config_Bert:
         # early stopping
         self.early_stopping = 3
         # progress rate
-        self.progress_rate = 1 / 2
+        self.progress_rate = 1 / 10
