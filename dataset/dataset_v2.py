@@ -199,8 +199,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
     # print(tweet[tweet_offsets_token_level[targets_start][0]: tweet_offsets_token_level[targets_end][1]],
     #       "------------", selected_text)
 
-    if tweet_offsets_word_level[targets_start][0] != tweet_offsets_token_level[targets_start][0] or \
-        tweet_offsets_word_level[targets_end][1] != tweet_offsets_token_level[targets_end][1]:
+    if tweet[tweet_offsets_token_level[targets_start][0]: tweet_offsets_token_level[targets_end][1]].strip() != \
+            selected_text.strip():
         noise_type = "noisy"
     else:
         noise_type = "clean"

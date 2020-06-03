@@ -361,8 +361,8 @@ class TweetBert(nn.Module):
             start_positions.clamp_(0, ignored_index)
             end_positions.clamp_(0, ignored_index)
 
-            start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
-            end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
+            # start_position_penalty = pos_weight(start_logits, start_positions, 1, 1)
+            # end_position_penalty = pos_weight(end_logits, end_positions, 1, 1)
             # ignored_index = None
 
             if self.training:
