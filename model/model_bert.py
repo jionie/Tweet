@@ -195,7 +195,7 @@ class TweetBert(nn.Module):
         self.qa_noise_classifier.apply(init_weights_linear)
 
         self.dropouts = nn.ModuleList([
-            nn.Dropout(0.3) for _ in range(1)
+            nn.Dropout(0.5) for _ in range(5)
         ])
 
         self.backup = {}
@@ -367,7 +367,7 @@ class TweetBert(nn.Module):
 
             if self.training:
 
-                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.9, reduction="mean")
+                loss_fct = CrossEntropyLossOHEM(ignore_index=ignored_index, top_k=0.5, reduction="mean")
                 loss_classification = nn.BCEWithLogitsLoss()
 
                 # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)

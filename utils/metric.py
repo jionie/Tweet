@@ -209,11 +209,5 @@ def calculate_jaccard_score(
                         max_match = len(curr_output)
                         filtered_output = curr_output
 
-    common_words = ['****.']
-
-    for word in common_words:
-        if word in str(original_tweet).lower().split() and word not in str(filtered_output).lower().split():
-            filtered_output += " " + word
-
     jac = jaccard(original_selected_text.strip(), filtered_output.strip())
     return jac, filtered_output

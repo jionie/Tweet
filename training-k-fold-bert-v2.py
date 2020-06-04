@@ -708,8 +708,8 @@ class QA():
 
                     all_result.append(final_text)
 
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                    # if ans_logits[px] == 0:
+                    # if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
+                    if ans_logits[px] == 0:
                         self.eval_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                         # self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
                     else:

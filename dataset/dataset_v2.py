@@ -173,13 +173,10 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         input_ids_orig += encoded_word
 
         start_offsets = cursor
-        end_offsets = cursor
 
         token_level_cursor = start_offsets
 
         for i in range(number_of_tokens):
-
-            tweet_offsets_word_level.append((start_offsets, end_offsets))
 
             if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") \
                 or (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
@@ -196,6 +193,12 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
             tweet_offsets_token_level.append((token_level_cursor, token_level_cursor + sub_word_len))
             cursor = token_level_cursor + sub_word_len
             token_level_cursor += sub_word_len
+
+        end_offsets = cursor
+
+        for i in range(number_of_tokens):
+
+            tweet_offsets_word_level.append((start_offsets, end_offsets))
 
     # get word idx
     target_idx = []
