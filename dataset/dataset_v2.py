@@ -70,45 +70,11 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 
 
 def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
-
     # lower cased here
     tweet = " ".join(str(tweet).split()).lower()
     selected_text = " ".join(str(selected_text).split()).lower()
     original_tweet = copy.deepcopy(tweet)
     original_selected_text = copy.deepcopy(selected_text)
-
-    # some token optimization
-    special_tokens = ["!!!!", "!!!", "!!", "!",
-                      "....", "...", "..", ".",
-                      "????", "???", "??", "?",
-                      "****", "***", "**", "*",
-                      "----", "---", "--", "-",
-                      "~~~~", "~~~", "~~", "~",
-                      "////", "///", "//", "/",
-                      "````", "```", "``", "`",
-                      "====", "===", "==", "=",
-                      "####", "###", "##", "#",
-                      "&&&&", "&&&", "&&", "&",
-                      "))))", ")))", "))", ")",
-                      ";;;;", ";;;", ";;", ";",
-                      "''''", "'''", "''", "'",
-                      "<<<<", "<<<", "<<", "<"
-                      ]
-    for token in special_tokens:
-        replace_token = " " + " ".join(token) + " "
-        tweet = tweet.replace(token, replace_token)
-        selected_text = selected_text.replace(token, replace_token)
-
-    # special_words = {"gonna": "g onna", "minutes": "minute s", "for": "fo r", "going": "go ing", "and": "an d",
-    #                  "totally": "totall y", "be": "b e", "up": "u p", "have": "hav e", "until": "un til",
-    #                  "getting": "gettin g", "worth": "wort h", "match": "ma tch", "review": "re view", "haha": "ha ha",
-    #                  "one": "on e", "guess": "gues s", "picture": "pictur e", "sorry": "sorr y",
-    #                  "soproudofyou": "soproudofyo u", "artist": "artis t", "request": "reque st", "ok": "o k",
-    #                  "thanks": "than ks", "the": "th e", "it": "i t", "amazing": "amaz ing", "though": "thoug h",
-    #                  "much": "mu ch", "fun": "fu n", "wanna": "wann a", "baby": "ba by", "would": "woul d",
-    #                  "star": "st ar", "guys": "guy s", "gh)": "g h)", "but": "bu t", "so": "s o", "memo": "mem o",
-    #                  "that": "th at", "make": "ma ke", "are": "ar e", "there": "ther e", "mother": "mo ther"
-    #                 }
 
     tweet = " " + " ".join(tweet.split())
     selected_text = " " + " ".join(selected_text.split())
@@ -179,7 +145,8 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         for i in range(number_of_tokens):
 
             if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") \
-                or (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+                    or (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+
                 # for bert tokenizer, replace "##" and add " " for first sub_word
                 sub_word_len = len(sub_words[i].replace("##", ""))
                 if i == 0:
@@ -197,7 +164,6 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         end_offsets = cursor
 
         for i in range(number_of_tokens):
-
             tweet_offsets_word_level.append((start_offsets, end_offsets))
 
     # get word idx
@@ -330,7 +296,6 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         'token_type_ids': token_type_ids,
         'targets_start': targets_start,
         'targets_end': targets_end,
-        'split_tweet': tweet,
         'orig_tweet': original_tweet,
         'orig_selected': original_selected_text,
         'sentiment': sentiment,
@@ -356,7 +321,6 @@ class TweetDataset:
         return len(self.tweet)
 
     def __getitem__(self, item):
-
         data = process_data(
             self.tweet[item],
             self.selected_text[item],
@@ -387,12 +351,11 @@ class TweetDataset:
         return torch.tensor(data["ids"], dtype=torch.long), \
                torch.tensor(data["mask"], dtype=torch.long), \
                torch.tensor(data["token_type_ids"], dtype=torch.long), \
-               torch.tensor(data["targets_start"], dtype=torch.long),\
-               torch.tensor(data["targets_end"], dtype=torch.long),\
+               torch.tensor(data["targets_start"], dtype=torch.long), \
+               torch.tensor(data["targets_end"], dtype=torch.long), \
                onehot_sentiment_type[data["sentiment"]], \
                onehot_ans_type[data["ans_type"]], \
                onehot_noise_type[data["noise_type"]], \
-               data["split_tweet"], \
                data["orig_tweet"], \
                data["orig_selected"], \
                data["sentiment"], \
@@ -402,14 +365,12 @@ class TweetDataset:
                torch.tensor(data["offsets_word_level"], dtype=torch.long)
 
 
-
 ############################################ Define getting data split functions
 def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/",
                         save_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/",
                         n_splits=5,
                         seed=42,
                         split="StratifiedKFold"):
-
     os.makedirs(save_path + '/split', exist_ok=True)
     df_path = os.path.join(data_path, "train.csv")
     df = pd.read_csv(df_path, encoding='utf8')
@@ -437,7 +398,6 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
                     model_type="bert-base-uncased",
                     batch_size=4,
                     num_workers=4):
-
     CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     csv_path = os.path.join(data_path, "test.csv")
     df_test = pd.read_csv(csv_path)
@@ -465,12 +425,14 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
         )
     elif (model_type == "xlnet-base-cased") or (model_type == "xlnet-large-cased"):
         tokenizer = XLNetTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
+            pretrained_model_name_or_path=os.path.join(CURR_PATH,
+                                                       "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
         )
     elif (model_type == "albert-base-v2") or (model_type == "albert-large-v2") or (model_type == "albert-xlarge-v2"):
         tokenizer = AlbertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-spiece.model".format(model_type)),
+            pretrained_model_name_or_path=os.path.join(CURR_PATH,
+                                                       "transformers_vocab/{}-spiece.model".format(model_type)),
             lowercase=True,
         )
     elif model_type == "roberta-base":
@@ -517,7 +479,6 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
                           val_batch_size=4,
                           num_workers=2,
                           Datasampler="ImbalancedDatasetSampler"):
-
     CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     train_csv_path = os.path.join(data_path, 'split/train_fold_%s_seed_%s.csv' % (fold, seed))
     val_csv_path = os.path.join(data_path, 'split/val_fold_%s_seed_%s.csv' % (fold, seed))
@@ -641,17 +602,15 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                      model_type="bert-base-uncased",
                      batch_size=4,
                      num_workers=4):
-
     test_loader, _ = get_test_loader(data_path=data_path, max_seq_length=max_seq_length, model_type=model_type,
-                                  batch_size=batch_size, num_workers=num_workers)
+                                     batch_size=batch_size, num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-                    all_start_positions, all_end_positions,
-                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
-                    all_sentiment, all_ans, all_noise,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
-
+            all_start_positions, all_end_positions,
+            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+            all_orig_tweet, all_orig_selected,
+            all_sentiment, all_ans, all_noise,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -675,19 +634,17 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                       batch_size=4,
                       val_batch_size=4,
                       num_workers=2):
-
     train_loader, val_loader, _ = get_train_val_loaders(data_path=data_path, seed=seed, fold=fold,
-                                                     max_seq_length=max_seq_length, model_type=model_type,
-                                                     batch_size=batch_size, val_batch_size=val_batch_size,
-                                                     num_workers=num_workers)
+                                                        max_seq_length=max_seq_length, model_type=model_type,
+                                                        batch_size=batch_size, val_batch_size=val_batch_size,
+                                                        num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-                    all_start_positions, all_end_positions,
-                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
-                    all_sentiment, all_ans, all_noise,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
-
+            all_start_positions, all_end_positions,
+            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+            all_orig_tweet, all_orig_selected,
+            all_sentiment, all_ans, all_noise,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -703,12 +660,11 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-                    all_start_positions, all_end_positions,
-                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
-                    all_sentiment, all_ans, all_noise,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
-
+            all_start_positions, all_end_positions,
+            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+            all_orig_tweet, all_orig_selected,
+            all_sentiment, all_ans, all_noise,
+            all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)

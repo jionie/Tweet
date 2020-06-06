@@ -407,7 +407,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_split_tweet, all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.train_data_loader):
 
@@ -542,7 +542,6 @@ class QA():
 
                     selected_tweet = all_orig_selected[px]
                     jaccard_score, final_text = calculate_jaccard_score(
-                        split_tweet=all_split_tweet[px],
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
@@ -623,7 +622,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_split_tweet, all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.val_data_loader):
 
@@ -697,7 +696,6 @@ class QA():
                     selected_tweet = all_orig_selected[px]
 
                     jaccard_score, final_text = calculate_jaccard_score(
-                        split_tweet=all_split_tweet[px],
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
@@ -786,7 +784,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_split_tweet, all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
 
@@ -851,7 +849,6 @@ class QA():
 
                     selected_tweet = all_orig_selected[px]
                     _, final_text = calculate_jaccard_score(
-                        split_tweet=all_split_tweet[px],
                         original_tweet=orig_tweet,
                         selected_text=selected_tweet,
                         idx_start=start_idx_token,
