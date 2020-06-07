@@ -42,10 +42,9 @@ def find_all(word, text):
 
 
 def extract_end_index(text, selected_text):
-    i=0
+
     last_word = selected_text.split()[-1]
     index_last_word = find_all(last_word, text)
-    n_occ = len(index_last_word)
     selected_text_split = selected_text.split()
     text_split = text.split()
     n_end = 0
@@ -106,22 +105,11 @@ def calculate_jaccard_score(
         tokenizer):
 
     if idx_end < idx_start:
-        length = len(original_tweet)
         filtered_output = original_tweet
     else:
-        # filtered_output = ""
-        # for ix in range(idx_start, idx_end + 1):
-        #     filtered_output += original_tweet[offsets[ix][0]: offsets[ix][1]]
-        #     if (ix + 1) < len(offsets) and offsets[ix][1] < offsets[ix + 1][0]:
-        #         filtered_output += " "
-        sentiment_id = {
-            'positive': 1313,
-            'negative': 2430,
-            'neutral': 7974
-        }
         input_ids_orig = tokenizer.encode(original_tweet).ids
-        input_ids = input_ids_orig + [2]
-        filtered_output = tokenizer.decode(input_ids[idx_start:idx_end+1])
+        input_ids = input_ids_orig
+        filtered_output = tokenizer.decode(input_ids[idx_start: idx_end+1])
 
     jac = jaccard(target_string.strip(), filtered_output.strip())
     return jac, filtered_output

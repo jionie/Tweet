@@ -544,13 +544,23 @@ class QA():
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                         final_text = tweet
-                        # extra_spaces = calculate_spaces(tweet, final_text)
-                        # final_text = pp_v2(tweet, final_text, extra_spaces)
+                        try:
+                            extra_spaces = calculate_spaces(tweet, final_text)
+                            final_text = pp_v2(tweet, final_text, extra_spaces)
+                        except:
+                            print("--------------- error postprocessing ------------")
+                            print("tweet:", tweet, "prediction:", final_text)
+                            print("--------------- error postprocessing ------------")
                         self.train_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        # extra_spaces = calculate_spaces(tweet, final_text)
-                        # final_text = pp_v2(tweet, final_text, extra_spaces)
+                        try:
+                            extra_spaces = calculate_spaces(tweet, final_text)
+                            final_text = pp_v2(tweet, final_text, extra_spaces)
+                        except:
+                            print("--------------- error postprocessing ------------")
+                            print("tweet:", tweet, "prediction:", final_text)
+                            print("--------------- error postprocessing ------------")
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
 
@@ -653,20 +663,25 @@ class QA():
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                         final_text = tweet
 
-                        # try:
-                        #     extra_spaces = calculate_spaces(tweet, final_text)
-                        #     final_text = pp_v2(tweet, final_text, extra_spaces)
-                        # except:
-                        #     print("--------------- error postprocessing ------------")
+                        try:
+                            extra_spaces = calculate_spaces(tweet, final_text)
+                            final_text = pp_v2(tweet, final_text, extra_spaces)
+                        except:
+                            print("--------------- error postprocessing ------------")
+                            print("tweet:", tweet, "prediction:", final_text)
+                            print("--------------- error postprocessing ------------")
 
                         self.eval_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        # try:
-                        #     extra_spaces = calculate_spaces(tweet, final_text)
-                        #     final_text = pp_v2(tweet, final_text, extra_spaces)
-                        # except:
-                        #     print("--------------- error postprocessing ------------")
+                        try:
+                            extra_spaces = calculate_spaces(tweet, final_text)
+                            final_text = pp_v2(tweet, final_text, extra_spaces)
+                        except:
+                            print("--------------- error postprocessing ------------")
+                            print("tweet:", tweet, "prediction:", final_text)
+                            print("--------------- error postprocessing ------------")
+
                         self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
 
