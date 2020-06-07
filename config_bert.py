@@ -84,7 +84,7 @@ class Config_Bert:
         # early stopping
         self.early_stopping = 3 / self.saving_rate
         # progress rate
-        self.progress_rate = 1/10
+        self.progress_rate = 1/3
         # inference setting
         self.n_best_size = 10
         self.verbose_logging = False

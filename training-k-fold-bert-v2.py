@@ -543,9 +543,14 @@ class QA():
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.train_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.train_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        final_text = tweet
+                        # extra_spaces = calculate_spaces(tweet, final_text)
+                        # final_text = pp_v2(tweet, final_text, extra_spaces)
+                        self.train_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
+                        # extra_spaces = calculate_spaces(tweet, final_text)
+                        # final_text = pp_v2(tweet, final_text, extra_spaces)
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
 
@@ -646,11 +651,24 @@ class QA():
                     all_result.append(final_text)
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        self.eval_metrics_postprocessing.append(jaccard(tweet.strip(), selected_tweet.strip()))
-                        self.eval_metrics.append(jaccard(tweet.strip(), selected_tweet.strip()))
+                        final_text = tweet
+
+                        # try:
+                        #     extra_spaces = calculate_spaces(tweet, final_text)
+                        #     final_text = pp_v2(tweet, final_text, extra_spaces)
+                        # except:
+                        #     print("--------------- error postprocessing ------------")
+
+                        self.eval_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        self.eval_metrics_no_postprocessing.append(jaccard_score)
-                        self.eval_metrics.append(jaccard_score)
+                        # try:
+                        #     extra_spaces = calculate_spaces(tweet, final_text)
+                        #     final_text = pp_v2(tweet, final_text, extra_spaces)
+                        # except:
+                        #     print("--------------- error postprocessing ------------")
+                        self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
@@ -736,6 +754,8 @@ class QA():
                         sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
+                    extra_spaces = calculate_spaces(tweet, final_text)
+                    final_text = pp_v2(tweet, final_text, extra_spaces)
                     all_results.append(final_text)
 
         # save csv
