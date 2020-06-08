@@ -444,7 +444,8 @@ class QA():
 
             for tr_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
+                    all_sentiment, all_offsets) in \
                     enumerate(self.train_data_loader):
 
                 rate = 0
@@ -538,29 +539,30 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
 
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        final_text = tweet
-                        try:
-                            extra_spaces = calculate_spaces(tweet, final_text)
-                            final_text = pp_v2(tweet, final_text, extra_spaces)
-                        except:
-                            print("--------------- error postprocessing ------------")
-                            print("tweet:", tweet, "prediction:", final_text)
-                            print("--------------- error postprocessing ------------")
+
+                        final_text = all_orig_tweet_with_extra_space[px]
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        if len(final_text.split()) == 1:
+                            final_text.replace('!!!!', '!')
+                            final_text.replace('..', '.')
+                            final_text.replace('...', '.')
+                            
                         self.train_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        try:
-                            extra_spaces = calculate_spaces(tweet, final_text)
-                            final_text = pp_v2(tweet, final_text, extra_spaces)
-                        except:
-                            print("--------------- error postprocessing ------------")
-                            print("tweet:", tweet, "prediction:", final_text)
-                            print("--------------- error postprocessing ------------")
+
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        if len(final_text.split()) == 1:
+                            final_text.replace('!!!!', '!')
+                            final_text.replace('..', '.')
+                            final_text.replace('...', '.')
+
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
 
@@ -611,7 +613,8 @@ class QA():
 
             for val_batch_i, (
                     all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions, all_end_positions,
-                    all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment, all_offsets) in \
+                    all_onthot_ans_type, all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
+                    all_sentiment, all_offsets) in \
                     enumerate(self.val_data_loader):
 
                 # set model to eval mode
@@ -654,36 +657,34 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
 
-                    all_result.append(final_text)
-
                     if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        final_text = tweet
 
-                        try:
-                            extra_spaces = calculate_spaces(tweet, final_text)
-                            final_text = pp_v2(tweet, final_text, extra_spaces)
-                        except:
-                            print("--------------- error postprocessing ------------")
-                            print("tweet:", tweet, "prediction:", final_text)
-                            print("--------------- error postprocessing ------------")
+                        final_text = all_orig_tweet_with_extra_space[px]
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        if len(final_text.split()) == 1:
+                            final_text.replace('!!!!', '!')
+                            final_text.replace('..', '.')
+                            final_text.replace('...', '.')
 
                         self.eval_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        try:
-                            extra_spaces = calculate_spaces(tweet, final_text)
-                            final_text = pp_v2(tweet, final_text, extra_spaces)
-                        except:
-                            print("--------------- error postprocessing ------------")
-                            print("tweet:", tweet, "prediction:", final_text)
-                            print("--------------- error postprocessing ------------")
+
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        if len(final_text.split()) == 1:
+                            final_text.replace('!!!!', '!')
+                            final_text.replace('..', '.')
+                            final_text.replace('...', '.')
 
                         self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
+
+                    all_result.append(final_text)
 
                 l = np.array([loss.item() * self.config.val_batch_size])
                 n = np.array([self.config.val_batch_size])
@@ -731,7 +732,8 @@ class QA():
             torch.cuda.empty_cache()
 
             for test_batch_i, (all_input_ids, all_attention_masks, all_token_type_ids, all_start_positions,
-                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_selected, all_sentiment,
+                               all_end_positions, all_onthot_ans_type, all_orig_tweet, all_orig_tweet_with_extra_space,
+                               all_orig_selected, all_sentiment,
                                all_offsets) in enumerate(self.test_data_loader):
 
                 # set model to eval mode
@@ -766,7 +768,6 @@ class QA():
                         target_string=selected_tweet,
                         idx_start=start_logits[px],
                         idx_end=end_logits[px],
-                        sentiment=all_sentiment[px],
                         tokenizer=self.tokenizer,
                     )
                     extra_spaces = calculate_spaces(tweet, final_text)
@@ -793,6 +794,6 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
     seed_everything(config.seed)
     qa = QA(config)
-    qa.train_op()
-    # qa.evaluate_op()
+    # qa.train_op()
+    qa.evaluate_op()
     # qa.infer_op()

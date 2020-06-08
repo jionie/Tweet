@@ -1,9 +1,7 @@
 import argparse
-import os
 import pandas as pd
-import numpy as np
+import copy
 
-import torch
 from torch.utils.data import DataLoader
 from transformers import *
 from transformers.data.processors.squad import *
@@ -74,6 +72,8 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
 
 
 def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, max_len, augment=False):
+
+    tweet_with_extra_space = copy.deepcopy(str(tweet).lower())
     tweet = " " + " ".join(str(tweet).lower().split())
     selected_text = " " + " ".join(str(selected_text).lower().split())
     old_selected_text = " " + " ".join(str(old_selected_text).lower().split())
@@ -175,6 +175,7 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
         'targets_start': targets_start,
         'targets_end': targets_end,
         'orig_tweet': tweet,
+        'orig_tweet_with_extra_space': tweet_with_extra_space,
         'orig_selected': old_selected_text,
         'sentiment': sentiment,
         'offsets': tweet_offsets,
@@ -220,6 +221,7 @@ class TweetDataset:
                torch.tensor(data["targets_end"], dtype=torch.long),\
                onthot_ans_type[data["ans_type"]], \
                data["orig_tweet"], \
+               data["orig_tweet_with_extra_space"], \
                data["orig_selected"], \
                data["sentiment"], \
                torch.tensor(data["offsets"], dtype=torch.long)
