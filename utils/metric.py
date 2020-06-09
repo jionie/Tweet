@@ -22,10 +22,12 @@ def find_text_idx(text, selected_text):
     for start_idx in range(text_len):
         if text[start_idx] == selected_text[0]:
             for end_idx in range(start_idx+1, text_len+1):
-                contained_text = text[start_idx: end_idx]
+                contained_text = " ".join(text[start_idx: end_idx].split())
                 # print("contained_text:", contained_text, "selected_text:", selected_text)
-                if " ".join(contained_text.split()) == selected_text:
+                if contained_text == selected_text:
                     return start_idx, end_idx
+                if len(contained_text) > len(selected_text):
+                    break
 
     return None, None
 
@@ -66,6 +68,13 @@ def pp_v2(text, predicted):
     predicted = predicted.lower()
     predicted = predicted.strip()
     spaces, index_start, index_end = calculate_spaces(text, predicted)
+
+    if len(predicted.split()) == 1:
+        predicted.replace('!!!!', '!')
+    if len(predicted.split()) == 1:
+        predicted.replace('..', '.')
+    if len(predicted.split()) == 1:
+        predicted.replace('...', '.')
 
     if spaces == 1:
         if len(text[max(0, index_start-1): index_end+1]) <= 0 or text[max(0, index_start-1): index_end+1][-1] != ".":

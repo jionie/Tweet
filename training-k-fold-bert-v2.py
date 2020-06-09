@@ -547,21 +547,11 @@ class QA():
                         final_text = all_orig_tweet_with_extra_space[px]
                         final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
 
-                        if len(final_text.split()) == 1:
-                            final_text.replace('!!!!', '!')
-                            final_text.replace('..', '.')
-                            final_text.replace('...', '.')
-                            
                         self.train_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
 
                         final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
-
-                        if len(final_text.split()) == 1:
-                            final_text.replace('!!!!', '!')
-                            final_text.replace('..', '.')
-                            final_text.replace('...', '.')
 
                         self.train_metrics_no_postprocessing.append(jaccard_score)
                         self.train_metrics.append(jaccard_score)
@@ -665,21 +655,11 @@ class QA():
                         final_text = all_orig_tweet_with_extra_space[px]
                         final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
 
-                        if len(final_text.split()) == 1:
-                            final_text.replace('!!!!', '!')
-                            final_text.replace('..', '.')
-                            final_text.replace('...', '.')
-
                         self.eval_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
 
                         final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
-
-                        if len(final_text.split()) == 1:
-                            final_text.replace('!!!!', '!')
-                            final_text.replace('..', '.')
-                            final_text.replace('...', '.')
 
                         self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
