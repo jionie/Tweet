@@ -111,6 +111,16 @@ class TweetBert(nn.Module):
                 model_type,
                 config=self.config,
             )
+        elif model_type == "xlnet-base-cased":
+            self.config = AutoConfig.from_pretrained(
+                "xlnet-base-cased",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.bert = AutoModel.from_pretrained(
+                model_type,
+                config=self.config,
+            )
         elif model_type == "roberta-base":
             self.config = AutoConfig.from_pretrained(
                 "roberta-base",
@@ -305,6 +315,15 @@ class TweetBert(nn.Module):
                 head_mask=head_mask,
                 inputs_embeds=inputs_embeds,
             )
+            hidden_states = outputs[2]
+        elif self.model_type == "xlnet-base-cased":
+
+            outputs = self.bert(
+                input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids,
+            )
+            hidden_states = outputs[1]
         else:
 
             outputs = self.bert(
@@ -315,13 +334,16 @@ class TweetBert(nn.Module):
                 head_mask=head_mask,
                 inputs_embeds=inputs_embeds,
             )
+            hidden_states = outputs[2]
 
-        hidden_states = outputs[2]
         # bs, seq len, hidden size
         fuse_hidden = self.get_hidden_states(hidden_states)
 
         fuse_hidden_context = fuse_hidden
-        # fuse_hidden_context = torch.cat([fuse_hidden_context, fuse_hidden[:, 0, :].unsqueeze(1)], dim=1)
+        if self.model_type == "xlnet-base-cased":
+            hidden_classification = fuse_hidden[:, -1, :]
+        else:
+            hidden_classification = fuse_hidden[:, 0, :]
 
         # #################################################################### aoa, attention over attention
         # hidden for question, cls + sentiment
@@ -343,8 +365,8 @@ class TweetBert(nn.Module):
         start_logits, end_logits = logits.split(1, dim=-1)
         start_logits, end_logits = start_logits.squeeze(-1), end_logits.squeeze(-1)
         # sentiment_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_sentiment_classifier)
-        ans_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_ans_classifier)
-        noise_logits = self.get_logits_by_random_dropout(fuse_hidden[:, 0, :], self.qa_noise_classifier)
+        ans_logits = self.get_logits_by_random_dropout(hidden_classification, self.qa_ans_classifier)
+        noise_logits = self.get_logits_by_random_dropout(hidden_classification, self.qa_noise_classifier)
 
 
         outputs = (start_logits, end_logits, ans_logits, noise_logits) + outputs[2:]

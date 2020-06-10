@@ -18,4 +18,10 @@
 #python training-k-fold-bert-v2.py --fold 3 --model_type "bert-base-uncased" --seed 1996 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
 #python training-k-fold-bert-v2.py --fold 4 --model_type "bert-base-uncased" --seed 1996 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
 
+python training-k-fold-bert-v2.py --fold 0 --model_type "xlnet-base-cased" --seed 323 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
+#python training-k-fold-bert-v2.py --fold 1 --model_type "xlnet-base-cased" --seed 323 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
+#python training-k-fold-bert-v2.py --fold 2 --model_type "xlnet-base-cased" --seed 323 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
+#python training-k-fold-bert-v2.py --fold 3 --model_type "xlnet-base-cased" --seed 323 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
+#python training-k-fold-bert-v2.py --fold 4 --model_type "xlnet-base-cased" --seed 323 --batch_size 16 --accumulation_steps 1 --Datasampler "None"
+
 

@@ -419,26 +419,26 @@ class QA():
                 self.model.train()
 
                 # set input to cuda mode
-                all_input_ids = all_input_ids.cuda()
-                all_attention_masks = all_attention_masks.cuda()
-                all_token_type_ids = all_token_type_ids.cuda()
-                all_start_positions = all_start_positions.cuda()
-                all_end_positions = all_end_positions.cuda()
-                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
-                all_onehot_ans_type = all_onehot_ans_type.cuda()
-                all_onehot_noise_type = all_onehot_noise_type.cuda()
+                all_input_ids = all_input_ids.to(self.config.device)
+                all_attention_masks = all_attention_masks.to(self.config.device)
+                all_token_type_ids = all_token_type_ids.to(self.config.device)
+                all_start_positions = all_start_positions.to(self.config.device)
+                all_end_positions = all_end_positions.to(self.config.device)
+                all_onehot_sentiment_type = all_onehot_sentiment_type.to(self.config.device)
+                all_onehot_ans_type = all_onehot_ans_type.to(self.config.device)
+                all_onehot_noise_type = all_onehot_noise_type.to(self.config.device)
 
                 sentiment = all_sentiment
                 sentiment_weight = np.array([self.config.sentiment_weight_map[sentiment_] for sentiment_ in sentiment])
-                sentiment_weight = torch.tensor(sentiment_weight).float().cuda()
+                sentiment_weight = torch.tensor(sentiment_weight).float().to(self.config.device)
 
                 ans = all_ans
                 ans_weight = np.array([self.config.ans_weight_map[ans_] for ans_ in ans])
-                ans_weight = torch.tensor(ans_weight).float().cuda()
+                ans_weight = torch.tensor(ans_weight).float().to(self.config.device)
 
                 noise = all_noise
                 noise_weight = np.array([self.config.noise_weight_map[noise_] for noise_ in noise])
-                noise_weight = torch.tensor(noise_weight).float().cuda()
+                noise_weight = torch.tensor(noise_weight).float().to(self.config.device)
 
 
                 outputs = self.model(input_ids=all_input_ids,
@@ -637,14 +637,14 @@ class QA():
                 self.model.eval()
 
                 # set input to cuda mode
-                all_input_ids = all_input_ids.cuda()
-                all_attention_masks = all_attention_masks.cuda()
-                all_token_type_ids = all_token_type_ids.cuda()
-                all_start_positions = all_start_positions.cuda()
-                all_end_positions = all_end_positions.cuda()
-                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
-                all_onehot_ans_type = all_onehot_ans_type.cuda()
-                all_onehot_noise_type = all_onehot_noise_type.cuda()
+                all_input_ids = all_input_ids.to(self.config.device)
+                all_attention_masks = all_attention_masks.to(self.config.device)
+                all_token_type_ids = all_token_type_ids.to(self.config.device)
+                all_start_positions = all_start_positions.to(self.config.device)
+                all_end_positions = all_end_positions.to(self.config.device)
+                all_onehot_sentiment_type = all_onehot_sentiment_type.to(self.config.device)
+                all_onehot_ans_type = all_onehot_ans_type.to(self.config.device)
+                all_onehot_noise_type = all_onehot_noise_type.to(self.config.device)
 
                 sentiment = all_sentiment
 
@@ -798,14 +798,14 @@ class QA():
                 self.model.eval()
 
                 # set input to cuda mode
-                all_input_ids = all_input_ids.cuda()
-                all_attention_masks = all_attention_masks.cuda()
-                all_token_type_ids = all_token_type_ids.cuda()
-                all_start_positions = all_start_positions.cuda()
-                all_end_positions = all_end_positions.cuda()
-                all_onehot_sentiment_type = all_onehot_sentiment_type.cuda()
-                all_onehot_ans_type = all_onehot_ans_type.cuda()
-                all_onehot_noise_type = all_onehot_noise_type.cuda()
+                all_input_ids = all_input_ids.to(self.config.device)
+                all_attention_masks = all_attention_masks.to(self.config.device)
+                all_token_type_ids = all_token_type_ids.to(self.config.device)
+                all_start_positions = all_start_positions.to(self.config.device)
+                all_end_positions = all_end_positions.to(self.config.device)
+                all_onehot_sentiment_type = all_onehot_sentiment_type.to(self.config.device)
+                all_onehot_ans_type = all_onehot_ans_type.to(self.config.device)
+                all_onehot_noise_type = all_onehot_noise_type.to(self.config.device)
 
                 sentiment = all_sentiment
 

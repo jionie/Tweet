@@ -10,7 +10,7 @@ class Config_Bert:
         self.load_from_load_from_data_parallel = False
         self.load_pretrain = False
         self.data_parallel = False  # enable data parallel training
-        self.apex = True  # enable mix precision training
+        self.apex = False  # enable mix precision training
         self.adversarial = False  # enable adversarial training
         self.load_optimizer = False
         self.skip_layers = []
