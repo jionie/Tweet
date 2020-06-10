@@ -69,12 +69,26 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
     return text
 
 
+def preprocessing(text):
+
+    # text = text.replace("....", ". . . .")
+    # text = text.replace("...", ". . .")
+    # text = text.replace("..", ". .")
+    # text = text.replace("!!!!", "! ! ! !")
+    # text = text.replace("!!!", "! ! !")
+    # text = text.replace("!!", "! !")
+    # text = text.replace("????", "? ? ? ?")
+    # text = text.replace("???", "? ? ?")
+    # text = text.replace("??", "? ?")
+
+    return text
+
 def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
 
-    tweet_with_extra_space = copy.deepcopy(str(tweet).lower())
-    tweet = " " + " ".join(str(tweet).lower().split())
-    selected_text = " " + " ".join(str(selected_text).lower().split())
-    old_selected_text = " " + " ".join(str(old_selected_text).lower().split())
+    tweet_with_extra_space = preprocessing(copy.deepcopy(str(tweet).lower()))
+    tweet = preprocessing(" " + " ".join(str(tweet).lower().split()))
+    selected_text = preprocessing(" " + " ".join(str(selected_text).lower().split()))
+    old_selected_text = preprocessing(" " + " ".join(str(old_selected_text).lower().split()))
 
     if len(tweet) == len(selected_text):
         ans_type = "long"
@@ -97,7 +111,9 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
 
     if idx0 is None and idx1 is None:
         print("--------------------------------------------- error cleaned selected----------------------------------")
-        print(tweet, selected_text, old_selected_text)
+        print("tweet:", tweet)
+        print("selected_text:", selected_text)
+        print("old_selected_text:", old_selected_text)
         print("--------------------------------------------- error cleaned selected----------------------------------")
 
         for ind in (i for i, e in enumerate(tweet) if e == old_selected_text[1]):

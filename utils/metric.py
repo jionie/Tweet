@@ -93,6 +93,46 @@ def pp_v2(text, predicted):
         return predicted
 
 
+def pp_v3(prediction):
+
+    prediction = prediction.split()
+    text = prediction[-1]
+    final_prediction = " ".join(prediction[:-1])
+
+    # change_list = ["and", "the", "review", "match", "mother", "compared", "all", "you", "when", "java", "though",
+    #                "ratatat", "evening", "going", "was", "unpacked", "demi", "with", "msft", "after", "even",
+    #                "experiment", "lovely", "weekend", "that", "jaron", "from", "end", "mom", "new", "fried", "not",
+    #                "ive", "traffic", "today", "cannot", "brawl", "move", "because", "eat", "twitter", "what", "but",
+    #                "about", "lol", "boy", "ticket", "tickets", "how", "movie", "movies", "them", "day", "has", "theatre",
+    #                "theatres", "beat", "marshall", "having", "concert", "really", "everyone", "than", "seat", "seats",
+    #                "history", "star", "frog", "frogs", "thing", "honey", "oowwwww", "camera", "seeing", "amy", "smugly",
+    #                "stadium", "bunny", "this", "selling", "book", "sweater", "access", "joss", "outside", "different",
+    #                "watch", "next", "flawless", "sunday", "man", "close", "morning", "babe", "getaway", "hulu",
+    #                "working", "work", "watch", "next", "flawless", "sunday", "sundays", "man", "close", "closer",
+    #                "babe", "getaway", "getaways", "got", "http", "https", "vesak", "josey", "say", "wamu", "weather",
+    #                "writing", "write"
+    #                ]
+
+    change_list = ["and", "the", "mother", "all", "you", "when", "though", "was", "with", "msft", "after", "even",
+                   "that", "from", "end", "new", "not", "because", "eat", "twitter", "what", "but", "about", "lol",
+                   "how", "movie", "them", "has", "having", "concert", "really", "than", "thing", "oowwwww", "this",
+                   "different", "next", "sunday", "man", "morning", "http", "https",
+                   ]
+
+    if text in change_list:
+        print(text, text[:2])
+        text = text[:2]
+
+    # print("------------")
+    # print("prediction:", final_prediction)
+    # print("text:", text)
+    # print("------------")
+
+    final_prediction += " " + text
+
+    return final_prediction
+
+
 def get_word_level_logits(start_logits,
                           end_logits,
                           model_type,
