@@ -69,15 +69,12 @@ def augmentation(text, insert=False, substitute=False, swap=True, delete=True):
     return text
 
 
-def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
-    # lower cased here
-    tweet = " ".join(str(tweet).split()).lower()
-    selected_text = " ".join(str(selected_text).split()).lower()
-    original_tweet = copy.deepcopy(tweet)
-    original_selected_text = copy.deepcopy(selected_text)
+def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, model_type, max_len, augment=False):
 
-    tweet = " " + " ".join(tweet.split())
-    selected_text = " " + " ".join(selected_text.split())
+    tweet_with_extra_space = copy.deepcopy(str(tweet).lower())
+    tweet = " " + " ".join(str(tweet).lower().split())
+    selected_text = " " + " ".join(str(selected_text).lower().split())
+    old_selected_text = " " + " ".join(str(old_selected_text).lower().split())
 
     if len(tweet) == len(selected_text):
         ans_type = "long"
@@ -97,6 +94,17 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
             idx0 = ind
             idx1 = ind + len_st - 1
             break
+
+    if idx0 is None and idx1 is None:
+        print("--------------------------------------------- error cleaned selected----------------------------------")
+        print(tweet, selected_text, old_selected_text)
+        print("--------------------------------------------- error cleaned selected----------------------------------")
+
+        for ind in (i for i, e in enumerate(tweet) if e == old_selected_text[1]):
+            if " " + tweet[ind: ind + len_st] == old_selected_text:
+                idx0 = ind
+                idx1 = ind + len_st - 1
+                break
 
     if augment:
         # augment for non-select text
@@ -285,19 +293,15 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
         tweet_offsets_token_level = tweet_offsets_token_level[:max_len]
         tweet_offsets_word_level = tweet_offsets_word_level[:max_len]
 
-    # prediction = tweet[tweet_offsets_token_level[targets_start][0]: tweet_offsets_token_level[targets_end][1]].lower().strip()
-    # label = selected_text.lower().strip()
-    # if prediction != label:
-    #     print(prediction, label, tokenizer.tokenize(tweet))
-
     return {
         'ids': input_ids,
         'mask': mask,
         'token_type_ids': token_type_ids,
         'targets_start': targets_start,
         'targets_end': targets_end,
-        'orig_tweet': original_tweet,
-        'orig_selected': original_selected_text,
+        'orig_tweet': tweet,
+        'orig_tweet_with_extra_space': tweet_with_extra_space,
+        'orig_selected': old_selected_text,
         'sentiment': sentiment,
         'ans_type': ans_type,
         'noise_type': noise_type,
@@ -308,10 +312,11 @@ def process_data(tweet, selected_text, sentiment, tokenizer, model_type, max_len
 
 ############################################ Define Tweet Dataset class
 class TweetDataset:
-    def __init__(self, tweet, sentiment, selected_text, tokenizer, model_type, max_len, augment=False):
+    def __init__(self, tweet, sentiment, selected_text, old_selected_text, tokenizer, model_type, max_len, augment=False):
         self.tweet = tweet
         self.sentiment = sentiment
         self.selected_text = selected_text
+        self.old_selected_text = old_selected_text
         self.tokenizer = tokenizer
         self.model_type = model_type
         self.max_len = max_len
@@ -324,6 +329,7 @@ class TweetDataset:
         data = process_data(
             self.tweet[item],
             self.selected_text[item],
+            self.old_selected_text[item],
             self.sentiment[item],
             self.tokenizer,
             self.model_type,
@@ -357,6 +363,7 @@ class TweetDataset:
                onehot_ans_type[data["ans_type"]], \
                onehot_noise_type[data["noise_type"]], \
                data["orig_tweet"], \
+               data["orig_tweet_with_extra_space"], \
                data["orig_selected"], \
                data["sentiment"], \
                data["ans_type"], \
@@ -372,7 +379,7 @@ def get_train_val_split(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/twee
                         seed=42,
                         split="StratifiedKFold"):
     os.makedirs(save_path + '/split', exist_ok=True)
-    df_path = os.path.join(data_path, "train.csv")
+    df_path = os.path.join(data_path, "train_clean_v03.csv")
     df = pd.read_csv(df_path, encoding='utf8')
 
     if split == "StratifiedKFold":
@@ -402,6 +409,8 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     csv_path = os.path.join(data_path, "test.csv")
     df_test = pd.read_csv(csv_path)
     df_test.loc[:, "selected_text"] = df_test.text.values
+    df_test.loc[:, "cleaned_selected_text"] = df_test.text.values
+
 
     if (model_type == "bert-base-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
@@ -460,7 +469,8 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     ds_test = TweetDataset(
         tweet=df_test.text.values,
         sentiment=df_test.sentiment.values,
-        selected_text=df_test.selected_text.values,
+        selected_text=df_test.cleaned_selected_text.values,
+        old_selected_text=df_test.selected_text.values,
         tokenizer=tokenizer,
         model_type=model_type,
         max_len=max_seq_length
@@ -543,7 +553,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     ds_train = TweetDataset(
         tweet=df_train.text.values,
         sentiment=df_train.sentiment.values,
-        selected_text=df_train.selected_text.values,
+        selected_text=df_train.cleaned_selected_text.values,
+        old_selected_text=df_train.selected_text.values,
         tokenizer=tokenizer,
         model_type=model_type,
         max_len=max_seq_length,
@@ -568,7 +579,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     ds_val = TweetDataset(
         tweet=df_val.text.values,
         sentiment=df_val.sentiment.values,
-        selected_text=df_val.selected_text.values,
+        selected_text=df_val.cleaned_selected_text.values,
+        old_selected_text=df_val.selected_text.values,
         tokenizer=tokenizer,
         model_type=model_type,
         max_len=max_seq_length

@@ -57,14 +57,14 @@ class Config_Bert:
         # optimizer
         self.optimizer_name = "AdamW"
         self.adam_epsilon = 1e-8
-        self.max_grad_norm = 5
+        self.max_grad_norm = 2
         # lr scheduler, can choose to use proportion or steps
         self.lr_scheduler_name = 'WarmupLinear'
         self.warmup_proportion = 0
-        self.warmup_steps = 50
+        self.warmup_steps = 200
         # lr
-        self.max_lr = 2e-5
-        self.min_lr = 2e-5
+        self.max_lr = 1e-5
+        self.min_lr = 1e-5
         self.lr = 2e-4
         self.weight_decay = 0.001
         # differential lr setting, step or decay
@@ -78,10 +78,10 @@ class Config_Bert:
         # gradient accumulation
         self.accumulation_steps = accumulation_steps
         # epochs
-        self.num_epoch = 4
+        self.num_epoch = 8
         # saving rate
-        self.saving_rate = 1 / 2
+        self.saving_rate = 1 / 3
         # early stopping
-        self.early_stopping = 4
+        self.early_stopping = 6
         # progress rate
-        self.progress_rate = 1 / 2
+        self.progress_rate = 1 / 3

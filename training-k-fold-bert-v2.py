@@ -27,7 +27,7 @@ from dataset.dataset_v2 import get_train_val_split, get_test_loader, get_train_v
 # import utils
 from utils.ranger import Ranger
 from utils.lrs_scheduler import WarmRestart
-from utils.metric import get_word_level_logits, get_token_level_idx, calculate_jaccard_score, jaccard
+from utils.metric import get_word_level_logits, get_token_level_idx, calculate_jaccard_score, jaccard, pp_v2
 from utils.file import Logger
 
 # import model
@@ -407,7 +407,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.train_data_loader):
 
@@ -552,11 +552,18 @@ class QA():
 
                     # if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                     if ans_logits[px] == 0:
-                        self.train_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
-                        self.train_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
+
+                        final_text = all_orig_tweet_with_extra_space[px]
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        self.train_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        self.train_metrics_no_postprocessing.append(jaccard_score)
-                        self.train_metrics.append(jaccard_score)
+
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        self.train_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.train_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
 
                     if ans_logits[px] == all_onehot_ans_type[px]:
                         self.train_ans_acc.append(1)
@@ -622,7 +629,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.val_data_loader):
 
@@ -708,19 +715,17 @@ class QA():
 
                     # if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                     if ans_logits[px] == 0:
-                        self.eval_metrics_postprocessing.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
-                        # self.eval_metrics.append(jaccard(orig_tweet.strip(), selected_tweet.strip()))
+                        final_text = all_orig_tweet_with_extra_space[px]
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        self.eval_metrics_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
                     else:
-                        # if noise_logits[px] == 1:
-                        #     # print(final_text, "-------", selected_tweet)
-                        #     final_text = final_text.replace('....!', '..')
-                        #     if final_text[:3] == "...":
-                        #         final_text = final_text[2:]
-                        #     if final_text[-4:-1] == "..." and final_text[-1] != ".":
-                        #         final_text = final_text[:-1]
-                        #     jaccard_score = jaccard(selected_tweet.strip(), final_text.strip())
-                        self.eval_metrics_no_postprocessing.append(jaccard_score)
-                    self.eval_metrics.append(jaccard_score)
+
+                        final_text = pp_v2(all_orig_tweet_with_extra_space[px], final_text)
+
+                        self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
+                        self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
 
                     if ans_logits[px] == all_onehot_ans_type[px]:
                         self.eval_ans_acc.append(1)
@@ -784,7 +789,7 @@ class QA():
                     all_input_ids, all_attention_masks, all_token_type_ids,
                     all_start_positions, all_end_positions,
                     all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_selected,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
                     all_sentiment, all_ans, all_noise,
                     all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
 
