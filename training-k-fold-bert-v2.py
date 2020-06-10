@@ -27,7 +27,7 @@ from dataset.dataset_v2 import get_train_val_split, get_test_loader, get_train_v
 # import utils
 from utils.ranger import Ranger
 from utils.lrs_scheduler import WarmRestart
-from utils.metric import get_word_level_logits, get_token_level_idx, calculate_jaccard_score, jaccard, pp_v2, pp_v3
+from utils.metric import get_word_level_logits, get_token_level_idx, calculate_jaccard_score, jaccard, pp_v2
 from utils.file import Logger
 
 # import model
@@ -946,7 +946,7 @@ if __name__ == "__main__":
                          accumulation_steps=args.accumulation_steps, Datasampler=args.Datasampler)
     seed_everything(config.seed)
     qa = QA(config)
-    # qa.train_op()
-    qa.evaluate_op()
+    qa.train_op()
+    # qa.evaluate_op()
     # qa.infer_op()
     # qa.find_errors()
