@@ -394,14 +394,14 @@ class TweetBert(nn.Module):
 
                 # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
                 ans_loss = loss_classification(ans_logits, onehot_ans_type)
-                noise_loss = loss_classification(noise_logits, onehot_noise_type)
+                # noise_loss = loss_classification(noise_logits, onehot_noise_type)
 
                 start_loss = loss_fct(start_logits, start_positions, sentiment=sentiment_weight, ans=ans_weight,
                                       noise=noise_weight)
                 end_loss = loss_fct(end_logits, end_positions, sentiment=sentiment_weight, ans=ans_weight,
                                     noise=noise_weight)
 
-                total_loss = (start_loss + end_loss + ans_loss + noise_loss) / 4
+                total_loss = (start_loss + end_loss + ans_loss) / 3
             else:
 
                 if ignored_index is not None:
@@ -413,7 +413,7 @@ class TweetBert(nn.Module):
 
                 # setiment_loss = loss_classification(sentiment_logits, onehot_sentiment_type)
                 ans_loss = loss_classification(ans_logits, onehot_ans_type)
-                noise_loss = loss_classification(noise_logits, onehot_noise_type)
+                # noise_loss = loss_classification(noise_logits, onehot_noise_type)
                 start_loss = loss_fct(start_logits, start_positions)
                 end_loss = loss_fct(end_logits, end_positions)
 
@@ -429,7 +429,7 @@ class TweetBert(nn.Module):
                     start_loss *= noise_weight
                     end_loss *= noise_weight
 
-                total_loss = (start_loss.mean() + end_loss.mean() + ans_loss + noise_loss) / 4
+                total_loss = (start_loss.mean() + end_loss.mean() + ans_loss) / 3
             outputs = (total_loss,) + outputs
 
         return outputs  # (loss), start_logits, end_logits, (hidden_states), (attentions)

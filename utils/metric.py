@@ -20,12 +20,10 @@ def find_text_idx(text, selected_text):
     for start_idx in range(text_len):
         if text[start_idx] == selected_text[0]:
             for end_idx in range(start_idx+1, text_len+1):
-                contained_text = " ".join(text[start_idx: end_idx].split())
+                contained_text = "".join(text[start_idx: end_idx].split())
                 # print("contained_text:", contained_text, "selected_text:", selected_text)
-                if contained_text == selected_text:
+                if contained_text == "".join(selected_text.split()):
                     return start_idx, end_idx
-                if len(contained_text) > len(selected_text):
-                    break
 
     return None, None
 
@@ -60,6 +58,21 @@ def calculate_spaces(text, selected_text):
     return l1 - l2, start_idx, end_idx
 
 
+def reverse_preprocessing(text):
+
+    text = text.replace(". . . .", "....")
+    text = text.replace(". . .", "...")
+    text = text.replace(". .", "..")
+    text = text.replace("! ! ! !", "!!!!")
+    text = text.replace("! ! !", "!!!")
+    text = text.replace("! !", "!!")
+    text = text.replace("? ? ? ?", "????")
+    text = text.replace("? ? ?", "???")
+    text = text.replace("? ?", "??")
+
+    return text
+
+
 def pp_v2(text, predicted):
 
     text = text.lower()
@@ -69,16 +82,10 @@ def pp_v2(text, predicted):
     if len(predicted) == 0:
         return predicted
 
-    spaces, index_start, index_end = calculate_spaces(text, predicted)
+    text = reverse_preprocessing(str(text))
+    predicted = reverse_preprocessing(str(predicted))
 
-    if len(predicted.split()) == 1:
-        predicted.replace('!!!!', '!!')
-    if len(predicted.split()) == 1:
-        predicted.replace('..', '.')
-    if len(predicted.split()) == 1:
-        predicted.replace('...', '..')
-    if len(predicted.split()) == 1:
-        predicted.replace('....', '..')
+    spaces, index_start, index_end = calculate_spaces(text, predicted)
 
     if spaces == 1:
         if len(text[max(0, index_start-1): index_end+1]) <= 0 or text[max(0, index_start-1): index_end+1][-1] != ".":

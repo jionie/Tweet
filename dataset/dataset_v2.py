@@ -88,7 +88,7 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
     tweet_with_extra_space = preprocessing(copy.deepcopy(str(tweet).lower()))
     tweet = preprocessing(" " + " ".join(str(tweet).lower().split()))
     selected_text = preprocessing(" " + " ".join(str(selected_text).lower().split()))
-    old_selected_text = preprocessing(" " + " ".join(str(old_selected_text).lower().split()))
+    old_selected_text = " " + " ".join(str(old_selected_text).lower().split())
 
     if len(tweet) == len(selected_text):
         ans_type = "long"

@@ -10,7 +10,7 @@ class Config_Bert:
         self.load_from_load_from_data_parallel = False
         self.load_pretrain = False
         self.data_parallel = False  # enable data parallel training
-        self.apex = False  # enable mix precision training
+        self.apex = True  # enable mix precision training
         self.adversarial = False  # enable adversarial training
         self.load_optimizer = False
         self.skip_layers = []
@@ -20,7 +20,7 @@ class Config_Bert:
         self.model_name = 'TweetBert'
         self.hidden_layers = [-1, -2, -3, -4]
         self.sentiment_weight_map = {"neutral": 0.8, "positive": 1, "negative": 1}
-        self.ans_weight_map = {"short": 1.2, "long": 1, "none": 1}
+        self.ans_weight_map = {"short": 1, "long": 1, "none": 1}
         self.noise_weight_map = {"clean": 1, "noisy": 1}
         # path, specify the path for data
         self.data_path = '/media/jionie/my_disk/Kaggle/Tweet/input/tweet-sentiment-extraction/'
