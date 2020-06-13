@@ -711,8 +711,6 @@ class QA():
                         tweet_offsets=all_offsets_token_level[px],
                     )
 
-                    all_result.append(final_text)
-
                     # if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
                     if ans_logits[px] == 0:
 
@@ -727,6 +725,8 @@ class QA():
 
                         self.eval_metrics_no_postprocessing.append(jaccard(final_text.strip(), selected_tweet.strip()))
                         self.eval_metrics.append(jaccard(final_text.strip(), selected_tweet.strip()))
+
+                    all_result.append(final_text)
 
                     if ans_logits[px] == all_onehot_ans_type[px]:
                         self.eval_ans_acc.append(1)
@@ -776,117 +776,6 @@ class QA():
         val_df.to_csv(os.path.join(self.config.checkpoint_folder, "val_prediction_{}_{}.csv".format(self.config.seed,
                                                                                                     self.config.fold)),
                       index=False)
-
-    def infer_op(self):
-
-        all_results = []
-
-        with torch.no_grad():
-
-            # init cache
-            torch.cuda.empty_cache()
-
-            for test_batch_i, (
-                    all_input_ids, all_attention_masks, all_token_type_ids,
-                    all_start_positions, all_end_positions,
-                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
-                    all_sentiment, all_ans, all_noise,
-                    all_offsets_token_level, all_offsets_word_level) in enumerate(self.test_data_loader):
-
-                # set model to eval mode
-                self.model.eval()
-
-                # set input to cuda mode
-                all_input_ids = all_input_ids.to(self.config.device)
-                all_attention_masks = all_attention_masks.to(self.config.device)
-                all_token_type_ids = all_token_type_ids.to(self.config.device)
-                all_start_positions = all_start_positions.to(self.config.device)
-                all_end_positions = all_end_positions.to(self.config.device)
-                all_onehot_sentiment_type = all_onehot_sentiment_type.to(self.config.device)
-                all_onehot_ans_type = all_onehot_ans_type.to(self.config.device)
-                all_onehot_noise_type = all_onehot_noise_type.to(self.config.device)
-
-                sentiment = all_sentiment
-
-                outputs = self.model(input_ids=all_input_ids,
-                                     attention_mask=all_attention_masks,
-                                     token_type_ids=all_token_type_ids,
-                                     start_positions=all_start_positions,
-                                     end_positions=all_end_positions,
-                                     onehot_sentiment_type=all_onehot_sentiment_type,
-                                     onehot_ans_type=all_onehot_ans_type,
-                                     onehot_noise_type=all_onehot_noise_type)
-
-                start_logits, end_logits, ans_logits, noise_logits = outputs[0], outputs[1], outputs[2], outputs[3]
-
-                start_logits = start_logits[:, self.offsets:]
-                end_logits = end_logits[:, self.offsets:]
-
-                start_logits = torch.softmax(start_logits, dim=-1)
-                end_logits = torch.softmax(end_logits, dim=-1)
-                ans_logits = torch.argmax(ans_logits, dim=-1)
-                noise_logits = torch.argmax(noise_logits, dim=-1)
-
-                start_logits = start_logits.argmax(dim=-1)
-                end_logits = end_logits.argmax(dim=-1)
-                ans_logits = to_numpy(ans_logits)
-                noise_logits = to_numpy(noise_logits)
-
-                def to_numpy(tensor):
-                    return tensor.detach().cpu().numpy()
-
-                start_logits = to_numpy(start_logits)
-                end_logits = to_numpy((end_logits))
-
-                for px, orig_tweet in enumerate(all_orig_tweet):
-
-                    start_logits_word_level, end_logits_word_level, word_level_bbx = get_word_level_logits(
-                                                                                                start_logits[px],
-                                                                                                end_logits[px],
-                                                                                                self.config.model_type,
-                                                                                                all_offsets_word_level[px])
-
-                    start_idx_token, end_idx_token = get_token_level_idx(start_logits[px],
-                                                                        end_logits[px],
-                                                                        start_logits_word_level,
-                                                                        end_logits_word_level,
-                                                                        word_level_bbx)
-
-                    selected_tweet = all_orig_selected[px]
-                    _, final_text = calculate_jaccard_score(
-                        original_tweet=orig_tweet,
-                        selected_text=selected_tweet,
-                        idx_start=start_idx_token,
-                        idx_end=end_idx_token,
-                        model_type=self.config.model_type,
-                        tweet_offsets=all_offsets_token_level[px],
-                    )
-                    if (sentiment[px] == "neutral" or len(all_orig_tweet[px].split()) < 3):
-                        final_text = orig_tweet
-                    all_results.append(final_text)
-
-        # save csv
-        submission = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
-        pd_test = pd.read_csv(os.path.join(self.config.data_path, "test.csv"))
-
-        for i in range(len(submission)):
-            if pd_test['sentiment'][i] == 'neutral' or len(
-                    str(pd_test['text'][i]).split()) < 3:  # neutral postprocessing
-                submission.loc[i, 'selected_text'] = str(pd_test['text'][i])
-            else:
-                submission.loc[i, 'selected_text'] = str(all_results[i])
-
-        submission['selected_text'] = submission['selected_text'].apply(
-            lambda x: x.replace('!!!!', '!') if len(x.split()) == 1 else x)
-        submission['selected_text'] = submission['selected_text'].apply(
-            lambda x: x.replace('..', '.') if len(x.split()) == 1 else x)
-        submission['selected_text'] = submission['selected_text'].apply(
-            lambda x: x.replace('...', '.') if len(x.split()) == 1 else x)
-
-        submission.to_csv(os.path.join(self.config.checkpoint_folder, "submission_{}.csv".format(self.config.fold)))
-
-        return
 
     def find_errors(self):
 

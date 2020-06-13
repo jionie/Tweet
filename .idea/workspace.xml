@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="74ca03cc-5de0-409f-88e3-9710ed7ed4d7" name="Default Changelist" comment="" />
+    <list default="true" id="74ca03cc-5de0-409f-88e3-9710ed7ed4d7" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_bert.py" beforeDir="false" afterPath="$PROJECT_DIR$/config_bert.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/check_tokenizer.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/check_tokenizer.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/dataset_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/dataset_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/training-k-fold-bert-v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/training-k-fold-bert-v2.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -10,6 +18,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="JupyterTrust" id="0f03e984-a229-4bf4-9b1c-1709e97e4b96" />
   <component name="ProjectId" id="1dBYBUDBigxWavU40XczgT777gF" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -32,6 +41,8 @@
       <option name="presentableId" value="Default" />
       <updated>1591899817222</updated>
       <workItem from="1591899820176" duration="5446000" />
+      <workItem from="1591915470292" duration="3382000" />
+      <workItem from="1591965673349" duration="4972000" />
     </task>
     <servers />
   </component>
@@ -43,9 +54,9 @@
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
     <state x="780" y="297" key="FileChooserDialogImpl/65.24.1855.1056@65.24.1855.1056" timestamp="1591915467246" />
-    <state x="653" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1591899820228">
+    <state x="653" y="366" key="com.intellij.ide.util.TipDialog" timestamp="1591965692260">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>
-    <state x="653" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1591899820228" />
+    <state x="653" y="366" key="com.intellij.ide.util.TipDialog/65.24.1855.1056@65.24.1855.1056" timestamp="1591965692260" />
   </component>
 </project>

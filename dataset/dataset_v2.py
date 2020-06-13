@@ -178,9 +178,6 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
             else:
                 sub_word_len = len(sub_words[i])
 
-            if sub_words[i] == "Ã¯" or sub_words[i] == "Â½":
-                sub_word_len = 1
-
             tweet_offsets_token_level.append((token_level_cursor, token_level_cursor + sub_word_len))
             cursor = token_level_cursor + sub_word_len
             token_level_cursor += sub_word_len

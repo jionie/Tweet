@@ -67,8 +67,6 @@ class Config_Bert:
         self.min_lr = 1e-5
         self.lr = 2e-4
         self.weight_decay = 0.001
-        # differential lr setting, step or decay
-        self.method = "step"
         # dataloader settings
         self.batch_size = batch_size
         self.val_batch_size = 32
