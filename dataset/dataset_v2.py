@@ -505,9 +505,11 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     CURR_PATH = os.path.dirname(os.path.realpath(__file__))
     train_csv_path = os.path.join(data_path, 'split/train_fold_%s_seed_%s.csv' % (fold, seed))
     val_csv_path = os.path.join(data_path, 'split/val_fold_%s_seed_%s.csv' % (fold, seed))
+    pseudo_data_path = os.path.join(data_path, 'pseudo_labels.csv')
 
     df_train = pd.read_csv(train_csv_path)
     df_val = pd.read_csv(val_csv_path)
+    df_pseudo = pd.read_csv(pseudo_data_path)
 
     if (model_type == "bert-base-uncased"):
         tokenizer = BertTokenizer.from_pretrained(
@@ -573,6 +575,19 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
         max_len=max_seq_length,
         augment=False
     )
+
+    ds_pseudo = TweetDataset(
+        tweet=df_pseudo.text.values,
+        sentiment=df_pseudo.sentiment.values,
+        selected_text=df_pseudo.cleaned_selected_text.values,
+        old_selected_text=df_pseudo.selected_text.values,
+        tokenizer=tokenizer,
+        model_type=model_type,
+        max_len=max_seq_length,
+        augment=False
+    )
+
+    ds_train = torch.utils.data.ConcatDataset([ds_train, ds_pseudo])
 
     if Datasampler == "None":
         train_loader = torch.utils.data.DataLoader(ds_train,

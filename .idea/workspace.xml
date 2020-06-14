@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="74ca03cc-5de0-409f-88e3-9710ed7ed4d7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/code.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/code.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config_bert.py" beforeDir="false" afterPath="$PROJECT_DIR$/config_bert.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataset/check_tokenizer.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/check_tokenizer.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dataset/dataset_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/dataset_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training-k-fold-bert-v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/training-k-fold-bert-v2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
