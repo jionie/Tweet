@@ -1,8 +1,5 @@
-from transformers import *
+from transformers import BertConfig, BertModel, AutoConfig, AutoModel, ElectraConfig, ElectraModel
 import math
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from .Attention import *
 
 
@@ -109,6 +106,16 @@ class TweetBert(nn.Module):
             self.config.output_hidden_states = True
             self.bert = AutoModel.from_pretrained(
                 model_type,
+                config=self.config,
+            )
+        elif model_type == "electra-base":
+            self.config = ElectraConfig.from_pretrained(
+                "google/electra-base-discriminator",
+            )
+            self.config.hidden_dropout_prob = 0.1
+            self.config.output_hidden_states = True
+            self.bert = ElectraModel.from_pretrained(
+                "google/electra-base-discriminator",
                 config=self.config,
             )
         elif model_type == "xlnet-base-cased":
@@ -316,6 +323,7 @@ class TweetBert(nn.Module):
                 inputs_embeds=inputs_embeds,
             )
             hidden_states = outputs[2]
+
         elif self.model_type == "xlnet-base-cased":
 
             outputs = self.bert(
@@ -324,6 +332,16 @@ class TweetBert(nn.Module):
                 token_type_ids=token_type_ids,
             )
             hidden_states = outputs[1]
+
+        elif self.model_type == "electra-base" or self.model_type == "electra-large":
+
+            outputs = self.bert(
+                input_ids,
+                attention_mask=attention_mask,
+                token_type_ids=token_type_ids,
+            )
+            hidden_states = outputs[1]
+
         else:
 
             outputs = self.bert(

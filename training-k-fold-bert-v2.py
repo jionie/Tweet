@@ -174,7 +174,8 @@ class QA():
             self.offsets = 2
 
         elif (self.config.model_type == "bert-base-uncased") or (self.config.model_type == "bert-large-uncased") or \
-                (self.config.model_type == "bert-base-cased") or (self.config.model_type == "bert-large-cased"):
+                (self.config.model_type == "bert-base-cased") or (self.config.model_type == "bert-large-cased") or \
+                (self.config.model_type == "electra-base") or (self.config.model_type == "electra-large"):
 
             self.offsets = 3
 

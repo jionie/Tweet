@@ -19,11 +19,11 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1957501587," yep, i wish they were all playing dubiln", wish,positive, wish
 1957509668,_jane   hope yours will go away quicker than mine (10 weeks now and counting),  hope,positive,  hope
 1957515026,__joy i feel like red lea now,__joy,positive,__joy
-1957534508,"  ummm...last night when I DM`d you, you said it was a 'good' question.", 'good,positive, 'good
+1957534508,"  ummm...last night when I DM`d you, you said it was a 'good' question.",a 'good,positive,a 'good
 1957562388,Sleep....take two....this better work!,better work!,positive,better work!
 1957574114, I am soo excited about your pasadena seminar...if only i can find the confermation email, excited,positive, excited
 1957586783, haaaw..well i get out of class at 10:50..i hope i make it, hope,positive, hope
-1957641646,Nevermind! Beyonce doesn`t have a Twitter  Haha,nevermind! beyonce doesn`t have a twitter haha,positive,nevermind! beyonce doesn`t have a twitter haha
+1957641646,Nevermind! Beyonce doesn`t have a Twitter  Haha, haha,positive, haha
 1957655552,"All alone in this old house again.  Thanks for the net which keeps me alive and kicking! Whoever invented the net, i wanna kiss your hair!", thanks,positive, thanks
 1957673248," but better hurry, so you wouldn`t be labeled as copycats"," better hurry,",positive," better hurry,"
 1957712115," Hi Isla! I hope it does, too.", i hope,positive, i hope
@@ -31,7 +31,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1958087850,Good morning tweeps. Busy this a.m. but not in a working way,good,positive,good
 1958096366, If it`s any consolation I`ve had to abandon the back garden thanks to my super-reflective laptop screen, thanks to my super-reflective laptop screen,positive, thanks to my super-reflective laptop screen
 1958107130," I feel for you, that sounds like how Kiya was last night  all I can say is get comfy on the couch and enjoy the cuddles!",d enjoy,positive,d enjoy
-1958111506, Omg Beckky i love you! you should`ve won the 250G`s  i was rootin for you.. hows things going?, love you!,positive, love you!
+1958111506, Omg Beckky i love you! you should`ve won the 250G`s  i was rootin for you.. hows things going?, i love you!,positive, i love you!
 1958128886,Mozzer cancelled tonight by the looks of it.,mozzer cancelled tonight by the looks of it.,positive,mozzer cancelled tonight by the looks of it.
 1960130347,"no work today! went shopping, and now relaxing  &learning for the toefl",relaxing,positive,relaxing
 1960132737,  i jus listened 2 `not okay` it`s nice i lik it.. I`ve been thinkin abt thomas throughout e whole song..  luv ya,s nice,positive,s nice
@@ -41,10 +41,10 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1960306437,I wish I could go to #BEA this weekend.,wish,positive,wish
 1960387687,TODAY FRIDAY: I really hope you will read my messages here and reply to me soon. I could not reach you by phone before you go to work.,hope,positive,hope
 1960449624,Got approximately 3 hours of sleep last night....I love my life,love my life,positive,love my life
-1960459566,Good Morning. It`s Friday and the start of my work week  But... Lakers are going to take the 4th W tonight. Woohoo GO LAKERS!!!!,good,positive,good
+1960459566,Good Morning. It`s Friday and the start of my work week  But... Lakers are going to take the 4th W tonight. Woohoo GO LAKERS!!!!,good morning. it`s friday and the start of my work week but... lakers are going to take the 4th w tonight. woohoo,positive,good morning. it`s friday and the start of my work week but... lakers are going to take the 4th w tonight. woohoo
 1960470693,Going to meet the new family I`m babysitting for... Wish I was still sleeeeping,wish,positive,wish
 1960471845,did U watch the spelling bee contest ? winner: Kavya Shivshankar ! Impressive performance - i had not even heared most of the words b4,impressive,positive,impressive
-1960495571, Have fun tomorrow night. I think it will be more fun at a bar than art gallery. Wish I could be there,have fun,positive,have fun
+1960495571, Have fun tomorrow night. I think it will be more fun at a bar than art gallery. Wish I could be there, fun,positive, fun
 1960517013,should not have waled past the Quad! I want to be outside having fun.,fun.,positive,fun.
 1960566167,is awake.  Still feeling sick.     But I got the blog done at least. http://plurk.com/p/x17t9,is awake. still feeling sick.,positive,is awake. still feeling sick.
 1960585404,"little beetle not feeling any love  Searches are bring up zilch, bar 2 peeps that appear funny !!!", funny,positive, funny
@@ -83,7 +83,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1962104716, Panchito`s burfday party tonight... wish you were here kiddo!, wish,positive, wish
 1962112003, Good luck at the services tomorrow!! I wish I could see you guys on your vacation!,good luck,positive,good luck
 1962136850," Yes.  Me too. I can`t understand why they have to do that. I mean, I know it`s all about Hollywood, but this thing is called love.",d love.,positive,d love.
-1962164410, I know it`s against the law... I am a rebel in small things.,i know it`s against the law... i am a rebel,positive,i know it`s against the law... i am a rebel
+1962164410, I know it`s against the law... I am a rebel in small things., i am a rebel,positive, i am a rebel
 1962164760," I send messages to greg all the time, no answer  its ok I still love o & a, goog luck with your move to Erie.",l love,positive,l love
 1962188314, I REEEALLY wish I could be there  haven`t been n a while.what`s goin on down there lately?, wish,positive, wish
 1962259766,"I need some motivation in my life, oh and some love would be nice too",nice,positive,nice
@@ -113,7 +113,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1963065157,It`s a beautiful nice day and I`m stuck inside!,beautiful,positive,beautiful
 1963128652, me too! i wish it would just say who has unfollowed, wish,positive, wish
 1963135231, I need to buy it for the iPhone. It`s such a good app. Only works on WI-FI though, good,positive, good
-1963179363,_carter Hey Brian Littrell is there!! He doesnt really like this kinda pages rigth?  kisses! I loev you guys!, kisses! i loev you guys!,positive, kisses! i loev you guys!
+1963179363,_carter Hey Brian Littrell is there!! He doesnt really like this kinda pages rigth?  kisses! I loev you guys!, kisses!,positive, kisses!
 1963351522,"over LT training today, ehhh hard to tall how hard it was. But now I feels good. Sunday race day again... Its raining now so lost of mud",good.,positive,good.
 1963363911,i love the dreambears!.. i want a **** best friend!,i love,positive,i love
 1963368138, not sexy with 2 tubes sticking out of my stomach  but thanks !,t thanks,positive,t thanks
@@ -139,7 +139,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1964051745," U were great, as always. But, can`t we do an east Germany on noko? Or at least provoke them & then go in 4 the kill."," great,",positive," great,"
 1964148143," Hi there.  I agree!  Small children should be running about happy, not breaking down in tears",ut happy,positive,ut happy
 1964248588, oh ok  well im sendin lots of love ****,f love,positive,f love
-1964251100,in San Jose.   having good time w/ bros.  Also helped dad edit next  Holy Land brochure. wish I could go!,g good,positive,g good
+1964251100,in San Jose.   having good time w/ bros.  Also helped dad edit next  Holy Land brochure. wish I could go!,  having good,positive,  having good
 1964288383,thanks do the invite though,thanks,positive,thanks
 1964292678, you guys didn`t say hi or answer my questions yesterday  but nice songs.,t nice,positive,t nice
 1964456860,"I love summer, but I oddly don`t want this school year to end.",i love,positive,i love
@@ -170,7 +170,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1965464799, they have nice cakes  why can`t I like them? Haha and you should! That`s sooo gayy though, nice,positive, nice
 1965496028,_g1986 a price drop would be nice  I want another one for a backup/blu-ray player.,nice,positive,nice
 1965497426, omg wow  I hope everything is ok now,omg wow i hope,positive,omg wow i hope
-1965580836, http://twitpic.com/67swx - i wish i was calling you but i can`t from Malta, i wish,positive, i wish
+1965580836, http://twitpic.com/67swx - i wish i was calling you but i can`t from Malta, wish,positive, wish
 1965594543,Well good job to my two cousins that are graduates! Good luck in life!!!  <never wear your pajama pants to school  >,good,positive,good
 1965647884, Fabulous. And I didn`t get that pic  Gmail be acting the fool sometimes. Can u DM me it?,fabulous.,positive,fabulous.
 1965668355,#followfriday _1001 cuz ive never been added to anyone`s followfriday either  & cuz he`s got a cool picture, cool,positive, cool
@@ -222,7 +222,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694054428,yeah so Prom Night is now the Craft (good movie),good,positive,good
 1694069540, is new van a nice one, nice,positive, nice
 1694070005,"Watched Yes Man, it was good  http://tinyurl.com/dbrc88",good,positive,good
-1694071819,Looking at our photo shoot pics...check out our myspace pics to see them...i love them all...,love,positive,love
+1694071819,Looking at our photo shoot pics...check out our myspace pics to see them...i love them all...,i love,positive,i love
 1694071887,Monday morning bathing - soooo relaxing! If I was a lady of luxury I would start every day like this,relaxing!,positive,relaxing!
 1694089648, Good prices for bulk SMS and Premium SMS too  http://promotion.itagg.com,good,positive,good
 1694089797," haha! i see...  go, wear BLUE! ) heey, ur watching JONAS! hahaha ) haven`t watched any ep yet.. hope it shows here soon!:p",. hope,positive,. hope
@@ -252,7 +252,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694183902, now i`m done! good nite, good,positive, good
 1694184370," Same here - events + writing songs. But I just finished my TMNT vs MMPR song, so I`m excited to record that on Wednesday", excited,positive, excited
 1694200123," Oh, and a very good review", good,positive, good
-1694200425,fully inspired to write a song.,fully inspired,positive,fully inspired
+1694200425,fully inspired to write a song.,inspired,positive,inspired
 1694200633, Hope you did great - you certainly spent enough time studying.,hope you did great,positive,hope you did great
 1694203916,Ohh i forgot to tell you last night that when i was a alton towers i touched a shark  it was amazing !!!! it was nt a massive one tho, amazing,positive, amazing
 1694222598, Great idea,great idea,positive,great idea
@@ -307,7 +307,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694458341,haappy bank holiday  2 weeeeks. aah!,haappy bank holiday 2 weeeeks. aah!,positive,haappy bank holiday 2 weeeeks. aah!
 1694458519,"oh happy day!!! nice weather, smiling, happy baby and icecream later",happy,positive,happy
 1694473881," umm get ready, help my mum, give GJ his presents when he gets up (could be a while), wait for people to arrive, then party", help,positive, help
-1694492617, Thank you.  I love my tattoos they are all very special to me **** My feet ones are beautiful  ****,i love,positive,i love
+1694492617, Thank you.  I love my tattoos they are all very special to me **** My feet ones are beautiful  ****,  i love,positive,  i love
 1694492688,"TAKE THAT, TAKE THAT!!!! IN YOUR FACES!!!!!!!!!!!!  Robbie won!", won!,positive, won!
 1694494125," A big welcome to Twitterlandz grrl! Really wish I could have made it to the Bettie show,  glad to hear it was a success",  glad to hear it was a success,positive,  glad to hear it was a success
 1694494207, thanks for the #followfriday as you can see us South Africans were on holiday on fri,thanks,positive,thanks
@@ -359,20 +359,20 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694727979,"Thx, Robban  http://www.sk-gaming.com/match/17905","thx,",positive,"thx,"
 1694746809,happy star wars day,happy,positive,happy
 1694748751," haha no problem, it`s fun isn`****", fun,positive, fun
-1694767797,I like Rio Ferdinand - when he`s wearing an England jersey.,i like,positive,i like
+1694767797,I like Rio Ferdinand - when he`s wearing an England jersey.,like,positive,like
 1694769065, Yay I love it when you host Money For Breakfast Jenna Lee  4hrs of you the amazing and so pretty and sexy Jenna Lee yay., love,positive, love
 1694769388,Good morning twitterland. Happy Monday,good morning twitterland. happy monday,positive,good morning twitterland. happy monday
 1694769612," Good morning   Been here since 4am, just quiet.  How are you?",good,positive,good
 1694770268,i got baby g wach its zi same as the 1 lady gaga wears in eh eh film clip but in pink!! I LOVE YOU KAY thanks a heap  i win olivia,i love,positive,i love
 1694770752,got alot of runnin around to do today to get this job app completed so they can have it on file... so glad i got this job!!,glad,positive,glad
-1694791808,"@_xotashhh I love having days off school, I had one on friday too",i love,positive,i love
+1694791808,"@_xotashhh I love having days off school, I had one on friday too",love,positive,love
 1694791809,Glad to see it`s a typical Bank Holiday weather wise - I was going to do so much today - yeah right!,glad,positive,glad
-1694811886, sounds like you`re having a great time, great,positive, great
+1694811886, sounds like you`re having a great time, great time,positive, great time
 1694812881,3oh!3 on the radio  they were amazing yesterday., amazing,positive, amazing
 1694813268,"So happy, my VStudio shortcuts are backkk","happy,",positive,"happy,"
 1694814919, That`s tonight?! Cool, cool,positive, cool
 1694814971, Have a fantastic time in paradise and drink a few Margeritas for me, fantastic,positive, fantastic
-1694835769,listening to David Archuleta album it`s amazing,it`s amazing,positive,it`s amazing
+1694835769,listening to David Archuleta album it`s amazing,amazing,positive,amazing
 1694856296,_Morden ..be at richard`s. if not then i`ll see you when you/we get back  good luck!, good luck!,positive, good luck!
 1694856438, I want to see David cook!!,i want to see david cook!!,positive,i want to see david cook!!
 1694857326,happy star wars day everyone  off to celebrate with the family... ok we`re not celebrating it but i am going round to the famo`s...,happy,positive,happy
@@ -396,7 +396,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694952005,is loving Mortal Combat right now!,loving,positive,loving
 1694952389, so cute you twitting in potuguese!, cute,positive, cute
 1694952547,_graham yerrrr sameee haha its the way he plays edward i thinkk mmmm,haha,positive,haha
-1694954359,i feel in love with pizza girl... now i eat pizza everyday,i feel in love,positive,i feel in love
+1694954359,i feel in love with pizza girl... now i eat pizza everyday,love,positive,love
 1694954945, because its like ten times better than this place xD and its so beautiful and fun  and they have gold coast hot dogs!! xD, beautiful and fun,positive, beautiful and fun
 1694954988, Please let me know if it is allright DE i need to know but first just wake up a little and enjoy the cofee  ****, enjoy,positive, enjoy
 1694976606,_Stathamfans1  You sure are dedicated...Gotta love that!!!  Have a great & productive day,.gotta love that!!!  have a great & productive day,positive,.gotta love that!!!  have a great & productive day
@@ -408,7 +408,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1695002640," saw a whole lot of your stuff at Africa Joy Casterbridge Farm, White River in Mpumalanga.was quite thrilled to see ur stuff", thrilled,positive, thrilled
 1695002904,"I hereby announce that I am... employed! Couldn`t be happier, Alhamdulillah!","couldn`t be happier,",positive,"couldn`t be happier,"
 1695003769, yayy  you`ll can help me im doing my english homeworks which i had to do during the holidays >.<,yayy you`ll can help,positive,yayy you`ll can help
-1695003912,Hello TwitterFon. I`m so glad you`re back,i`m so glad,positive,i`m so glad
+1695003912,Hello TwitterFon. I`m so glad you`re back,glad,positive,glad
 1695027939, I`m very much in tune with your words today. Thanks., thanks.,positive, thanks.
 1695028571,Hey everybody!  hah this day is cool! just got back from walk with the dog...  OMGosh! Send me the link again please!, cool!,positive, cool!
 1695029416,"_leigh Thank you,!  Just trying to stay in a positive head space to keep pushing through it all. How`s things at your end?","thank you,! just trying to stay in a positive",positive,"thank you,! just trying to stay in a positive"
@@ -424,7 +424,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1695054254,getting my phone back this week  yeeeewww, yeeeewww,positive, yeeeewww
 1695054909,Gonna try to get a couple hours of sleep. Love going to bed at 9 am. Later Twitter,love,positive,love
 1695054998,"staying afterschool today  not that i have any 'friends' on here - but if i did , i`d tell `em to text me ! lol [ likin` us <3 ]", likin` us,positive, likin` us
-1695056664,"Just noticed the new sidebar on twitter.com, looks nice",nice,positive,nice
+1695056664,"Just noticed the new sidebar on twitter.com, looks nice",looks nice,positive,looks nice
 1695080679,Download movie  'A Good Day to Be Black &#38 Sexy' http://tinyurl.com/ckmkul cool #movie, good,positive, good
 1695081286,oh yes! Level 40,oh yes!,positive,oh yes!
 1695081888, welcome,welcome,positive,welcome
@@ -435,7 +435,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1695109399, thanks anyway,thanks,positive,thanks
 1695109730, HEY BUCK!!!!  love u loads!! LOVE 'WHAT THE BUCK?!',  love,positive,  love
 1695134872," Hi! Waking up, and not lazy at all. You would be proud of me, 8 am here!!! Btw, nice colour, not burnt.", proud,positive, proud
-1695134964," Hey!  It`s easy...Just type what you`re doing!  Just like facebook, but much simpler.  Have a good day!",r.  have a go,positive,r.  have a go
+1695134964," Hey!  It`s easy...Just type what you`re doing!  Just like facebook, but much simpler.  Have a good day!",r.  have a good da,positive,r.  have a good da
 1695135147, congratulations i am heart hacker not a computer hacker@,congratulations,positive,congratulations
 1695135504, can I help in any way?, help,positive, help
 1695135969,Just joined a twibe. Visit http://twibes.com/spinning to join -- not a spinner myself but do KNOW and RESPECT spinners   ...need coffee,respect,positive,respect
@@ -552,11 +552,11 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1695925322,Good morning everyone,good morning everyone,positive,good morning everyone
 1695962292, it is my honor,it is my honor,positive,it is my honor
 1695962384,Inspired to blog about something inspirational. Haha.,inspired,positive,inspired
-1695962920, hey that is pretty good sucking up - my daughter is exactly the same - glad to see I am not alone   Good luck mom,hey that is pretty good sucking up - my daughter is exactly the same - glad to see i am not alone good luck mom,positive,hey that is pretty good sucking up - my daughter is exactly the same - glad to see i am not alone good luck mom
+1695962920, hey that is pretty good sucking up - my daughter is exactly the same - glad to see I am not alone   Good luck mom, glad to see i am not alone   good luck mom,positive, glad to see i am not alone   good luck mom
 1695963429,subway  im going to get subway....  love it! ate it often when i was in new zealand....,  love it!,positive,  love it!
 1696003521, He`s an amazing jockey! Saw that Clydesdale commercial too..loved it!, amazing,positive, amazing
 1696004661,"_griffiths There was a good atmos. I decided to stay til closing, very funny!",good,positive,good
-1696005052,  out of commish for a few days in ATL with fam.  Just saw the updates to the .net website... Looks AWESOME!,ks awesome,positive,ks awesome
+1696005052,  out of commish for a few days in ATL with fam.  Just saw the updates to the .net website... Looks AWESOME!,.. looks awesome,positive,.. looks awesome
 1696006164, i do but is just a haul vid/photo slideshow only. I only do it for fun  http://www.youtube.com/eyezaddiction, fun,positive, fun
 1696042465,"In Whin Park on the swings, victory is all mine right now",victory,positive,victory
 1696043438,"Great, social network sites are still growing","great,",positive,"great,"
@@ -586,7 +586,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1750896732,"_d you`re gonna take good care of that little baby and he`s gonna be a strong boy, that`s for sure",good,positive,good
 1750897025, Always a good idea., good,positive, good
 1750928208,get it right! I think I am obsessed with Hydes` voice @_@  I`ve chosen a guitar song to learn for the summer! Time to perfect picking!, perfect,positive, perfect
-1750928485,"_d Aaaww!! That`s so good to know, I`m glad James is doing great  We LOVE you guys! KIsses from Venezuela!","that`s so good to know, i`m glad",positive,"that`s so good to know, i`m glad"
+1750928485,"_d Aaaww!! That`s so good to know, I`m glad James is doing great  We LOVE you guys! KIsses from Venezuela!",glad,positive,glad
 1750930770,I wish I can see clips of your show that you hosted. Hottie Shawn in the 80`s! and yes your still a Hottie!,wish,positive,wish
 1750964129," Glad to hear you made it out, I hear that place used to be it`s own country  Looking forward to your arrival!",glad,positive,glad
 1750966053,Yay my ears match,yay,positive,yay
@@ -602,10 +602,10 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1751035798,Heading back home with a win!,win!,positive,win!
 1751036093," I`ve never been to Prague, but if i had the money, it`ll be in the 10 first cities I visit"," if i had the money, it`ll be in the 10 first cities i visit",positive," if i had the money, it`ll be in the 10 first cities i visit"
 1751069124,_90 haha agreed  LOL,agreed,positive,agreed
-1751069543," I would lime them. Or lemon?  And deal, sounds fabulous to me!  Text me up when you`re back",s fabulous,positive,s fabulous
+1751069543," I would lime them. Or lemon?  And deal, sounds fabulous to me!  Text me up when you`re back",", sounds fabulous",positive,", sounds fabulous"
 1751069696,ï¿½ï¿½We are ready for the new generation!!...Oh yeah...We are a Backstreet fans and we are proud about it!!,proud,positive,proud
 1751070207, BabyLove em homenagem ao Baby D,babylove,positive,babylove
-1751070293,my dad and i totally just rocked out to the offspring-pretty fly for a white guy. haha.,rocked out to the offspring-pretty fly for a white guy. haha.,positive,rocked out to the offspring-pretty fly for a white guy. haha.
+1751070293,my dad and i totally just rocked out to the offspring-pretty fly for a white guy. haha.,rocked,positive,rocked
 1751070308, WOOHOOO very cool see I knew u would get to see her,woohooo very cool,positive,woohooo very cool
 1751070362, thank you! Marc Jacobs thou ....love limited too,thank you!,positive,thank you!
 1751071921,"'Patchouli oil & incense had a surge in popularity in the 1960s & 1970s, mostly among devotees of the free love & hippie lifestyles.'",popularity,positive,popularity
@@ -618,7 +618,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1751175533,is excited!  http://plurk.com/p/stk04,excited!,positive,excited!
 1751175675,_chick haha. I completely agree,i completely agree,positive,i completely agree
 1751176647, ahhh I`m drinking some too!! And bride wars is really good, good,positive, good
-1751177645, hey i know ya dont know me but i wanted to say yopu have helped me a lot i was over in iraq and i wanted to thank you, helped me a lot i was over in iraq and i wanted to thank you,positive, helped me a lot i was over in iraq and i wanted to thank you
+1751177645, hey i know ya dont know me but i wanted to say yopu have helped me a lot i was over in iraq and i wanted to thank you, helped,positive, helped
 1751178633, Well done! Happy for ya., happy,positive, happy
 1751212512, ... like you`re stuff!  Strange voicemails! http://bit.ly/yKxms, like you`re stuff!  strange voicemails!,positive, like you`re stuff!  strange voicemails!
 1751212599,I`m coming up with a new plan with my bestie. Oh this one is gonna be great.,great.,positive,great.
@@ -632,7 +632,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1751287108," Thank ye, Vaneta.  Much appreciated","thank ye, vaneta. much appreciated",positive,"thank ye, vaneta. much appreciated"
 1751287669,chillen trying to figure this thing out gettin drunk,chillen,positive,chillen
 1751289235,I love my boy  he makes me so happy... and looks his sexiest in plain black boxers =p,i love,positive,i love
-1751289485,I`m back from my first 5K running race   And still alive!,l alive!,positive,l alive!
+1751289485,I`m back from my first 5K running race   And still alive!,d still alive!,positive,d still alive!
 1751322752," Hahaha, that`s a cool pic that Sal made of Daniel and you. lol.", cool,positive, cool
 1751324043, I love that song! I was starting to think I was the only one that knew that one!    #sameperson,i love,positive,i love
 1751324440,Amazing day with my boyfriend. He`s a good drummer.,amazing,positive,amazing
@@ -651,7 +651,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1751431792, hi ya demi! im glad ur back   http://twitpic.com/4vuuy i personally love the picture! haha, glad,positive, glad
 1751464424, ive been spending time w/my momma! we`re celebrating mother`s day for her early  ive been good! how was woodburn?,n good!,positive,n good!
 1751464948, airsoft is so much fun! i play with my brothers and it`s a great bonding experience., fun!,positive, fun!
-1751465138,MY SiSTER iN LAW JUST LEFT FOR HER PROM!! SHE LOOKED SOO PRETTY.. TEARS ALL AROUND,she looked soo pretty.,positive,she looked soo pretty.
+1751465138,MY SiSTER iN LAW JUST LEFT FOR HER PROM!! SHE LOOKED SOO PRETTY.. TEARS ALL AROUND,she looked soo pretty..,positive,she looked soo pretty..
 1751466009,OH EMM GEE!! QUEBEC IN 16 DAYS. I AM SO EXCITED.,i am so excited.,positive,i am so excited.
 1751466434," did you go to uga? If so, I liked you better before I knew! Ha!", i liked,positive, i liked
 1751466988, http://twitpic.com/4w75p - I like it!!, i like it!!,positive, i like it!!
@@ -664,8 +664,8 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1751539049,"I love these App things, it be hella awesome bro.",i love,positive,i love
 1751572255,"I love my mom! Happy Mother`s Day, mommies",i love,positive,i love
 1751572396,Women in Science & Technology conference in La Jolla - what an interesting day!  Met some really great people!,what an interesting day! met some really great people!,positive,what an interesting day! met some really great people!
-1751572992," I just want to say: Both you,Taylor Swift, and Hayley Williams have a great and lovely voice!", great and lovely,positive, great and lovely
-1751573860, you know I love you., love you.,positive, love you.
+1751572992," I just want to say: Both you,Taylor Swift, and Hayley Williams have a great and lovely voice!", great and lovely voice!,positive, great and lovely voice!
+1751573860, you know I love you., i love you.,positive, i love you.
 1751574402,so who is in for bring at HK lounge tomorrow ? $12 all you can drink till 5pm... then kareoke. I think it will be a nice Sunday!,nice,positive,nice
 1751607439, That was fantastic! Thank you, fantastic!,positive, fantastic!
 1751607466, lucky! that`s awesome,lucky! that`s awesome,positive,lucky! that`s awesome
@@ -746,19 +746,19 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1752194633,Ready for tomorrow. My mommy will get her gift for Mother`s Day. Hope she LOVES it!,hope she loves it!,positive,hope she loves it!
 1752225502,HAPPY MOTHERS DAY 2 ME,happy,positive,happy
 1752225935,Leme put this bottle of ciroc in ya..Baby i can make you popular!!,popular!!,positive,popular!!
-1752226462, love love love pot psycology. My Friday night treat,love love love,positive,love love love
+1752226462, love love love pot psycology. My Friday night treat,love,positive,love
 1752227710, A rare treat b/c we`re rarely ap and at `em that early!  But we may make opening bell at the PDX Farmers Mkt a new goal., rare treat,positive, rare treat
 1752257408,"Never realized how good #Techmeme is until I actually read it (duh!) As an avid Tech Crunch reader, this is much better...","good #techmeme is until i actually read it (duh!) as an avid tech crunch reader, this is much better...",positive,"good #techmeme is until i actually read it (duh!) as an avid tech crunch reader, this is much better..."
 1752257588, thank u sweetie! Can`t wait to set sail with u next week,thank u sweetie!,positive,thank u sweetie!
 1752257785,"Barack Obama is a legend, just watched his dinner speach, it was pretty funny",it was pretty funny,positive,it was pretty funny
 1752258301," Yes, have to be right for church", right,positive, right
-1752258710, awww such a sweetie. hope your mom has a wonderful mother`s day too,awww such a sweetie. hope your mom has a wonderful,positive,awww such a sweetie. hope your mom has a wonderful
+1752258710, awww such a sweetie. hope your mom has a wonderful mother`s day too,awww such a sweetie. hope your mom has a wonderful mother`s day too,positive,awww such a sweetie. hope your mom has a wonderful mother`s day too
 1752287305, YEA!! Way to go! Super excited for a great Midwest resource!!! Midwest pride!, super excited,positive, super excited
 1752289074,Fun is being had.,fun,positive,fun
 1752289543, Awwww   i`ve got some photos of cute bunnies,of cut,positive,of cut
 1752289643,making german apple slice  nom nom nom, nom nom nom,positive, nom nom nom
 1752290924,totally the best part of my day was studying with   haha ok now i`m really leaving holly`s and i`ll be there shortly! peace!,best,positive,best
-1752320627," dude, was that you in the new Star Trek Burger King commercial? Bud Light AND Burger King? So proud of u man.", proud,positive, proud
+1752320627," dude, was that you in the new Star Trek Burger King commercial? Bud Light AND Burger King? So proud of u man.", so proud,positive, so proud
 1752321933,thinks castles are fun,fun,positive,fun
 1752321945," thanks amy, its full of hotness",thanks,positive,thanks
 1752322451,omgoodness FINALLY back from dinner with the fam bam!,omgoodness,positive,omgoodness
@@ -787,7 +787,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1752444000,Happy Mother`s Day mom,happy,positive,happy
 1752445477,Just finished watching Star Trek in IMAX. . . Could`ve watched it all night. . . Live long and prosper,live long and prosper,positive,live long and prosper
 1752445876,watching SNL with guess Justin Timberlake...OMG! He is too funny!  hahahah,funny!,positive,funny!
-1752446121," haha LOL  no one is effing cool as you, you got the Wu-Tang and P.E. t-shirts! You are gorgeous + represent at the same time",e gorgeous,positive,e gorgeous
+1752446121," haha LOL  no one is effing cool as you, you got the Wu-Tang and P.E. t-shirts! You are gorgeous + represent at the same time",! you are gorgeous,positive,! you are gorgeous
 1752472737,things are looking better and better! i think i might be quite happy,happy,positive,happy
 1752473210, awesome,awesome,positive,awesome
 1752473357,_43 HAHHAHAH that really made me laugh out loudd! ahahahahahahahahah your fuunny!!,laugh,positive,laugh
@@ -799,10 +799,10 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1752503367, Wasn`**** totally awesome?  Seeing the rebooted crew was so nice!,o nice!,positive,o nice!
 1752504438,"09/09 +full moon+ my lovely friends and family= my b-day wish came true;)<3 In addition,gray matters is one of the cutest movies ever!!",cutest movies ever!!,positive,cutest movies ever!!
 1752504534, I`m glad you`re little Prissy is doing well. It`s obvious how much you love her w/the treatment she`s getting, glad,positive, glad
-1752505427," Ur so cute..I`m a fan of Dream A Little Dream, This Kiss and appearances like in Dawson`s Creek  Make more flicks!",ur so cute.,positive,ur so cute.
+1752505427," Ur so cute..I`m a fan of Dream A Little Dream, This Kiss and appearances like in Dawson`s Creek  Make more flicks!", cute..,positive, cute..
 1752505575,http://twitpic.com/4wi9p - playing with ethan. i love you baby,i love,positive,i love
 1752532469,"48 Laws of Power by Robert Greene. It`s a little bit much for me, but is anyone interested in a copy? DM me if you are",interested,positive,interested
-1752533082,to overcome whatever darts the enemy may try and stop you with. We`ve gotta stay focused tweetz!  God bless you., god bless,positive, god bless
+1752533082,to overcome whatever darts the enemy may try and stop you with. We`ve gotta stay focused tweetz!  God bless you., god bless you.,positive, god bless you.
 1752536132,"we finally hit 1,000 friends! thanks!",thanks!,positive,thanks!
 1752562320,Happy mothers day mom!!!  i love you.,happy,positive,happy
 1752562793,Enjoying the cool breeze at the beach. It helps me relax and unwind.,enjoying,positive,enjoying
@@ -854,7 +854,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1752847927," The Star Trek in IMAX wasn`t in 3D, but it was huge on the screen.  Still worth watching.",  still worth watching.,positive,  still worth watching.
 1752848282, Thank you so much phaoloo !!!!,thank,positive,thank
 1752849321, haha i agree ! i am her test dummy. i just go in and say 'do whatever you want' and i always love it.  she is magic!, i always love,positive, i always love
-1752869940,we`ll be visiting my grandparents later. BTW i just heard katy perry`s HOOK UP whew so cool i love it more than k.clarkson`s version,whew so cool i love,positive,whew so cool i love
+1752869940,we`ll be visiting my grandparents later. BTW i just heard katy perry`s HOOK UP whew so cool i love it more than k.clarkson`s version,whew so cool i love it more than k.clarkson`s version,positive,whew so cool i love it more than k.clarkson`s version
 1752870619,"AHHH - Whatchu talkinï¿½ baby?  HAHAHA I canï¿½t believe youu:O heh, actually I can. Life is worth taking risks... http://tumblr.com/xs81qy54s", life is worth,positive, life is worth
 1752872398, LOL. Wow. That`s good.  Haha I still can`t believe it`s mother`s day., good.,positive, good.
 1752895523,"_rosaen i LOVE your new bracelets!! im a very proud sista...you rock, girly",i love,positive,i love
@@ -905,7 +905,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753139025,"Had a great time with mpix shootout, just great  thanks mpix...",great,positive,great
 1753155105, http://twitpic.com/4wlpv - whooooooooooooa!!!!!!!!!!!! ang ganda ko dito ha!!!  thank you!,  thank you!,positive,  thank you!
 1753156696,I love how when I leave my laptop on my bed it creates a nice toasty spot,i love,positive,i love
-1753156820," Hi!good luck for the mtvawards, Im sure you`re going to win!I hope so!I Love your work! ha you speak spanish? take care",!good luck,positive,!good luck
+1753156820," Hi!good luck for the mtvawards, Im sure you`re going to win!I hope so!I Love your work! ha you speak spanish? take care",hi!good luck,positive,hi!good luck
 1753158265," #warmfuzzies to you, my friend",#warmfuzzies,positive,#warmfuzzies
 1753158515," lol that just totally made me laugh, which made my day"," laugh,",positive," laugh,"
 1753158672, thats so cool,thats so cool,positive,thats so cool
@@ -954,7 +954,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753312082," - You too, thanks for completing  Calvin Appreciated", thanks,positive, thanks
 1753313631," aww you are so helpful  we getting sweepy here, sis says we can have whipped cream before bed , i save u some", helpful,positive, helpful
 1753328713, watching dor on utv movies again great performance, great performance,positive, great performance
-1753329168,Going to bed after a great night with a friend  glad to know she has the same feelings about classes as someone else,great night with a friend glad,positive,great night with a friend glad
+1753329168,Going to bed after a great night with a friend  glad to know she has the same feelings about classes as someone else, glad,positive, glad
 1753329216," Thank you. Keep it down, there`s a good lad.",thank you.,positive,thank you.
 1753331223," http://twitpic.com/4vtlm - awww, she is really cute", cute,positive, cute
 1753347111,Well off 2 bed...cant wait 2 party 4 Mother`s Day in like 14 hours or so,well off 2 bed...cant wait 2 party 4 mother`s day in like 14 hours or so,positive,well off 2 bed...cant wait 2 party 4 mother`s day in like 14 hours or so
@@ -979,7 +979,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753416785,Bout to hit the sack...got **** to do tomorrow. Happy mothers day MOM!,happy,positive,happy
 1753418693, (RE:'your joint w/  is crazy!!') Thx    Hey Trax heard a 49er rear ended you??,) thx,positive,) thx
 1753433812,And thanks for the gorgeous flowers.,thanks for the gorgeous flowers.,positive,thanks for the gorgeous flowers.
-1753433969,"  very sweet!!! HAHA. I am like super proud to be a new mom!!! I feel like, i got the PERFECT daughter. And i am a GREAT mom!!!", very sweet!!! haha. i am like super proud,positive, very sweet!!! haha. i am like super proud
+1753433969,"  very sweet!!! HAHA. I am like super proud to be a new mom!!! I feel like, i got the PERFECT daughter. And i am a GREAT mom!!!",r proud,positive,r proud
 1753434766, FOLLOW ME BABY U SAID N DA CHAT U WILL  LUV YA GOODNITE,  luv ya goodnite,positive,  luv ya goodnite
 1753449321,at    Happy mother`s dayyy Deniseee <3,   happ,positive,   happ
 1753449982,"church bellss are ringin  got to go. adieu,(god bless in german)",(god bless,positive,(god bless
@@ -996,7 +996,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753498095, Are y`all coming out today??? We could go to the graveyard!!  HOORAYY!!!!!,  hoorayy!,positive,  hoorayy!
 1753498555,Yet another good weekend with someone. Sigh. Man I like the boy..,good,positive,good
 1753501002,_ PrintChick thx for sharen LUV IT,thx for sharen luv it,positive,thx for sharen luv it
-1753518337, http://twitpic.com/4so0u - OOO i wish i was her  he`s hot, wish i was her  he`s hot,positive, wish i was her  he`s hot
+1753518337, http://twitpic.com/4so0u - OOO i wish i was her  he`s hot, wish,positive, wish
 1753518557,LOVE ME LOVE ME SAY THAT YOU LOVE ME...,love,positive,love
 1753519127,"happy mothers day mommy  i love you so much, dono what id do without you ??",happy,positive,happy
 1753531847,"yep, good morning to you all  or night or evening or whatever xD",good,positive,good
@@ -1020,7 +1020,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753566139,munchin BACON BUTTIES! woohoo!!  my faves!!!, faves!!!,positive, faves!!!
 1753566977, rofl that`s what we like to hear, like to hear,positive, like to hear
 1753568060,misses my Mom today. She was my Best Friend and even though she has been gone several yrs I still miss her dearly. Happy Mother`s Day,happy mother`s day,positive,happy mother`s day
-1753568258,"I love waking up and thinking it`s a weekday, but then realizing it`s the weekend.",i love,positive,i love
+1753568258,"I love waking up and thinking it`s a weekday, but then realizing it`s the weekend.",love,positive,love
 1753568643, Happy Mothers Day,happy,positive,happy
 1753568701,"Perfect night. Best month of my life so far!! You my boo, ",perfect,positive,perfect
 1753582585," love this one, especially the shoes  anyway, gmn punya acc lookbook ya? http://lookbook.nu/look/92920",love,positive,love
@@ -1038,7 +1038,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753617473, oh and twas my very brilliant idea if I do say so myself  what can I say i`m an ideas woman, brilliant,positive, brilliant
 1753617629,Happy mothers day mom  ?,happy,positive,happy
 1753617642,had nutella croissant+mango+melon+coffee and a lovely stalk of iris for breakfast in bed courtesy of N  Have the house to myself til noon,lovely,positive,lovely
-1753617741," Aww, thank you Soulmate! Haha.", thank you soulmate! haha.,positive, thank you soulmate! haha.
+1753617741," Aww, thank you Soulmate! Haha.","aww, thank you soulmate! haha.",positive,"aww, thank you soulmate! haha."
 1753617924, Happy Mothers Day,happy,positive,happy
 1753618411,Listening `Hallelujah` on Youtube. Leonard Cohen wins.  #xfactor,wins.,positive,wins.
 1753632411,Just got back from Kuantan Had sooooooo much FUN,fun,positive,fun
@@ -1076,7 +1076,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1753757063," oh, that is very nice!! I will do something nice next week ~ going to Madrid next weekend for few days", nice!!,positive, nice!!
 1753757494,"Good morning, to all the mommies happy mothers day.  Now I am off the pull the cats tail.  I know she likes it",happy,positive,happy
 1753757945, http://twitpic.com/4vuuy - That`s so cool., that`s so cool.,positive, that`s so cool.
-1753758014," well, as i mother & grandma i am a bit in a kidding mode", kidding mode,positive, kidding mode
+1753758014," well, as i mother & grandma i am a bit in a kidding mode", kidding,positive, kidding
 1753759463, Congrats to Howie! I hope you bring little James to germany soon  Wish you all the best for your family!,congrats,positive,congrats
 1753759918,http://twitpic.com/4wtii - new hair going to greeattt use!,greeattt use!,positive,greeattt use!
 1753760086,YES! I DONE IT! at last.  my homework is ready dx and i can go waaalkiiing because the sun is shining ^^ oh yeah.,yes! i done it! at last. my homework is ready dx and i can go waaalkiiing because the sun is shining ^^ oh yeah.,positive,yes! i done it! at last. my homework is ready dx and i can go waaalkiiing because the sun is shining ^^ oh yeah.
@@ -1172,16 +1172,16 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1957241621,I still miss him... And i dont think he`s coming back,miss,negative,miss
 1957246312,My throat hurts and I can`t sleep.,hurts,negative,hurts
 1957252543, I`m straining to hear but it`s very hard from all the way over here., hard,negative, hard
-1957264644,tiiiired but i cant sleep,tiiiired but i cant sleep,negative,tiiiired but i cant sleep
+1957264644,tiiiired but i cant sleep,tiiiired,negative,tiiiired
 1957268164,very very bad headache that is getting worse by the minute not better.,very very bad,negative,very very bad
 1957270955,is tired of summer already,tired,negative,tired
 1957271130,feels really sick.,feels really sick.,negative,feels really sick.
 1957271323,Why am I having such a hard time falling asleep,hard,negative,hard
 1957273826,Dying to get my hands on the Diagnosis Murder DVD boxset but those pesky kids at Amazon still won`t deliver to Zimbabwe,pesky,negative,pesky
-1957276719,Their songs make me want to cry..,their songs make me want to cry..,negative,their songs make me want to cry..
+1957276719,Their songs make me want to cry..,cry..,negative,cry..
 1957284838,_**** cheer up lizzi there will b another foh hero concert   but still i suppose we can b upset  xoxoxo,b upset,negative,b upset
 1957292899,@_shannon1234 Shannie im so sorry! didnt mean to upset you! i just thought you would find it cute  im sorry dont be sad!,im so sorry!,negative,im so sorry!
-1957298715,jessie has gone away 4 the weekend!! I miss her already,i miss,negative,i miss
+1957298715,jessie has gone away 4 the weekend!! I miss her already,miss,negative,miss
 1957305086,OMG sore shoulder,sore,negative,sore
 1957316549,crash in Qmbol,crash,negative,crash
 1957331325,Only 1 tweet in the last 24 hours?  Nobody likes my tweetboard, nobody likes,negative, nobody likes
@@ -1214,7 +1214,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1957464811,Bout to knock out. Feelin a lil sick  peace y`all,sick,negative,sick
 1957467675,with hubby at the dentist ready to hold his hand  and getting nervy about potentially buying a car tomorrow, nervy,negative, nervy
 1957474049,So many farewell parties! sad to see people leaving ..,sad,negative,sad
-1957475168,5500 words and counting.  My hands hurt, my hands hurt,negative, my hands hurt
+1957475168,5500 words and counting.  My hands hurt, hurt,negative, hurt
 1957483566,"  hey, is your site down? I was going to listen to the web stream but can`t get to the site...",t can`t get to the site...,negative,t can`t get to the site...
 1957484797,playing bejewled on facebook.. **** it i want a higherscore!,**** it,negative,**** it
 1957485760,Have to sell my car. It`s costing me too much. Can now afford one rollerskate. Bye bye petey,it`s costing me too much.,negative,it`s costing me too much.
@@ -1244,7 +1244,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1957602754,"nothing could get worse, or could it? if it did i think id be on the verge of killing myself or someone else, things are not good anymore",things are not good anymore,negative,things are not good anymore
 1957604493, Aw it says the pic doesn`t exist anymore,aw it says the pic doesn`t exist anymore,negative,aw it says the pic doesn`t exist anymore
 1957607620,All of a sudden I`m craving broccoli and cheese soup really bad... my mouth is watering envisioning a bread bowl in my head...,bad..,negative,bad..
-1957613033,Start of diet today  I think I have to face I will never get back down to 77kilos (unless I cut a leg off)ï¿½,start of diet today i think i have to face i will never get back down to 77kilos (unless i cut a leg off)ï¿½,negative,start of diet today i think i have to face i will never get back down to 77kilos (unless i cut a leg off)ï¿½
+1957613033,Start of diet today  I think I have to face I will never get back down to 77kilos (unless I cut a leg off)ï¿½, i will never get back down to 77kilos (unless i cut a leg off)ï¿½,negative, i will never get back down to 77kilos (unless i cut a leg off)ï¿½
 1957618813,i miss the Soulja Boy dance...,miss,negative,miss
 1957632370,sick n tired of people who steal other people`s work,sick n tired,negative,sick n tired
 1957633103, I miss you terribly,i miss you terribly,negative,i miss you terribly
@@ -1325,7 +1325,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1960506460, unfortunately I didn`t leave the house in time,unfortunately,negative,unfortunately
 1960534160,Might have broken text messages.,broken,negative,broken
 1960554738, I`ve been sat sunbathing in the bombed out church all day and left and missed you, missed you,negative, missed you
-1960556773," you`re a busy Bob, I`m jealous. I`m not sure I can even afford to go meet John de Lancie and Leonard Nimoy", i`m jealous.,negative, i`m jealous.
+1960556773," you`re a busy Bob, I`m jealous. I`m not sure I can even afford to go meet John de Lancie and Leonard Nimoy", jealous.,negative, jealous.
 1960567815,PSA::::: Being that I`ve been usuing twiddict- my last 14 tweets have yet to show on the bored. Bare w me.,bored.,negative,bored.
 1960576502," Oh, final msg - Why didn`t you review my boardgame Bookchaseï¿½ when you were on telly? We didn`t even get a nice letter..", we didn`t even get a nice letter..,negative, we didn`t even get a nice letter..
 1960584783, well piss on that. I can`t get into their site @ work nor does it come thru on my phone., piss,negative, piss
@@ -1333,12 +1333,12 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1960591132,It`s a bad start to the day when you`re sweating your butt off before 0930 at the range,bad,negative,bad
 1960603153,"Allergies  sun is out, wearing shorts.  Stuck with my advisory the whole day.... This should be boring. Except fun. If people make it fun?",e boring.,negative,e boring.
 1960603390,"Working... And attempting to keep squirrels away.............. Squirels 1, jesska 0   I should stick to spiders",  i should stick to spiders,negative,  i should stick to spiders
-1960626434,The lab informs me the logic board is dead as well. It is farking expensive to replace. I don`t know what to do.  #MyPowerBookG4RIP,dead as well. it is farking expensive to replace. i don`t know what to do.,negative,dead as well. it is farking expensive to replace. i don`t know what to do.
+1960626434,The lab informs me the logic board is dead as well. It is farking expensive to replace. I don`t know what to do.  #MyPowerBookG4RIP,dead as well.,negative,dead as well.
 1960626773,"_The_Moon Hiya hun! It`s just not my day. Dentist appointment (ouch!),notebook being a ****. Feeling sick  How`s you?",feeling sick,negative,feeling sick
 1960632121,"oh kasa, please lose the hair do",lose,negative,lose
 1960661455,Missing my mom today. We made it a 'date' every year to get our flowers together. This yr I was alone. Felt so weird,missing my mom today. we made it a 'date' every year to get our flowers together. this yr i was alone. felt so weird,negative,missing my mom today. we made it a 'date' every year to get our flowers together. this yr i was alone. felt so weird
 1960706810, i am so sorry,i am so sorry,negative,i am so sorry
-1960716755,I`m very conflicted here.  I really like Mike but I still have feelings for Darrin.  It`s really complicated.  I don`t know what to do.,i`m very conflicted,negative,i`m very conflicted
+1960716755,I`m very conflicted here.  I really like Mike but I still have feelings for Darrin.  It`s really complicated.  I don`t know what to do.,conflicted,negative,conflicted
 1960750680," Though it was a cold that would go away, turns out it`s a sinus infection that just keeps getting worse and worse by the day.", worse and worse by the day.,negative, worse and worse by the day.
 1960751420,Jesus Christ meadowhall could do with better air con! Too hot,too hot,negative,too hot
 1960752950,bye LA... I already miss you,miss you,negative,miss you
@@ -1361,7 +1361,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1961002608," My eyes are starting to hurt. So late. But must reach 200 updates due to tweets sent to youuuu! Philippines tour, pleeease?", hurt.,negative, hurt.
 1961034908,  sad face., sad,negative, sad
 1961047643,"   Awww, that wasn`t very nice.","  awww, that wasn`t very nice.",negative,"  awww, that wasn`t very nice."
-1961049714,_uk  o2 - train from Bristol to London. It`s terrible - and no wifi, it`s terrible,negative, it`s terrible
+1961049714,_uk  o2 - train from Bristol to London. It`s terrible - and no wifi, terrible,negative, terrible
 1961067685,_WOCKEEZ I`m missin u guys by a day!! Ill b there tomorrow  butttt see u june 18th with the blockkkkk!!!!,missin,negative,missin
 1961078703,just thought about how unfair 3 ppl have been 2 me n got depressed again  HATERS!!!,depressed,negative,depressed
 1961080590, Nooooo!  Working this weekend,nooooo!,negative,nooooo!
@@ -1390,9 +1390,9 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1961194683,**** awake at 2 am !  i hate sickness, i hate sickness,negative, i hate sickness
 1961195969,Pulled in all directions and not knowing where to go,not knowing where to go,negative,not knowing where to go
 1961215362,Straighening my hair and its not going as straight as i want it to be what a  bummerrr for me, bummerrr for me,negative, bummerrr for me
-1961217929,Aaaaahhhh.... Friday!!!! but.......     Funeral at 5,aaaaahhhh.,negative,aaaaahhhh.
+1961217929,Aaaaahhhh.... Friday!!!! but.......     Funeral at 5,aaaaahhhh..,negative,aaaaahhhh..
 1961224347,Its seriously quiet and lonely here without Bunny,lonely,negative,lonely
-1961227194,Ugh i hate not having my car!! i miss you my little ford focus!!!,ugh i hate,negative,ugh i hate
+1961227194,Ugh i hate not having my car!! i miss you my little ford focus!!!,hate,negative,hate
 1961227894, hmmm really??? that`s weird idk about that one  sowwy, weird,negative, weird
 1961238151,i`m getting ready for tonight (teachers dinner on the beach!) but it`s raining and i hate this!,i hate this!,negative,i hate this!
 1961243837,why is it so **** cold ??!,**** cold ??!,negative,**** cold ??!
@@ -1415,7 +1415,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1961426774,"Oh god, a moth was living in a **** power outlet!  (Actually, my PowerSquid.)","oh god, a moth was living in a ****",negative,"oh god, a moth was living in a ****"
 1961433056,sucks that i don`t have a drawing tablet!,sucks,negative,sucks
 1961433178,want to see him so badly,badly,negative,badly
-1961434407,Truly sad... My cheap little camcorder just shot craps.....,sad...,negative,sad...
+1961434407,Truly sad... My cheap little camcorder just shot craps.....,sad..,negative,sad..
 1961437632,"a guy called me AD-HD kid earlier today, and that hurts",hurts,negative,hurts
 1961452439,Blah to car repairs... almost 600 dollars...   Shopping around for a better deal.,blah,negative,blah
 1961456343," Ian and I are going to a matinee tomorrow, or that`s the plan at least...it`s going to be too expensive for 3d at night", too expensive,negative, too expensive
@@ -1426,7 +1426,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1961478807,it makes me sad when people phones are sick,sad,negative,sad
 1961480778, im following you! im following you! im sorry!  ahhahah i missed you!, im sorry!,negative, im sorry!
 1961500898,its freezing cold! i cant function right in this type of weather. starving to the max,i cant function right in this type of weather. starving to the max,negative,i cant function right in this type of weather. starving to the max
-1961503128,tweeting from ally court for the last time.... its a sad sad moment,sad sad moment,negative,sad sad moment
+1961503128,tweeting from ally court for the last time.... its a sad sad moment,its a sad sad moment,negative,its a sad sad moment
 1961517164,My cankle is sore.,sore.,negative,sore.
 1961519131,    GRR! my stupid meebo is disconnecting me every 5 seconds, my stup,negative, my stup
 1961522147,"the neighborhood gas station is gone, kaput, out of business. No more convenient trips for ice or whatevs. over 3 miles now to travel..","gone, kaput,",negative,"gone, kaput,"
@@ -1469,7 +1469,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1961964729,This morning I rode behind a guy with a bird cage containing a plastic Tyrannosaurus rex attached to his bicycle. I couldn`t get a photo.,i couldn`t get a photo.,negative,i couldn`t get a photo.
 1961966569,Sad that david is leaving tomoro. for a week.,sad,negative,sad
 1961970941,not at all happy...dont know what the reason is,not at all happy..,negative,not at all happy..
-1962018757, Yes I think so unless it changed.  I sent u a happy mothers day text but u never responded back,t u never responded back,negative,t u never responded back
+1962018757, Yes I think so unless it changed.  I sent u a happy mothers day text but u never responded back,t but u never responded back,negative,t but u never responded back
 1962108279," haha yea, i just feel like its being taken the wrong direction, used to be a cool place, now its a mess", mess,negative, mess
 1962142867, it because your handwriting isnt on any of them. and everyone is making fun of me because im sitting by myseld in the lrc, fun of me,negative, fun of me
 1962147403,_beag     I hate cat pee.,  i ha,negative,  i ha
@@ -1528,7 +1528,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1962651071, a steak burrito bowl right! I wish I wasn`t too lazy to go downtown, lazy,negative, lazy
 1962652280, i dont like #kde since ver. 4.0 its like vista  #fail,i dont like #kde since ver. 4.0 its like vista #fail,negative,i dont like #kde since ver. 4.0 its like vista #fail
 1962653254,My tummy hurts,hurts,negative,hurts
-1962654726, still not 100%    im sick of being sick!, im sick of being sic,negative, im sick of being sic
+1962654726, still not 100%    im sick of being sick!,    im sick of being sic,negative,    im sick of being sic
 1962660224,lost my DC hat ..,lost,negative,lost
 1962695175,"Guess I`m gonna try the nap thing again 2day, but since my kids haven`t cooperated with it yet this week I`m sure 2day won`t be different",since my kids haven`t cooperated with it yet this week i`m sure 2day won`t be different,negative,since my kids haven`t cooperated with it yet this week i`m sure 2day won`t be different
 1962712694,eating my roommate`s cereal. sorry bro,sorry,negative,sorry
@@ -1598,7 +1598,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1963156635,"At every gas station, I look for postcards for   No luck.",  no luck.,negative,  no luck.
 1963157199,  that sucks, that sucks,negative, that sucks
 1963157363,ugh! nothing to do in the valley  Seriously gotta move out of here!!!,ugh!,negative,ugh!
-1963165023," (2) in commentary  , I was with her, was sad, very sad","s sad, very sad",negative,"s sad, very sad"
+1963165023," (2) in commentary  , I was with her, was sad, very sad",", was sad, very sad",negative,", was sad, very sad"
 1963175434,I wish I could twitter from the BOOK EXPO but the reception at the Javitz is horrible....,horrible....,negative,horrible....
 1963179332,someone doesn`t feel good...,someone doesn`t feel good...,negative,someone doesn`t feel good...
 1963198399," ****, i dont have 2 work saturday, & i was suppose 2 hang out with my friend & watch it. we can still hang out but no JONAS =","****,",negative,"****,"
@@ -1610,7 +1610,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1963229336,My Birthday weekend! cant find where my ex hid our DANE COOK TICKETS for tomorrow!!! WTF that`s all i wanted for my birthday,wtf,negative,wtf
 1963271422,looks like we`re rained out for weekend climbing,rained out,negative,rained out
 1963295507,My comp is being slo w,slo w,negative,slo w
-1963296289,"28deg C in here, all this tech in my room does have the major downside of a lot of heat, doesn`t help its hot outside 2","28deg c in here, all this tech in my room does have the major downside of a lot of heat, doesn`t help its hot outside 2",negative,"28deg c in here, all this tech in my room does have the major downside of a lot of heat, doesn`t help its hot outside 2"
+1963296289,"28deg C in here, all this tech in my room does have the major downside of a lot of heat, doesn`t help its hot outside 2",doesn`t help its hot outside 2,negative,doesn`t help its hot outside 2
 1963305108,Babysitting in the sun and heat. I`m getting lots of freckles,i`m getting lots of freckles,negative,i`m getting lots of freckles
 1963307029,all alone for the weekend!,all alone,negative,all alone
 1963344272,this is absurd ! I feel like a dipping in the pool real quick . its too bad i dont have a poool,this is absurd !,negative,this is absurd !
@@ -1635,13 +1635,13 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1963474741, I can`t go to the grocery store on an empty stomach. That`s trouble! I wanna see ur show but not sure ill get to  let u kno, trouble!,negative, trouble!
 1963475475,no internet for a week or longer,no internet for a week or longer,negative,no internet for a week or longer
 1963482799,Cut my thumb with the saw in small metals   again...,cut my thumb with the saw in small metals again...,negative,cut my thumb with the saw in small metals again...
-1963496176,I`m dreading hearing even worse news tonight,i`m dreading,negative,i`m dreading
+1963496176,I`m dreading hearing even worse news tonight,dreading,negative,dreading
 1963501395,"Oh..Summer begins..yay..  The fighting, Crying and stress has started with the kids..It`s only been 3 hrs since they got out.", stress,negative, stress
 1963502727,_Hodges Yup. Their loss.,loss.,negative,loss.
 1963516439,ahhh i think my legs are burnt  they hurt, hurt,negative, hurt
 1963521132,Bad week for connectivity...Arlington Panera wifi sucks. Maybe head to Legal Seafoods at airport. Dang...missing Metaverse U stream.,bad week for connectivity...arlington panera wifi sucks.,negative,bad week for connectivity...arlington panera wifi sucks.
 1963524251, not happy,not happy,negative,not happy
-1963531201,"  How vile are people, they have to remove things that have a value","w vile are people,",negative,"w vile are people,"
+1963531201,"  How vile are people, they have to remove things that have a value"," how vile are people,",negative," how vile are people,"
 1963553113,watching Army Wives and it always makes me cry,cry,negative,cry
 1963565636,omfg. one of the worst days ever!,worst,negative,worst
 1963566188,Not happy,not happy,negative,not happy
@@ -1670,9 +1670,9 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1963710608, srry im not so interesting right now... stayed up til 6am cause my tummy hurt and now im pooped and have to work, hurt,negative, hurt
 1963720997,"Brian (cat) still hasn`t shown up...I feel sad and sick, I`m afraid he`s been eaten by something.    It doesn`t look  good","i feel sad and sick,",negative,"i feel sad and sick,"
 1963722413,Excitement: 8 new followers overnight. Sadness: 6 of them are ad bots.,sadness:,negative,sadness:
-1963723124,_89 I feel so sorry for her  hope she dnt cry 2nd time,i feel so sorry,negative,i feel so sorry
+1963723124,_89 I feel so sorry for her  hope she dnt cry 2nd time,sorry,negative,sorry
 1963723323,NCAA Baseball Road 2 Omaha: South Carolina just hit a 3-run homerun. Dagger 2 my heart.    Mason 1 - South Carolina 3..,dagger 2 my heart.,negative,dagger 2 my heart.
-1963729133, that made me cry  poor hollie ****, cry  poor hollie ****,negative, cry  poor hollie ****
+1963729133, that made me cry  poor hollie ****, cry,negative, cry
 1963748798," I forgot that was tonight! Was planning on heading down to the Cask, that might not be such a good idea", that might not be such a good idea,negative, that might not be such a good idea
 1963750425,"that little girl on BGT  omggg, how can people not feel sorry for her?", sorry,negative, sorry
 1963750533,grrr hate when i make careless mistakes on docs i give to my partner,hate,negative,hate
@@ -1707,7 +1707,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1964053324,Oh no!!!!! It`s raining on our Sea World parade  http://yfrog.com/0wvnpj,oh no!!!!!,negative,oh no!!!!!
 1964053983,dammit.  I need new cupcake tins,dammit.,negative,dammit.
 1964057687, lol exams i didn`t go to mcast or other school i finished form 5 and that`s it soo disappointed in myself, disappointed,negative, disappointed
-1964092643, Im sad i cant go. it makes me sad,im sad,negative,im sad
+1964092643, Im sad i cant go. it makes me sad, sad,negative, sad
 1964097295,Sooo the Children`s Museum was closed for a fund raiser when we got there.  annoying, annoying,negative, annoying
 1964120552,_law_rence &  WHY?! my head feels like the surface of the sun  underneath a beaver pelt., my head feels like the surface of the sun  underneath a beaver pelt.,negative, my head feels like the surface of the sun  underneath a beaver pelt.
 1964122852,bad mood and i dont feel good. too bad no one cares,bad,negative,bad
@@ -1724,7 +1724,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1964331523,Under sooooo much stress lately,under sooooo much stress lately,negative,under sooooo much stress lately
 1964365251, i guess you get loads of emails & people asking you stuff al the time but i seriously wonder if you ever read my comments  x, i seriously wonder,negative, i seriously wonder
 1964366087,My fingers hurt,hurt,negative,hurt
-1964371804,http://twitpic.com/67i90 - My plans have been ruined,my plans have been ruined,negative,my plans have been ruined
+1964371804,http://twitpic.com/67i90 - My plans have been ruined,ruined,negative,ruined
 1964385754,Wish I had a laptop charger so I could tweet faster,wish i had a laptop charger so i could tweet faster,negative,wish i had a laptop charger so i could tweet faster
 1964396447,Whuuurrrrr - glands really swollen now. Guess the weekend`s a blow out.,whuuurrrrr - glands really swollen,negative,whuuurrrrr - glands really swollen
 1964449991,"Feeling awful, new medication is making me nauseous","feeling awful,",negative,"feeling awful,"
@@ -1776,17 +1776,17 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1964868310,i`m sad...i`ll miss you grandma angie.. you were always like a 3rd grandma to me..,i`m sad..,negative,i`m sad..
 1964872630,"i cant believe that its already friday! omg, what had i done?!",i cant believe,negative,i cant believe
 1964872714,hello..aint been tweetin all day cuz i had 2 switch things over 2 da new place. (exhausted and sick),exhausted and sick),negative,exhausted and sick)
-1964873790,I have the biggest headache ever. My photosensitivity is getting OUT OF CONTROL!! Help.,i have the biggest headache,negative,i have the biggest headache
+1964873790,I have the biggest headache ever. My photosensitivity is getting OUT OF CONTROL!! Help.,headache,negative,headache
 1964873841,misses Nanny.,misses,negative,misses
 1964887360," I need botox work on the lips if I`m going to change my name to Angelina Jolie, but it`s a thought! Sad though about the racism", sad,negative, sad
 1964890465,Not feeling all that well today,not feeling all that well today,negative,not feeling all that well today
 1964893530,my day has been so crappy that i just want to cry.,crappy,negative,crappy
-1964946060,its too hot in my room. i wanna go swimming.,its too hot,negative,its too hot
+1964946060,its too hot in my room. i wanna go swimming.,too hot,negative,too hot
 1964948597,Ugh. My feet feel like they`re going to fall off.,ugh.,negative,ugh.
 1964950585,"tired as heck, i wanna go home and sleep but i cant cause im have to be at the wash till my daddy gets off work.","tired as heck,",negative,"tired as heck,"
-1964965917,"i`m sunburnt on my arms, and i have burnt my mouth, and some skin is coming off",burnt,negative,burnt
+1964965917,"i`m sunburnt on my arms, and i have burnt my mouth, and some skin is coming off",i`m sunburnt,negative,i`m sunburnt
 1964967952," Sadly, I can`t view that site due to region restrictions","sadly,",negative,"sadly,"
-1964970112,Its coming out the socket  I feel like my phones hole is not a virgin. That`s how loose it is... :`(, that`s how loose,negative, that`s how loose
+1964970112,Its coming out the socket  I feel like my phones hole is not a virgin. That`s how loose it is... :`(, loose,negative, loose
 1964992152,"owww, back pain  hm, walmart or no? i could get cupcakes~","owww, back pain",negative,"owww, back pain"
 1964992479,"i think my cold is getting worse, not better!!  i cant stop coughing - it really sucks!!", sucks!!,negative, sucks!!
 1965009423,They wouldn`t reverse any of my overdraft fees.,they wouldn`t reverse any of my overdraft fees.,negative,they wouldn`t reverse any of my overdraft fees.
@@ -1795,7 +1795,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1965097763,"bored bored bored! wish i had something to do tomorrow, especially with the weather we`re to have!  not fair", not fair,negative, not fair
 1965097888," Sorry Mike, was assuming it was music that was missing..I don`t know then.. a mystery..",sorry,negative,sorry
 1965212590,i`m oh so very bored!  buut.. almost 2 days til i leave for france!,bored!,negative,bored!
-1965215143," OI, are you mocking the fact I dont cry at tv things?!  *Feels bad*xxx",s bad,negative,s bad
+1965215143," OI, are you mocking the fact I dont cry at tv things?!  *Feels bad*xxx",  *feels bad,negative,  *feels bad
 1965219511,One of the most random phone calls ever. My god kill me now.,kill me now.,negative,kill me now.
 1965249853, ****. You could have just called or told me in person. You didn`t have to humiliate me in front of the whole twitterverse.,****.,negative,****.
 1965250714, aww that sounds sad, sad,negative, sad
@@ -1825,7 +1825,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1965425688,There is ALWAYS one JOYKILL in the crowd!    haters!,   haters,negative,   haters
 1965428439,playing at my old school playground still the same except them lame **** got rid of the tire swing,lame,negative,lame
 1965430276, unfortunately I`m not drunk enough lol and have no money to get drunk  I have had alot though as u can imagine haha,unfortunately,negative,unfortunately
-1965430822," 'You guys could have fun in a cardboard box'.. I miss you already, bro.", miss,negative, miss
+1965430822," 'You guys could have fun in a cardboard box'.. I miss you already, bro.", i miss,negative, i miss
 1965439876," I talked to Kat, that is crappy", crappy,negative, crappy
 1965440570, sadface,sadface,negative,sadface
 1965449463,18 hours to work....*cry* i can`t survive!  // Weeelcome to my wonderland *sing along*,i can`t survive!,negative,i can`t survive!
@@ -1841,7 +1841,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1965512162,Sunburn is really bad now. Regretting sitting in the sun without suncream now,bad,negative,bad
 1965516640, oh that looks boring  and even more boring you have an exam on a saturday, boring,negative, boring
 1965542801,My net died so yeah....  I`m sad now, i`m sad,negative, i`m sad
-1965555727, she forgot her words and then started crying  and she stopped singing but then carried on and then cried again so she stopped, forgot her words and then started crying  and she stopped singing but then carried on and then cried again so she stopped,negative, forgot her words and then started crying  and she stopped singing but then carried on and then cried again so she stopped
+1965555727, she forgot her words and then started crying  and she stopped singing but then carried on and then cried again so she stopped, forgot,negative, forgot
 1965557233,hey guys y did the sun make my day gloomy?,gloomy?,negative,gloomy?
 1965571738,Why did everyone seem to leave me this weekend  ....sigh. In bed,.sigh.,negative,.sigh.
 1965578558, D: But it is making people unhappy and I dun like unhappiness, unhappy,negative, unhappy
@@ -1852,11 +1852,11 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1965657704,getting ready to see my cousins graduate.  gonna miss em., miss,negative, miss
 1965671333,sad ending to the softball season.,sad,negative,sad
 1965673996,_John Sounds like a terrific service. I`m sorry to hear about her mom.,sorry,negative,sorry
-1965684631,seagull hates me and im utterly depressed about it. i miss him.,hates me and im utterly depressed about it. i miss him.,negative,hates me and im utterly depressed about it. i miss him.
+1965684631,seagull hates me and im utterly depressed about it. i miss him.,seagull hates me and im utterly depressed about it. i miss him.,negative,seagull hates me and im utterly depressed about it. i miss him.
 1965685020,Idk i cant do ****,****,negative,****
 1965689651,wonders if anyone would care if she died tomorrow,wonders if anyone would care if she died tomorrow,negative,wonders if anyone would care if she died tomorrow
 1965697388,  do it at like like 9 causeee im babysitting haha or you should call me causeee im kinda bored right now,a bored,negative,a bored
-1965723520, Oh no....Sorry to hear that ....,.sorry,negative,.sorry
+1965723520, Oh no....Sorry to hear that ....,..sorry,negative,..sorry
 1965724779,I hve a blister on my pinky nd it hurts soooo much!,hurts soooo much!,negative,hurts soooo much!
 1965726238,Stupid storm. No river for us tonight,stupid,negative,stupid
 1965738630, Sorry - I have failed to grasp your meaning,sorry,negative,sorry
@@ -1962,7 +1962,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1966338978, Sadly I think I know exactly were you put it--in the expired drawer   Those things have a life span of less than two years,sadly,negative,sadly
 1966346870, bahah sadly I am not, sadly,negative, sadly
 1966350244, this is the worst, worst,negative, worst
-1966353075,  so what was said??  I`m so bummed I missed it!.  *sigh* I want to go to california,so bumme,negative,so bumme
+1966353075,  so what was said??  I`m so bummed I missed it!.  *sigh* I want to go to california,?  i`m so bumme,negative,?  i`m so bumme
 1966357472," You know I am so ashamed. I did not watch a single episode of the new GH season.  I kept falling asleep, so I gave up.", ashamed.,negative, ashamed.
 1966401983,"Well, looks like it is going to be another night without my snuggle bug  Missing my Big Girl.", missing,negative, missing
 1966412179,just took my shirt off and my back is COVERED in blisters  http://bit.ly/vUiXG,covered in blisters,negative,covered in blisters
@@ -1990,7 +1990,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694568114, got ya - that wouldn`t be so bad tho right?, bad,negative, bad
 1694568930, my bad homie, bad,negative, bad
 1694588952,": hmmm, wrong link, ignore my tweet","wrong link, ignore my tweet",negative,"wrong link, ignore my tweet"
-1694628019, Internet 1 drawing 0 ....**** I`m backing up blackberry files which could take hours  then to the drawing preps done,.**** i`m backing up blackberry files which could take hours,negative,.**** i`m backing up blackberry files which could take hours
+1694628019, Internet 1 drawing 0 ....**** I`m backing up blackberry files which could take hours  then to the drawing preps done,..**** i`m backing up blackberry files which could take hours,negative,..**** i`m backing up blackberry files which could take hours
 1694663842," I`m mo nudge you again, better watch out!", better watch out!,negative, better watch out!
 1694767572,My Life Would Suck Without You - Kelly Clarkson,suck,negative,suck
 1694770883,rearry rip. Youd never guess what i ate..,rearry rip.,negative,rearry rip.
@@ -1998,7 +1998,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1694905755,"sorry  I misspelled twice already. Im notgiving you up, just have to run  ? http://blip.fm/~5jjxr",sorry,negative,sorry
 1694976875, it`s trashy and sensationalist...so yes, trashy,negative, trashy
 1694977678, Perhaps they see it as the twitter version of pulling someone`s pigtails? Let me know if that works out for you., let me know if that works out for you.,negative, let me know if that works out for you.
-1695001346," Lol - I could try!  Seriously tho, dont do all of it! That sucks! ****",t sucks!,negative,t sucks!
+1695001346," Lol - I could try!  Seriously tho, dont do all of it! That sucks! ****",! that sucks!,negative,! that sucks!
 1695001498, you are lame  go make me breakfast!!, lame,negative, lame
 1695030069, Skinny dipping with work colleagues?!  Maybe not.  I`d never live it down with this lot!,.  i`d never live it down with this lot,negative,.  i`d never live it down with this lot
 1695081038,is pretty dang tired. but chambers class is for napping.,tired.,negative,tired.
@@ -2032,7 +2032,7 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1750893942,I honestly hate what I have said to some ppl sometimes. sorry for makin an **** of myself to anyone.,hate,negative,hate
 1750894676, you`re alive!!!!!!  Go w/ The Notebook...it`ll make you cry and stuff,u cry,negative,u cry
 1750928145,Kinda doing nothing. Life is boring. I feel like changing my look. Let`s go shopping tomorrow,boring.,negative,boring.
-1750930421,"twitter fam, i`m about to hop back on AIM i went ghost on y`all lolz sowwy",ghost on y`all lolz sowwy,negative,ghost on y`all lolz sowwy
+1750930421,"twitter fam, i`m about to hop back on AIM i went ghost on y`all lolz sowwy",ghost,negative,ghost
 1750997738,"I`m in VA for the weekend, my youngest son turns 2 tomorrow......it makes me kinda sad, he is getting so big, check out my twipics","sad,",negative,"sad,"
 1751001174," the problem is, superstars always deliver huge files! too much energy pixels", problem,negative, problem
 1751036552,I should have know that 'extra hand' comment would cause trouble...  About to upload House Music and Beyond Vol. 3,trouble..,negative,trouble..
@@ -2082,18 +2082,18 @@ textID,text,selected_text,sentiment,cleaned_selected_text
 1752943449,my gawwddd ! 6 headshotss inna row? im on fyaaahhh!,my gawwddd ! 6 headshotss inna row? im on fyaaahhh!,negative,my gawwddd ! 6 headshotss inna row? im on fyaaahhh!
 1753006903,"Grinding Skyguard rep. This is less awful than I anticipated. Yet, still awful. Last tabard I need","this is less awful than i anticipated. yet, still awful.",negative,"this is less awful than i anticipated. yet, still awful."
 1753007002,the voter paint just peeled off my skin. or maybe my skin just peeled off with the voter paint,peeled,negative,peeled
-1753007659, Yeah  The entire time I was all *swoon* b/c of his eyes..... *swoons thinking about it*,yeah the entire time i was all *swoon*,negative,yeah the entire time i was all *swoon*
-1753028962,"  Yes,... I blame you all",i blame,negative,i blame
+1753007659, Yeah  The entire time I was all *swoon* b/c of his eyes..... *swoons thinking about it*,l *swoon*,negative,l *swoon*
+1753028962,"  Yes,... I blame you all",. i blame,negative,. i blame
 1753074520,i dont know why i follow sme of the ppl that i do... they e anoying and boring. * note to self -unfollow peeps on monday morning,boring.,negative,boring.
 1753115514, http://twitpic.com/4wh5x - LUCKY! I`m so jealous even though I don`t like her that much, jealous,negative, jealous
 1753235119," Yes, but I`m quite rusty.  I`m hoping to get back to it and 'tune up' my skills.  Tim plays guitar.  We threaten duets.", rusty.,negative, rusty.
 1753255434, I hope you didn`t take that quote personally!! I`ve been throwing them out here and there all day-guess I shoulda waited a bit,i hope you didn`t take that quote personally!!,negative,i hope you didn`t take that quote personally!!
 1753255533,forcing myself to watch the movie 1984 for my book report  im lazy to read, lazy,negative, lazy
-1753256372,"No phone call yett... Hrmm. Maybe a call from my end is in order?  I`ll wait a bit longer, Prom nights are often `spuratic` moments.",`spuratic` moments.,negative,`spuratic` moments.
+1753256372,"No phone call yett... Hrmm. Maybe a call from my end is in order?  I`ll wait a bit longer, Prom nights are often `spuratic` moments.", `spuratic` moments.,negative, `spuratic` moments.
 1753272795,"http://twitpic.com/4wp8s - My ear hurts, and THIS is my medicine. GUM","hurts,",negative,"hurts,"
 1753294280," if I have 5000 friend requests tomorrow, I`m blaming you  nite", i`m blaming,negative, i`m blaming
 1753312788," Yeah, I`ll probably `stop` when ALL of my stories are completely finished. That won`t be for a while though. Wide awake.","yeah, i`ll probably `stop` when all of my stories are completely finished. that won`t be for a while though. wide awake.",negative,"yeah, i`ll probably `stop` when all of my stories are completely finished. that won`t be for a while though. wide awake."
-1753329847, that`s odd as it`s on my lap  maybe that`s your cat O: s:,that`s odd,negative,that`s odd
+1753329847, that`s odd as it`s on my lap  maybe that`s your cat O: s:, odd,negative, odd
 1753330503, miss u too. I`m still at a club...u know...west coast ****!,miss,negative,miss
 1753348253,"_ really!? that son of a ****, screw him, ill talk to on msn later k  xox","that son of a ****, screw him,",negative,"that son of a ****, screw him,"
 1753366717, I miss u like cotton candy  <3, miss,negative, miss

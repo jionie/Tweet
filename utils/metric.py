@@ -125,6 +125,9 @@ def get_word_level_logits(start_logits,
     elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
         logit_offset = 3
 
+    elif (model_type == "electra-base") or (model_type == "electra-large"):
+        logit_offset = 3
+
     prev = tweet_offsets_word_level[logit_offset]
     word_level_bbx = []
     curr_bbx = []
@@ -235,6 +238,15 @@ def calculate_jaccard_score(
             # print(selected_text, filtered_output)
 
         elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+
+            # we remove first tokens in hidden states
+            idx_start += 3
+            idx_end += 3
+
+            prediction = original_tweet[tweet_offsets[idx_start][0]: tweet_offsets[idx_end][1]]
+            # print(selected_text, filtered_output)
+
+        elif (model_type == "electra-base") or (model_type == "electra-large"):
 
             # we remove first tokens in hidden states
             idx_start += 3

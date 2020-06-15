@@ -169,7 +169,8 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
         for i in range(number_of_tokens):
 
             if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") \
-                    or (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+                    or (model_type == "bert-base-cased") or (model_type == "bert-large-cased") \
+                    or (model_type == "electra-base") or (model_type == "electra-large"):
 
                 # for bert tokenizer, replace "##" and add " " for first sub_word
                 sub_word_len = len(sub_words[i].replace("##", ""))
@@ -274,6 +275,22 @@ def process_data(tweet, selected_text, old_selected_text, sentiment, tokenizer, 
         targets_end += 3
 
     elif (model_type == "bert-base-cased") or (model_type == "bert-large-cased"):
+
+        sentiment_id = {
+            'positive': 3112,
+            'negative': 4366,
+            'neutral': 8795
+        }
+
+        input_ids = [101] + [sentiment_id[sentiment]] + [102] + input_ids_orig + [102]
+        token_type_ids = [0, 0, 0] + [0] * (len(input_ids_orig) + 1)
+        mask = [1] * len(token_type_ids)
+        tweet_offsets_token_level = [(0, 0)] * 3 + tweet_offsets_token_level + [(0, 0)]
+        tweet_offsets_word_level = [(0, 0)] * 3 + tweet_offsets_word_level + [(0, 0)]
+        targets_start += 3
+        targets_end += 3
+
+    elif (model_type == "electra-base") or (model_type == "electra-large"):
 
         sentiment_id = {
             'positive': 3112,
@@ -425,22 +442,8 @@ def get_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-se
     df_test.loc[:, "cleaned_selected_text"] = df_test.text.values
 
 
-    if (model_type == "bert-base-uncased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-large-uncased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-base-cased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-large-cased"):
+    if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") or (model_type == "bert-base-cased")\
+            or (model_type == "bert-large-cased") or (model_type == "electra-base") or (model_type == "electra-large"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
@@ -511,22 +514,8 @@ def get_train_val_loaders(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tw
     df_val = pd.read_csv(val_csv_path)
     df_pseudo = pd.read_csv(pseudo_data_path)
 
-    if (model_type == "bert-base-uncased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-large-uncased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-base-cased"):
-        tokenizer = BertTokenizer.from_pretrained(
-            pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
-            lowercase=True,
-        )
-    elif (model_type == "bert-large-cased"):
+    if (model_type == "bert-base-uncased") or (model_type == "bert-large-uncased") or (model_type == "bert-base-cased") \
+            or (model_type == "bert-large-cased") or (model_type == "electra-base") or (model_type == "electra-large"):
         tokenizer = BertTokenizer.from_pretrained(
             pretrained_model_name_or_path=os.path.join(CURR_PATH, "transformers_vocab/{}-vocab.txt".format(model_type)),
             lowercase=True,
