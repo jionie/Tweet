@@ -4,11 +4,7 @@
     <list default="true" id="74ca03cc-5de0-409f-88e3-9710ed7ed4d7" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataset/dataset_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/dataset_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/model_bert.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/model_bert.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pseudo_labels.csv" beforeDir="false" afterPath="$PROJECT_DIR$/pseudo_labels.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/training-k-fold-bert-v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/training-k-fold-bert-v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/metric.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metric.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
