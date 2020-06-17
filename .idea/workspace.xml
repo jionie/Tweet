@@ -3,8 +3,89 @@
   <component name="ChangeListManager">
     <list default="true" id="74ca03cc-5de0-409f-88e3-9710ed7ed4d7" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pseudo_labels.csv" beforeDir="false" afterPath="$PROJECT_DIR$/pseudo_labels.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analyzing_validation_result.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bad_cases_roberta.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold-v2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/k-fold-v2.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bert-large-uncased-k-fold.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config_xlnet.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/dataset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/dataset_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset/dataset_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset/dataset_v3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-noise-head/fold_0/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-noise-head/fold_1/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-noise-head/fold_2/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-noise-head/fold_3/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-noise-head/fold_4/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-with-processing/fold_0/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-with-processing/fold_1/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-with-processing/fold_2/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-with-processing/fold_3/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42-with-processing/fold_4/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42/fold_0/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42/fold_1/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42/fold_2/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42/fold_3/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/seed-42/fold_4/train_log.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/model_xlnet.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/postprocessing.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/config_bert.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/dataset.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-cased-finetuned-mrpc-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-cased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-chinese-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-german-cased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-german-dbmdz-cased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-german-dbmdz-uncased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-multilingual-cased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-multilingual-uncased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-base-uncased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-cased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-cased-whole-word-masking-finetuned-squad-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-cased-whole-word-masking-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-uncased-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-uncased-whole-word-masking-finetuned-squad-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/bert-large-uncased-whole-word-masking-vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/distilroberta-base-merges.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/distilroberta-base-vocab.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/distilroberta-base-vocab.json~HEAD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/distilroberta-base-vocab.json~classifier-based" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-merges.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-squad-config.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-squad-merges.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-squad-special_tokens_map.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-squad-tokenizer_config.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-squad-vocab.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-vocab (1).json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-base-vocab.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-large-merges.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-large-mnli-merges.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-large-mnli-vocab.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-large-vocab (1).json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/roberta-large-vocab.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/vocab.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/xlnet-base-cased-spiece.model" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/dataset/transformers_vocab/xlnet-large-cased-spiece.model" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/model/model_bert.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/train.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/train.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/Radam.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/file.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/functions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/include.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/loss_function.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/lrs_scheduler.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/metric.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pretrain/utils/ranger.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_squd.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/training-k-fold-bert.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/training-k-fold-xlnet.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/metric_v3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/squad_metrics.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/val_fold_0_seed_2020.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/val_prediction_2020_0_dataset.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/val_prediction_2020_0_huggingface.csv" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,7 +95,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="JupyterTrust" id="0f03e984-a229-4bf4-9b1c-1709e97e4b96" />
+  <component name="JupyterTrust" id="7398b1ff-9f9e-45d3-b147-34540cfc6016" />
   <component name="ProjectId" id="1dBYBUDBigxWavU40XczgT777gF" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -25,6 +106,9 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="SshConsoleOptionsProvider">
+    <option name="myEncoding" value="UTF-8" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -39,6 +123,7 @@
       <workItem from="1591899820176" duration="5446000" />
       <workItem from="1591915470292" duration="3382000" />
       <workItem from="1591965673349" duration="4972000" />
+      <workItem from="1592357232412" duration="1672000" />
     </task>
     <servers />
   </component>
@@ -46,6 +131,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="458" y="165" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1592357339198">
+      <screen x="0" y="23" width="1440" height="821" />
+    </state>
+    <state x="458" y="165" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.821@0.23.1440.821" timestamp="1592357339198" />
     <state x="780" y="297" key="FileChooserDialogImpl" timestamp="1591915467246">
       <screen x="65" y="24" width="1855" height="1056" />
     </state>

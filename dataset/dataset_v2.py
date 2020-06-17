@@ -635,11 +635,12 @@ def test_test_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-s
                                      batch_size=batch_size, num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-            all_start_positions, all_end_positions,
-            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-            all_orig_tweet, all_orig_selected,
-            all_sentiment, all_ans, all_noise,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(test_loader):
+
         print("------------------------testing test loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -669,11 +670,12 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
                                                         num_workers=num_workers)
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-            all_start_positions, all_end_positions,
-            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-            all_orig_tweet, all_orig_selected,
-            all_sentiment, all_ans, all_noise,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(train_loader):
+
         print("------------------------testing train loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
@@ -689,11 +691,12 @@ def test_train_loader(data_path="/media/jionie/my_disk/Kaggle/Tweet/input/tweet-
         break
 
     for _, (all_input_ids, all_attention_masks, all_token_type_ids,
-            all_start_positions, all_end_positions,
-            all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
-            all_orig_tweet, all_orig_selected,
-            all_sentiment, all_ans, all_noise,
-            all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
+                    all_start_positions, all_end_positions,
+                    all_onehot_sentiment_type, all_onehot_ans_type, all_onehot_noise_type,
+                    all_orig_tweet, all_orig_tweet_with_extra_space, all_orig_selected,
+                    all_sentiment, all_ans, all_noise,
+                    all_offsets_token_level, all_offsets_word_level) in enumerate(val_loader):
+
         print("------------------------testing val loader----------------------")
         print("all_input_ids (numpy): ", all_input_ids.numpy().shape)
         print("all_attention_masks (numpy): ", all_attention_masks.numpy().shape)
